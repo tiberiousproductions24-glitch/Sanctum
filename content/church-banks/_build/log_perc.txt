@@ -1,0 +1,17 @@
+wrote wav/perc/shaker_fwd.wav 0.08 s
+wrote wav/perc/shaker_back.wav 0.11 s
+wrote wav/perc/tamb_hit.wav 0.45 s
+wrote wav/perc/tamb_shake.wav 0.5998 s
+wrote wav/perc/clap.wav 0.3986 s
+wrote wav/perc/clap_layer.wav 0.4246 s
+wrote wav/perc/clap_congregation.wav 0.5985 s
+wrote wav/perc/snap.wav 0.0938 s
+wrote wav/perc/perc_groove_132bpm_2bar.wav 3.6364 s
+wrote wav/perc/perc_claps_132bpm_2bar.wav 3.6364 s
+wrote wav/perc/perc_groove_120bpm_2bar.wav 4.0 s
+wrote wav/perc/perc_claps_120bpm_2bar.wav 4.0 s
+wrote wav/perc/perc_groove_140bpm_2bar.wav 3.4286 s
+wrote wav/perc/perc_claps_140bpm_2bar.wav 3.4286 s
+wrote wav/perc/perc_groove_150bpm_2bar.wav 3.2 s
+wrote wav/perc/perc_claps_150bpm_2bar.wav 3.2 s
+saved /workspace/projects/sanctum/content/church-banks/_build/banks_perc.json

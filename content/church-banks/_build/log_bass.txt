@@ -1,0 +1,17 @@
+wrote wav/bass/bass_pump_G_132bpm_2bar.wav 3.6364 s
+wrote wav/bass/bass_pump_C_120bpm_2bar.wav 4.0 s
+wrote wav/bass/bass_pump_D_140bpm_2bar.wav 3.4286 s
+wrote wav/bass/bass_pump_A_150bpm_2bar.wav 3.2 s
+wrote wav/bass/bass_walk_G_132bpm_4bar.wav 7.2727 s
+wrote wav/bass/bass_walk_C_120bpm_4bar.wav 8.0 s
+wrote wav/bass/bass_walk_D_140bpm_4bar.wav 6.8571 s
+wrote wav/bass/bass_walk_A_150bpm_4bar.wav 6.4 s
+wrote wav/bass/bass_run_G_132bpm_1bar.wav 1.8182 s
+wrote wav/bass/bass_run_C_120bpm_1bar.wav 2.0 s
+wrote wav/bass/bass_run_D_140bpm_1bar.wav 1.7143 s
+wrote wav/bass/bass_run_A_150bpm_1bar.wav 1.6 s
+wrote wav/bass/bass_hit_G.wav 0.9583 s
+wrote wav/bass/bass_hit_C.wav 0.9527 s
+wrote wav/bass/bass_hit_D.wav 0.9555 s
+wrote wav/bass/bass_hit_A.wav 0.9574 s
+saved /workspace/projects/sanctum/content/church-banks/_build/banks_bass.json

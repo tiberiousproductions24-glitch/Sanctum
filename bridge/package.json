@@ -1,0 +1,15 @@
+{
+  "name": "sanctum-link-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Relays Ableton Link tempo/beat/phase to the Sanctum web app over WebSocket",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "abletonlink": "^0.2.0-beta.0",
+    "ws": "^8.22.0"
+  }
+}

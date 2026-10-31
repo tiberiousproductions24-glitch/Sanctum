@@ -1,0 +1,17 @@
+wrote wav/guitar/gtr_scratch_G_132bpm_2bar.wav 3.6364 s
+wrote wav/guitar/gtr_scratch_C_120bpm_2bar.wav 4.0 s
+wrote wav/guitar/gtr_scratch_D_140bpm_2bar.wav 3.4286 s
+wrote wav/guitar/gtr_scratch_A_150bpm_2bar.wav 3.2 s
+wrote wav/guitar/gtr_passing_G_132bpm_4bar.wav 7.2727 s
+wrote wav/guitar/gtr_passing_C_120bpm_4bar.wav 8.0 s
+wrote wav/guitar/gtr_passing_D_140bpm_4bar.wav 6.8571 s
+wrote wav/guitar/gtr_passing_A_150bpm_4bar.wav 6.4 s
+wrote wav/guitar/gtr_lick_G_132bpm_2bar.wav 3.6364 s
+wrote wav/guitar/gtr_lick_C_120bpm_2bar.wav 4.0 s
+wrote wav/guitar/gtr_lick_D_140bpm_2bar.wav 3.4286 s
+wrote wav/guitar/gtr_lick_A_150bpm_2bar.wav 3.2 s
+wrote wav/guitar/gtr_G9.wav 0.5731 s
+wrote wav/guitar/gtr_C13.wav 0.5611 s
+wrote wav/guitar/gtr_D7s9.wav 0.5795 s
+wrote wav/guitar/gtr_scratch.wav 0.2905 s
+saved /workspace/projects/sanctum/content/church-banks/_build/banks_guitar.json

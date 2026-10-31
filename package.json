@@ -1,0 +1,19 @@
+{
+  "name": "sanctum",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sanctum — MPC-style touch drum machine (PWA prototype)",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host --port 4173",
+    "bridge": "node bridge/server.js",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.16.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}
