@@ -89,6 +89,7 @@ export function timingLabBody(app: App) {
       const t0 = app.engine.now + 0.6; const iv = 60 / 100;
       for (let i = 0; i < 16; i++) { const t = t0 + i * iv; clicks.push(t); app.engine.trigger({ at: t, id: i % 4 === 0 ? 'sys.click.hi' : 'sys.click.lo', vel: 0.9 }); }
       zone.textContent = 'Tap on every click…';
+      (window as any).__sanctumTapTest = { clicks };
       setTimeout(() => {
         running = false; zone.textContent = 'Start tap test';
         const offs = taps.map((ht) => { const near = clicks.reduce((b, c) => Math.abs(c - ht) < Math.abs(b - ht) ? c : b, clicks[0]); return (ht - near) * 1000; }).filter((o) => Math.abs(o) < 200).slice(2);

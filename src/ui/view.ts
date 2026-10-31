@@ -60,7 +60,7 @@ export class View {
     const lat = h('button', { class: 'chip lat', 'aria-label': 'Latency — open Timing Lab', onclick: () => this.sheets.timingLab() }, '⚡', h('span', { class: 'v' }, '–'));
     const link = h('button', { class: 'chip link', 'aria-label': 'Ableton Link', onclick: () => this.sheets.sync() }, h('span', { class: 'led' }), 'LINK', h('span', { class: 'v' }, ''));
     const midi = h('button', { class: 'chip midi hide-phone', 'aria-label': 'MIDI', onclick: () => this.sheets.sync() }, h('span', { class: 'led' }), 'MIDI');
-    const menu = h('button', { class: 'tbtn', 'aria-label': 'Menu', onclick: () => this.sheets.menu() }, '⚙');
+    const menu = h('button', { class: 'tbtn hide-phone', 'aria-label': 'Menu', onclick: () => this.sheets.menu() }, '⚙');
     const status = h('header', { class: 'status' }, h('div', { class: 'mark', html: archPadSvg(false) + '<span class="word">SANCTUM</span>' }), rec, play, stop, lcd, lat, link, midi, menu);
     Object.assign(this.els, { rec, play, lcd, lat, link, midi });
 

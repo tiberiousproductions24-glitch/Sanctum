@@ -1,5 +1,5 @@
 {
-  "at": "Sat Oct 31 2026 00:57:54 GMT-0700 (Pacific Daylight Time)",
+  "at": "Sat Oct 31 2026 00:59:16 GMT-0700 (Pacific Daylight Time)",
   "results": [
     {
       "name": "audio engine starts (render thread running)",
@@ -49,7 +49,12 @@
     {
       "name": "loop pad launches on next bar, tempo-synced rate",
       "pass": true,
-      "info": "{\"at\":3.3513623188405797,\"now\":3.066666666666667,\"startRel\":0,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
+      "info": "{\"at\":3.3513623188405797,\"now\":3.018666666666667,\"startRel\":0,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
+    },
+    {
+      "name": "Timing Lab tap test measures input offset and sets recording correction",
+      "pass": true,
+      "info": "{\"off\":30.370000002978514,\"jit\":0.31821790517904447,\"comp\":30.4}"
     },
     {
       "name": "autosave restores project on reload",
@@ -59,17 +64,17 @@
     {
       "name": "Link: bridge connected, peer visible, tempo follows peer (97)",
       "pass": true,
-      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":1.4572750761057174,\"rtt\":1.3999999985098839,\"chip\":\"LINK1\"}"
+      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":2.0975501526987483,\"rtt\":1.2999999970197678,\"chip\":\"LINK1\"}"
     },
     {
       "name": "Link: phase error < 5 ms",
       "pass": true,
-      "info": "offset=1.46 ms"
+      "info": "offset=2.10 ms"
     },
     {
       "name": "Link: app tempo change propagates to the other peer",
       "pass": true,
-      "info": "[peer] t=1793433464468 peers=1 bpm=111.00 beat=23.388 phase=3.388"
+      "info": "[peer] t=1793433546734 peers=1 bpm=111.00 beat=40.382 phase=0.382"
     },
     {
       "name": "no console errors",

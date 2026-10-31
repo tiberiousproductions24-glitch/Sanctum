@@ -38,3 +38,9 @@ All times Pacific (PDT).
 - Loop rate now corrects for resampling rounding (cycle = beats·60/BPM exactly); Link start/stop sync follows other peers; relay "play" no longer re-requests beat 0 (keeps the shared timeline phase-safe).
 - Smoke re-run 15/15 (smoke waits for headless audio sink to come up — on this shared box it sometimes starts ~1–2 s late).
 - Next: polish pass (phone header, tap-test check), final screenshots + zip.
+
+## 2026-10-31 00:59 PDT — Polish + final verification
+- Phone header: gear moved to action-bar menu (⌘) so the LCD has room; tablet unchanged.
+- Smoke now 16/16: added Timing Lab tap-test check (synthetic taps +25 ms after audible clicks → measured 30.4 ms offset, 0.3 ms jitter, correction applied). No console errors.
+- Screenshots regenerated; zip rebuilt at /workspace/projects/sanctum-build.zip.
+- Status: core demo complete and playable. Untested on real hardware: MIDI devices, mic loopback on a real interface, iOS Safari.

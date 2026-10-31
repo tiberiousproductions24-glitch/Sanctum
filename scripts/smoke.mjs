@@ -102,6 +102,24 @@ try {
   await page.screenshot({ path: `${SHOTS}/phone-dark-playing-loop.png` });
   await page.evaluate(() => { window.__sanctum.app.stop(); window.__sanctum.view.setBank(0); });
 
+  // Timing Lab tap test: synthetic taps 25 ms after each audible click → correction ≈ 25 ms
+  await page.evaluate(() => window.__sanctum.sheets.timingLab());
+  const tz = await page.evaluate(() => { const z = document.querySelector('.tapzone'); z.scrollIntoView({ block: 'center' }); const r = z.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+  await sleep(200);
+  await page.touchscreen.tap(tz.x, tz.y);
+  await sleep(50);
+  await page.evaluate(() => {
+    const a = window.__sanctum.app; const zone = document.querySelector('.tapzone');
+    for (const c of window.__sanctumTapTest.clicks.slice(1)) {
+      const due = a.engine.ctxToPerf(c) + 25 - performance.now();
+      setTimeout(() => zone.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' })), due);
+    }
+  });
+  await page.waitForFunction(() => window.__sanctum.app.p.lab.tapOffsetMs != null, { timeout: 15000 }).catch(() => {});
+  const tap = await page.evaluate(() => ({ off: window.__sanctum.app.p.lab.tapOffsetMs, jit: window.__sanctum.app.p.lab.tapJitterMs, comp: window.__sanctum.app.p.settings.touchCompMs }));
+  ok('Timing Lab tap test measures input offset and sets recording correction', tap.off != null && tap.off > 18 && tap.off < 40 && tap.comp > 18, JSON.stringify(tap));
+  await page.evaluate(() => { window.__sanctum.sheets.close(); const a = window.__sanctum.app; a.p.settings.touchCompMs = 0; a.p.lab.tapOffsetMs = null; a.p.lab.tapJitterMs = null; });
+
   // autosave → reload restores
   await page.evaluate(() => { const a = window.__sanctum.app; a.p.bpm = 101.5; a.p.theme = 'warm'; a.p.swing = 61; a.save(); });
   await sleep(600);
