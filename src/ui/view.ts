@@ -276,7 +276,7 @@ export class View {
   // ---------- render ----------
   renderAll() {
     this.renderHeader(); this.renderBanks(); this.renderPads(); this.renderSteps(); this.updateActs();
-    if (this.layout === 'tablet') { this.renderBrowser(); this.renderInspector(); this.renderMacro(); }
+    if (this.layout === 'tablet' && this.sheets) { this.renderBrowser(); this.renderInspector(); this.renderMacro(); }
   }
 
   renderHeader() {
@@ -402,6 +402,7 @@ export class View {
   }
 
   renderInspector() {
+    if (!this.sheets) return;
     const el = this.els.inspector; el.innerHTML = '';
     el.append(h('div', { class: 'panel-title' }, 'Pad'), this.sheets.padEditorBody(this.app.p.selectedPad, true), h('div', { class: 'panel-title' }, 'Sequencer'), this.sheets.transportBody(true));
   }

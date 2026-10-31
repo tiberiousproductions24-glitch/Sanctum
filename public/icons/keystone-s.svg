@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0B0F"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+<rect width="1024" height="1024" rx="200" fill="#0B0B0F"/>
+<g transform="translate(512 512) scale(1) translate(-512 -512)">
 <path d="M332 232 H692 L612 792 H412 Z" fill="none" stroke="#C9A227" stroke-width="28"/>
-<text x="512" y="640" text-anchor="middle" font-family="Georgia,serif" font-size="380" fill="#F2EEE6">S</text>
-<circle cx="512" cy="720" r="22" fill="#FF6A13"/></svg>
+<text x="512" y="640" text-anchor="middle" font-family="Georgia,'Noto Serif',serif" font-size="380" fill="#F2EEE6">S</text>
+<circle cx="512" cy="720" r="22" fill="#FF6A13"/></g></svg>

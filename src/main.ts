@@ -11,6 +11,7 @@ const app = new App();
 const view = new View(app);
 const sheets = new Sheets(app, view);
 view.sheets = sheets;
+view.renderAll();
 const gate = new AccessGate(app, () => sheets.accessPreview());
 
 const q = new URLSearchParams(location.search);

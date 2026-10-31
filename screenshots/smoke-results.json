@@ -1,0 +1,80 @@
+{
+  "at": "Sat Oct 31 2026 00:51:11 GMT-0700 (Pacific Daylight Time)",
+  "results": [
+    {
+      "name": "audio engine starts",
+      "pass": true,
+      "info": "{\"mode\":\"worklet\",\"sr\":48000,\"state\":\"running\",\"lat\":{\"base\":0.010666666666666666,\"output\":0,\"sampleRate\":48000,\"hint\":\"interactive\",\"mode\":\"worklet\",\"state\":\"running\"}}"
+    },
+    {
+      "name": "AudioWorklet engine active",
+      "pass": true,
+      "info": "worklet"
+    },
+    {
+      "name": "church manifest banks loaded into C–F",
+      "pass": true,
+      "info": "{\"sources\":[\"foundation\",\"stagefx\",\"ext.shout-guitar\",\"ext.shout-organ\",\"ext.shout-bass\",\"ext.shout-percussion\",null,null],\"load\":{\"ext.shout-guitar\":\"ready\",\"ext.shout-organ\":\"ready\",\"ext.shout-bass\":\"ready\",\"ext.shout-percussion\":\"ready\"},\"samples\":98}"
+    },
+    {
+      "name": "pad tap produces audio (worklet voices/peak)",
+      "pass": true,
+      "info": "{\"voices\":1,\"late\":0,\"peak\":0.40695058852434157,\"frame\":4608,\"queued\":0}"
+    },
+    {
+      "name": "multi-touch (2 pads) triggers",
+      "pass": true,
+      "info": "voices=2"
+    },
+    {
+      "name": "sequencer plays pattern",
+      "pass": true,
+      "info": "{\"playing\":true,\"tick\":2125.5679999999993,\"voices\":6,\"late\":0,\"events\":14}"
+    },
+    {
+      "name": "no late (unscheduled) events",
+      "pass": true,
+      "info": "late=0"
+    },
+    {
+      "name": "note repeat + record → quantized events",
+      "pass": true,
+      "info": "{\"n\":5,\"onGrid\":true}"
+    },
+    {
+      "name": "swing warp/unwarp",
+      "pass": true,
+      "info": "{\"w\":316.8,\"u\":240}"
+    },
+    {
+      "name": "loop pad launches on next bar, tempo-synced rate",
+      "pass": true,
+      "info": "{\"at\":3.03136231884058,\"now\":2.624,\"startRel\":0,\"rate\":0.696969696969697,\"bpm\":92,\"soundBpm\":132}"
+    },
+    {
+      "name": "autosave restores project on reload",
+      "pass": true,
+      "info": "{\"bpm\":101.5,\"theme\":\"warm\",\"swing\":61,\"events\":19,\"restored\":true,\"theme2\":\"warm\"}"
+    },
+    {
+      "name": "Link: bridge connected, peer visible, tempo follows peer (97)",
+      "pass": true,
+      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":1.6690279182896348,\"rtt\":2.599999997764826,\"chip\":\"LINK1\"}"
+    },
+    {
+      "name": "Link: phase error < 5 ms",
+      "pass": true,
+      "info": "offset=1.67 ms"
+    },
+    {
+      "name": "Link: app tempo change propagates to the other peer",
+      "pass": true,
+      "info": "[peer] t=1793433061844 peers=1 bpm=111.00 beat=21.713 phase=1.713"
+    },
+    {
+      "name": "no console errors",
+      "pass": true,
+      "info": ""
+    }
+  ]
+}

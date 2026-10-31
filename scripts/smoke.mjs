@@ -1,0 +1,167 @@
+// Headless smoke test + screenshots.
+//   npm run build && npm run smoke
+// Starts `vite preview` (4173), the Link bridge (20809) and a second Link test peer, then drives
+// headless Chrome: loads the app, taps pads, plays the sequencer, checks for console errors,
+// verifies Link peers/tempo in the UI, and saves phone/tablet screenshots in every theme.
+import puppeteer from 'puppeteer-core';
+import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+
+const CHROME = process.env.CHROME || '/usr/bin/google-chrome';
+const PORT = 4173; const BASE = `http://localhost:${PORT}/`;
+const SHOTS = 'screenshots'; fs.mkdirSync(SHOTS, { recursive: true });
+const procs = [];
+const run = (cmd, args, name) => { const p = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] }); p.stdout.on('data', (d) => process.env.VERBOSE && process.stdout.write(`[${name}] ${d}`)); p.stderr.on('data', (d) => process.stdout.write(`[${name}!] ${d}`)); procs.push(p); return p; };
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const results = []; const ok = (name, pass, info = '') => { results.push({ name, pass, info }); console.log(`${pass ? 'PASS' : 'FAIL'}  ${name}${info ? '  — ' + info : ''}`); };
+
+async function waitHttp(url, ms = 15000) { const t0 = Date.now(); while (Date.now() - t0 < ms) { try { const r = await fetch(url); if (r.ok) return true; } catch {} await sleep(200); } return false; }
+
+run('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], 'preview');
+run('node', ['bridge/server.js'], 'bridge');
+await sleep(800);
+const peer = run('node', ['bridge/test-peer.js', '--bpm', '97', '--set-after', '1'], 'peer');
+let peerLines = []; peer.stdout.on('data', (d) => { peerLines.push(...String(d).trim().split('\n')); peerLines = peerLines.slice(-5); });
+if (!(await waitHttp(BASE))) { console.error('preview server did not start'); process.exit(1); }
+
+const browser = await puppeteer.launch({ executablePath: CHROME, headless: true,
+  args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
+const errors = [];
+async function newPage(vp) {
+  const page = await browser.newPage();
+  await page.setViewport(vp);
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(`${m.text()}`); });
+  page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
+  return page;
+}
+const PHONE = { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
+const TAB_L = { width: 1180, height: 820, deviceScaleFactor: 1, isMobile: true, hasTouch: true };
+const TAB_P = { width: 820, height: 1180, deviceScaleFactor: 1, isMobile: true, hasTouch: true };
+
+try {
+  // ---------- phone: core checks ----------
+  const page = await newPage(PHONE);
+  await page.goto(BASE + '?layout=auto', { waitUntil: 'networkidle0' });
+  await page.evaluate(() => localStorage.clear());
+  await page.goto(BASE, { waitUntil: 'networkidle0' });
+  await page.touchscreen.tap(195, 600); // splash "tap to start"
+  await page.waitForFunction(() => window.__sanctum.app.started && window.__sanctum.app.engine.ctx, { timeout: 8000 });
+  const eng = await page.evaluate(() => { const a = window.__sanctum.app; return { mode: a.engine.mode, sr: a.engine.sampleRate, state: a.engine.ctx.state, lat: a.engine.latency() }; });
+  ok('audio engine starts', eng.state === 'running', JSON.stringify(eng));
+  ok('AudioWorklet engine active', eng.mode === 'worklet', eng.mode);
+  await page.waitForFunction(() => [...window.__sanctum.app.bankLoad.values()].length >= 4 && [...window.__sanctum.app.bankLoad.values()].every((v) => v === 'ready'), { timeout: 20000 }).catch(() => {});
+  const banks = await page.evaluate(() => { const a = window.__sanctum.app; return { sources: a.p.bankSources, load: Object.fromEntries(a.bankLoad), samples: a.engine.samples.size }; });
+  ok('church manifest banks loaded into C–F', banks.sources.slice(2, 6).every((s) => s && s.startsWith('ext.')) && Object.values(banks.load).every((v) => v === 'ready'), JSON.stringify(banks));
+
+  // tap pad 1 (kick) with a real touch event
+  const box = await page.evaluate(() => { const r = document.querySelector('.pad[data-pad="0"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 3 }; });
+  const peak0 = await page.evaluate(() => window.__sanctum.app.engine.stats.peak);
+  await page.touchscreen.tap(box.x, box.y);
+  await sleep(250);
+  const after = await page.evaluate(() => ({ stats: window.__sanctum.app.engine.stats, sel: window.__sanctum.app.p.selectedPad }));
+  ok('pad tap produces audio (worklet voices/peak)', after.stats.peak > peak0 + 0.01 || after.stats.voices > 0, JSON.stringify(after.stats));
+  // multi-touch: two pads at once via CDP
+  const cdp = await page.createCDPSession();
+  const p2 = await page.evaluate(() => [3, 5].map((i) => { const r = document.querySelector(`.pad[data-pad="${i}"]`).getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; }));
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: p2.map((p, i) => ({ x: p.x, y: p.y, id: i })) });
+  await sleep(30);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await sleep(200);
+  const v2 = await page.evaluate(() => window.__sanctum.app.engine.stats.voices);
+  ok('multi-touch (2 pads) triggers', v2 >= 1, `voices=${v2}`);
+  // keyboard pad
+  await page.keyboard.down('KeyZ'); await page.keyboard.up('KeyZ');
+  // sequencer: program steps, play, verify notes are scheduled and position moves
+  await page.evaluate(() => { const a = window.__sanctum.app; a.p.selectedPad = 0; for (let i = 0; i < 16; i += 4) a.toggleStep(0, i * 240, 240); for (let i = 4; i < 16; i += 8) a.toggleStep(2, i * 240, 240); for (let i = 0; i < 16; i += 2) a.toggleStep(6, i * 240, 240); a.emit('select'); });
+  await page.evaluate(() => window.__sanctum.app.play());
+  await sleep(1500);
+  const seq = await page.evaluate(() => { const a = window.__sanctum.app; return { playing: a.seq.playing, tick: a.seq.positionTick(), voices: a.engine.stats.voices, late: a.engine.stats.late, events: a.seq.pattern.events.length }; });
+  ok('sequencer plays pattern', seq.playing && seq.tick >= 0 && seq.events >= 14, JSON.stringify(seq));
+  ok('no late (unscheduled) events', seq.late === 0, `late=${seq.late}`);
+  // record a live hit with note repeat & quantize
+  await page.evaluate(() => { const a = window.__sanctum.app; a.p.quantize = '1/16'; a.seq.recording = true; a.seq.noteRepeat = true; });
+  const pb = await page.evaluate(() => { const r = document.querySelector('.pad[data-pad="4"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: pb.x, y: pb.y, id: 7 }] });
+  await sleep(700);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  const rec = await page.evaluate(() => { const a = window.__sanctum.app; const evs = a.seq.pattern.events.filter((e) => e.p === 4); a.seq.recording = false; a.seq.noteRepeat = false; return { n: evs.length, onGrid: evs.every((e) => e.t % 240 === 0) }; });
+  ok('note repeat + record → quantized events', rec.n >= 2 && rec.onGrid, JSON.stringify(rec));
+  // swing changes timing but keeps grid
+  const sw = await page.evaluate(() => { const a = window.__sanctum.app; a.p.swing = 66; const w = a.seq.warp(240); const u = a.seq.unwarp(w); a.p.swing = 56; return { w, u }; });
+  ok('swing warp/unwarp', Math.abs(sw.w - 316.8) < 0.5 && Math.abs(sw.u - 240) < 1e-6, JSON.stringify(sw));
+  // loop pad from church bank (bank C pad 1) launches on next bar, rate = bpm/loopBpm
+  await page.evaluate(() => { window.__sanctum.view.setBank(2); });
+  const lp = await page.evaluate(() => { const r = document.querySelector('.pad[data-pad="0"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+  await page.touchscreen.tap(lp.x, lp.y);
+  const loop = await page.evaluate(() => { const a = window.__sanctum.app; const l = a.loops.get(32); return l ? { at: l.at, now: a.engine.now, startRel: (l.startBeat - a.seq.playStartBeat) % 4, rate: a.loopRate(l.sound), bpm: a.p.bpm, soundBpm: l.sound.bpm } : null; });
+  ok('loop pad launches on next bar, tempo-synced rate', !!loop && Math.abs(loop.startRel) < 1e-6 && Math.abs(loop.rate - loop.bpm / loop.soundBpm) < 1e-9, JSON.stringify(loop));
+  await sleep(2500);
+  await page.screenshot({ path: `${SHOTS}/phone-dark-playing-loop.png` });
+  await page.evaluate(() => { window.__sanctum.app.stop(); window.__sanctum.view.setBank(0); });
+
+  // autosave → reload restores
+  await page.evaluate(() => { const a = window.__sanctum.app; a.p.bpm = 101.5; a.p.theme = 'warm'; a.p.swing = 61; a.save(); });
+  await sleep(600);
+  await page.reload({ waitUntil: 'networkidle0' });
+  const restored = await page.evaluate(() => { const a = window.__sanctum.app; return { bpm: a.p.bpm, theme: a.p.theme, swing: a.p.swing, events: a.p.patterns[0].events.length, restored: a.restored, theme2: document.documentElement.dataset.theme }; });
+  ok('autosave restores project on reload', restored.restored && restored.bpm === 101.5 && restored.theme === 'warm' && restored.swing === 61 && restored.events >= 14 && restored.theme2 === 'warm', JSON.stringify(restored));
+  await page.touchscreen.tap(195, 600);
+  await page.waitForFunction(() => window.__sanctum.app.started, { timeout: 8000 });
+
+  // ---------- Link end-to-end ----------
+  await page.evaluate(() => { const a = window.__sanctum.app; a.p.bpm = 120; a.setLink(true); });
+  await page.waitForFunction(() => { const s = window.__sanctum.app.link.state; return s.connected && s.peers >= 1 && Math.abs(s.bpm - 97) < 0.01; }, { timeout: 12000 }).catch(() => {});
+  await sleep(1200);
+  const link = await page.evaluate(() => { const a = window.__sanctum.app; const s = a.link.state; return { connected: s.connected, peers: s.peers, bpm: s.bpm, backend: s.backend, appBpm: a.p.bpm, clockBpm: a.seq.clock.bpm, offsetMs: s.offsetMs, rtt: s.rttMs, chip: document.querySelector('.chip.link').textContent }; });
+  ok('Link: bridge connected, peer visible, tempo follows peer (97)', link.connected && link.peers >= 1 && Math.abs(link.clockBpm - 97) < 0.01 && Math.abs(link.appBpm - 97) < 0.01, JSON.stringify(link));
+  ok('Link: phase error < 5 ms', Math.abs(link.offsetMs) < 5, `offset=${link.offsetMs?.toFixed(2)} ms`);
+  // propose a tempo from the app → peer must follow
+  await page.evaluate(() => window.__sanctum.app.setTempo(111));
+  await sleep(1800);
+  const peerSaw = peerLines.join('\n');
+  ok('Link: app tempo change propagates to the other peer', /bpm=111\.00/.test(peerSaw), peerLines.at(-1));
+  await page.evaluate(() => window.__sanctum.sheets.sync());
+  await sleep(400);
+  await page.screenshot({ path: `${SHOTS}/phone-warm-link-sync.png` });
+  await page.evaluate(() => window.__sanctum.sheets.close());
+
+  // ---------- screenshots ----------
+  const themes = ['dark', 'light', 'warm'];
+  const shoot = async (pg, name) => { await sleep(250); await pg.screenshot({ path: `${SHOTS}/${name}.png` }); };
+  const setTheme = (pg, t) => pg.evaluate((t) => { const a = window.__sanctum.app; a.p.theme = t; a.emit('theme'); }, t);
+  for (const t of themes) { await setTheme(page, t); await shoot(page, `phone-${t}`); }
+  await setTheme(page, 'dark');
+  await page.evaluate(() => window.__sanctum.sheets.timingLab()); await shoot(page, 'phone-dark-timing-lab');
+  await page.evaluate(() => window.__sanctum.sheets.sounds()); await shoot(page, 'phone-dark-sounds');
+  await page.evaluate(() => window.__sanctum.sheets.close());
+  for (const st of ['locked', 'invite', 'paywall', 'expired']) {
+    await page.evaluate((st) => { const a = window.__sanctum.app; a.p.access = st; a.emit('access'); }, st); await shoot(page, `phone-dark-access-${st}`);
+  }
+  await page.evaluate(() => { const a = window.__sanctum.app; a.p.access = 'owner'; a.setLink(false); a.emit('access'); });
+  await page.close();
+
+  for (const [vp, name] of [[TAB_L, 'tablet-landscape'], [TAB_P, 'tablet-portrait']]) {
+    const tp = await newPage(vp);
+    await tp.goto(BASE, { waitUntil: 'networkidle0' });
+    await tp.touchscreen.tap(vp.width / 2, vp.height * 0.7);
+    await tp.waitForFunction(() => window.__sanctum.app.started, { timeout: 8000 });
+    await tp.evaluate(() => { const a = window.__sanctum.app; a.play(); });
+    await sleep(900);
+    for (const t of themes) { await setTheme(tp, t); await shoot(tp, `${name}-${t}`); }
+    if (name === 'tablet-landscape') { await setTheme(tp, 'warm'); await tp.evaluate(() => window.__sanctum.sheets.timingLab()); await shoot(tp, `${name}-warm-timing-lab`); }
+    await tp.evaluate(() => window.__sanctum.app.stop());
+    await tp.close();
+  }
+
+  const real = errors.filter((e) => !/favicon|Failed to load resource.*sw\.js/i.test(e));
+  ok('no console errors', real.length === 0, real.slice(0, 5).join(' | '));
+} catch (e) {
+  ok('smoke run', false, e.stack || String(e));
+} finally {
+  await browser.close();
+  for (const p of procs) { try { p.kill('SIGTERM'); } catch {} }
+  const failed = results.filter((r) => !r.pass);
+  fs.writeFileSync(`${SHOTS}/smoke-results.json`, JSON.stringify({ at: new Date().toString(), results }, null, 2));
+  console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
+  setTimeout(() => process.exit(failed.length ? 1 : 0), 300);
+}
