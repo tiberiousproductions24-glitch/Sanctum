@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200"><rect width="520" height="200" fill="#0B0B0F"/>
+<g transform="translate(30,20)"><path d="M0 160 V60 A80 80 0 0 1 160 60 V160 Z" fill="none" stroke="#C9A227" stroke-width="6"/>
+<g fill="#F2EEE6"><rect x="16" y="70" width="28" height="28" rx="5"/><rect x="52" y="70" width="28" height="28" rx="5"/><rect x="88" y="70" width="28" height="28" rx="5"/><rect x="124" y="70" width="20" height="28" rx="5"/>
+<rect x="16" y="110" width="28" height="28" rx="5"/><rect x="52" y="110" width="28" height="28" rx="5" fill="#FF6A13"/><rect x="88" y="110" width="28" height="28" rx="5"/><rect x="124" y="110" width="20" height="28" rx="5"/>
+<rect x="56" y="30" width="48" height="28" rx="14"/></g></g>
+<text x="215" y="118" font-family="Georgia,serif" font-size="48" letter-spacing="10" fill="#F2EEE6">SANCTUM</text></svg>
