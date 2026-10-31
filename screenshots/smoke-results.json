@@ -1,10 +1,10 @@
 {
-  "at": "Sat Oct 31 2026 00:54:39 GMT-0700 (Pacific Daylight Time)",
+  "at": "Sat Oct 31 2026 00:57:54 GMT-0700 (Pacific Daylight Time)",
   "results": [
     {
       "name": "audio engine starts (render thread running)",
       "pass": true,
-      "info": "{\"mode\":\"worklet\",\"sr\":48000,\"state\":\"running\",\"t\":0.8746666666666667,\"frame\":41472,\"lat\":{\"base\":0.010666666666666666,\"output\":0.032,\"sampleRate\":48000,\"hint\":\"interactive\",\"mode\":\"worklet\",\"state\":\"running\"}}"
+      "info": "{\"mode\":\"worklet\",\"sr\":48000,\"state\":\"running\",\"t\":0.096,\"frame\":4608,\"lat\":{\"base\":0.010666666666666666,\"output\":0.032,\"sampleRate\":48000,\"hint\":\"interactive\",\"mode\":\"worklet\",\"state\":\"running\"}}"
     },
     {
       "name": "AudioWorklet engine active",
@@ -19,7 +19,7 @@
     {
       "name": "pad tap produces audio (worklet voices/peak)",
       "pass": true,
-      "info": "{\"voices\":1,\"late\":0,\"peak\":0.3121374630142748,\"frame\":53760,\"queued\":0}"
+      "info": "{\"voices\":1,\"late\":0,\"peak\":0.3121374630142748,\"frame\":16896,\"queued\":0}"
     },
     {
       "name": "multi-touch (2 pads) triggers",
@@ -49,7 +49,7 @@
     {
       "name": "loop pad launches on next bar, tempo-synced rate",
       "pass": true,
-      "info": "{\"at\":4.130028985507247,\"now\":3.7866666666666666,\"startRel\":0,\"rate\":0.696969696969697,\"bpm\":92,\"soundBpm\":132}"
+      "info": "{\"at\":3.3513623188405797,\"now\":3.066666666666667,\"startRel\":0,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
     },
     {
       "name": "autosave restores project on reload",
@@ -59,17 +59,17 @@
     {
       "name": "Link: bridge connected, peer visible, tempo follows peer (97)",
       "pass": true,
-      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":-0.9522595961315077,\"rtt\":1.3999999985098839,\"chip\":\"LINK1\"}"
+      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":1.4572750761057174,\"rtt\":1.3999999985098839,\"chip\":\"LINK1\"}"
     },
     {
       "name": "Link: phase error < 5 ms",
       "pass": true,
-      "info": "offset=-0.95 ms"
+      "info": "offset=1.46 ms"
     },
     {
       "name": "Link: app tempo change propagates to the other peer",
       "pass": true,
-      "info": "[peer] t=1793433270224 peers=1 bpm=111.00 beat=22.505 phase=2.505"
+      "info": "[peer] t=1793433464468 peers=1 bpm=111.00 beat=23.388 phase=3.388"
     },
     {
       "name": "no console errors",

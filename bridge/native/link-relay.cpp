@@ -30,8 +30,7 @@ int main(int argc, char** argv) {
       const auto now = link.clock().micros();
       if (cmd == "tempo" && v > 20 && v < 999) { s.setTempo(v, now); link.commitAppSessionState(s); }
       else if (cmd == "play") {
-        if (v > 0) s.setIsPlayingAndRequestBeatAtTime(true, now, 0.0, quantum);
-        else s.setIsPlaying(false, now);
+        s.setIsPlaying(v > 0, now); // keep the shared beat timeline untouched (phase-safe)
         link.commitAppSessionState(s);
       }
       else if (cmd == "quantum" && v > 0) quantum = v;

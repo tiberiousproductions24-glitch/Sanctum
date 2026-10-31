@@ -58,7 +58,16 @@ export class App {
     });
     this.seq.noteRepeat = false;
     this.link = new LinkClient(this.engine, this.seq.clock, () => this.p.settings.linkUrl);
-    this.link.onState = () => this.emit('link');
+    let linkWasPlaying = false;
+    this.link.onState = (st) => {
+      // Link start/stop sync: follow other peers' transport (start lands on the next quantum)
+      if (this.p.settings.linkEnabled && st.connected && st.playing !== linkWasPlaying) {
+        linkWasPlaying = st.playing;
+        if (st.playing && !this.seq.playing && this.started) this.play();
+        else if (!st.playing && this.seq.playing) this.stop();
+      }
+      this.emit('link');
+    };
     this.link.onTempo = (bpm) => { this.p.bpm = Math.round(bpm * 100) / 100; this.updateLoopRates(); this.save(); this.emit('tempo'); };
     this.engine.onStats = () => this.emit('stats');
     this.engine.onRecreate.push((changed) => { if (changed) this.regenerateSynth(); });
@@ -228,7 +237,14 @@ export class App {
     this.loops.set(global, { sound: s, at, startBeat: this.seq.clock.beatAt(at) });
     this.emit('loops');
   }
-  loopRate(s: SoundDef, tune = 0) { return (s.bpm ? this.seq.clock.bpm / s.bpm : 1) * Math.pow(2, tune / 12); }
+  loopRate(s: SoundDef, tune = 0) {
+    if (!s.bpm) return Math.pow(2, tune / 12);
+    // exact: one loop cycle must last beats*60/projectBpm seconds, regardless of resampling rounding
+    const smp = this.engine.samples.get(s.id); const beats = s.beats || (s.bars ? s.bars * 4 : 0);
+    const lenSec = smp ? smp.ch[0].length / smp.sr : 0;
+    const fix = smp && beats ? lenSec / (beats * 60 / s.bpm) : 1;
+    return (this.seq.clock.bpm / s.bpm) * fix * Math.pow(2, tune / 12);
+  }
   updateLoopRates() { for (const [g, l] of this.loops) this.engine.setRate('L' + g, this.loopRate(l.sound, this.p.pads[g].tune)); }
   stopLoops() { for (const g of this.loops.keys()) this.engine.stop({ key: 'L' + g }); this.loops.clear(); this.emit('loops'); }
 
