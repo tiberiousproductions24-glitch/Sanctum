@@ -3,13 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Sanctum — MPC-style touch drum machine (PWA prototype)",
+  "description": "Sanctum \u2014 MPC-style touch drum machine (PWA prototype)",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host --port 4173",
     "bridge": "node bridge/server.js",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "dev:https": "HTTPS=1 vite --host",
+    "preview:https": "npm run build && HTTPS=1 vite preview --host --port 4173",
+    "bridge:setup": "cd bridge && npm install && bash native/build.sh",
+    "bridge:peer": "node bridge/test-peer.js",
+    "icons": "node scripts/icons.mjs",
+    "zip": "npm run build && python3 scripts/zip.py"
   },
   "devDependencies": {
     "@vitejs/plugin-basic-ssl": "^2.3.0",

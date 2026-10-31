@@ -208,7 +208,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
 .phasebar { display: grid; grid-template-columns: repeat(var(--q, 4), 1fr); gap: 4px; }
 .phasebar i { height: 14px; border-radius: 4px; background: var(--step-off); }
 .phasebar i.on { background: var(--accent); }
-.toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; z-index: 90; max-width: 90vw; box-shadow: var(--shadow); pointer-events: none; }
+.toast { position: fixed; left: 50%; top: calc(110px + env(safe-area-inset-top)); transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 9px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; z-index: 90; max-width: 90vw; box-shadow: var(--shadow); pointer-events: none; }
 
 /* ===== start + lock ===== */
 .overlay { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 18px; background: var(--bg); padding: 24px; text-align: center; }
@@ -224,3 +224,25 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
 .devtag { position: fixed; top: calc(6px + env(safe-area-inset-top)); right: 8px; z-index: 85; font-size: 10px; font-weight: 800; letter-spacing: .1em; padding: 3px 7px; border-radius: 4px; background: var(--gold); color: #fff; cursor: pointer; }
 .gracebar { position: fixed; top: 0; left: 0; right: 0; z-index: 40; background: #FF6A13; color: #fff; font-size: 13px; font-weight: 700; text-align: center; padding: 4px calc(8px + env(safe-area-inset-right)) 4px 8px; padding-top: calc(4px + env(safe-area-inset-top)); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* phone compaction */
+.layout-phone .status { gap: 5px; padding: 6px; }
+.layout-phone .status .stop, .layout-phone .lcd .lblbpm { display: none; }
+.layout-phone .mark svg { height: 26px; }
+.layout-phone .tbtn { min-width: 36px; height: 36px; padding: 0 6px; }
+.layout-phone .lcd { padding: 2px 8px; gap: 6px; height: 36px; min-width: 96px; }
+.layout-phone .lcd .big { font-size: 18px; }
+.layout-phone .lcd .pos { font-size: 12px; }
+.layout-phone .chip { padding: 0 7px; height: 30px; font-size: 11px; gap: 4px; }
+.layout-phone .trackrow .soundsBtn { display: none; }
+.layout-phone .lane { flex: 0 0 auto; height: clamp(44px, 9vh, 80px); }
+.layout-phone .editor .gridwrap { flex: 1 1 auto; }
+.layout-phone .grid .step { min-height: 12px; }
+.layout-phone .grid .rowlbl { font-size: 9px; }
+.grid { grid-auto-rows: minmax(12px, 1fr); }
+.layout-tablet .grid .step { min-height: 13px; }
+/* phone landscape "Studio": pads left (square, full height), editor right */
+.layout-phone.orient-landscape { grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr) auto; grid-template-areas: "head head" "track track" "pads editor" "actions actions"; }
+.layout-phone.orient-landscape .lane { height: 60px; }
+
+.layout-phone ~ .overlay .archmark svg, .overlay .archmark svg { max-height: 26vh; }

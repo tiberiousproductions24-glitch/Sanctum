@@ -30,7 +30,8 @@ const startNow = async () => {
   splash.remove();
   try { await app.start(); } catch (e) { console.error(e); alert('Audio failed to start: ' + (e as Error).message); }
 };
-splash.addEventListener('pointerdown', (e) => { e.preventDefault(); startNow(); }, { once: true });
+// 'click' (not pointerdown): counts as a user activation on iOS (touchend) and avoids click-through to pads below.
+splash.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); startNow(); }, { once: true });
 document.body.appendChild(splash);
 
 if ('serviceWorker' in navigator && window.isSecureContext && import.meta.env.PROD) {

@@ -25,7 +25,7 @@ let peerLines = []; peer.stdout.on('data', (d) => { peerLines.push(...String(d).
 if (!(await waitHttp(BASE))) { console.error('preview server did not start'); process.exit(1); }
 
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: true,
-  args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required', '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'] });
+  args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
 const errors = [];
 async function newPage(vp) {
   const page = await browser.newPage();
@@ -46,8 +46,9 @@ try {
   await page.goto(BASE, { waitUntil: 'networkidle0' });
   await page.touchscreen.tap(195, 600); // splash "tap to start"
   await page.waitForFunction(() => window.__sanctum.app.started && window.__sanctum.app.engine.ctx, { timeout: 8000 });
-  const eng = await page.evaluate(() => { const a = window.__sanctum.app; return { mode: a.engine.mode, sr: a.engine.sampleRate, state: a.engine.ctx.state, lat: a.engine.latency() }; });
-  ok('audio engine starts', eng.state === 'running', JSON.stringify(eng));
+  await sleep(600);
+  const eng = await page.evaluate(() => { const a = window.__sanctum.app; return { mode: a.engine.mode, sr: a.engine.sampleRate, state: a.engine.ctx.state, t: a.engine.now, frame: a.engine.stats.frame, lat: a.engine.latency() }; });
+  ok('audio engine starts (render thread running)', eng.state === 'running' && eng.frame > 0, JSON.stringify(eng));
   ok('AudioWorklet engine active', eng.mode === 'worklet', eng.mode);
   await page.waitForFunction(() => [...window.__sanctum.app.bankLoad.values()].length >= 4 && [...window.__sanctum.app.bankLoad.values()].every((v) => v === 'ready'), { timeout: 20000 }).catch(() => {});
   const banks = await page.evaluate(() => { const a = window.__sanctum.app; return { sources: a.p.bankSources, load: Object.fromEntries(a.bankLoad), samples: a.engine.samples.size }; });
@@ -96,6 +97,7 @@ try {
   const loop = await page.evaluate(() => { const a = window.__sanctum.app; const l = a.loops.get(32); return l ? { at: l.at, now: a.engine.now, startRel: (l.startBeat - a.seq.playStartBeat) % 4, rate: a.loopRate(l.sound), bpm: a.p.bpm, soundBpm: l.sound.bpm } : null; });
   ok('loop pad launches on next bar, tempo-synced rate', !!loop && Math.abs(loop.startRel) < 1e-6 && Math.abs(loop.rate - loop.bpm / loop.soundBpm) < 1e-9, JSON.stringify(loop));
   await sleep(2500);
+  await page.evaluate(() => document.querySelectorAll('.toast').forEach((t) => (t.style.display = 'none')));
   await page.screenshot({ path: `${SHOTS}/phone-dark-playing-loop.png` });
   await page.evaluate(() => { window.__sanctum.app.stop(); window.__sanctum.view.setBank(0); });
 
@@ -127,7 +129,7 @@ try {
 
   // ---------- screenshots ----------
   const themes = ['dark', 'light', 'warm'];
-  const shoot = async (pg, name) => { await sleep(250); await pg.screenshot({ path: `${SHOTS}/${name}.png` }); };
+  const shoot = async (pg, name) => { await sleep(250); await pg.evaluate(() => document.querySelectorAll('.toast').forEach((t) => (t.style.display = 'none'))); await pg.screenshot({ path: `${SHOTS}/${name}.png` }); };
   const setTheme = (pg, t) => pg.evaluate((t) => { const a = window.__sanctum.app; a.p.theme = t; a.emit('theme'); }, t);
   for (const t of themes) { await setTheme(page, t); await shoot(page, `phone-${t}`); }
   await setTheme(page, 'dark');

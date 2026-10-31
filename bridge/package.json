@@ -6,10 +6,15 @@
   "description": "Relays Ableton Link tempo/beat/phase to the Sanctum web app over WebSocket",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "build:relay": "bash native/build.sh",
+    "test-peer": "node test-peer.js",
+    "build:addon": "npx node-gyp rebuild --directory node_modules/abletonlink"
   },
   "dependencies": {
-    "abletonlink": "^0.2.0-beta.0",
     "ws": "^8.22.0"
+  },
+  "optionalDependencies": {
+    "abletonlink": "0.2.0-beta.0"
   }
 }

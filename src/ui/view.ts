@@ -48,11 +48,11 @@ export class View {
     this.applyTheme();
     // status strip
     const rec = h('button', { class: 'tbtn rec', 'aria-label': 'Record', title: 'Record (Enter)', onclick: () => a.toggleRecord() }, h('span', { class: 'dot' }), h('span', { class: 'hide-phone' }, 'REC'));
-    const play = h('button', { class: 'tbtn play', 'aria-label': 'Play', title: 'Play / Stop (Space)', onclick: () => (a.seq.playing ? a.stop() : a.play()) }, '▶');
+    const play = h('button', { class: 'tbtn play', 'aria-label': 'Play / Stop', title: 'Play / Stop (Space)', onclick: () => (a.seq.playing ? a.stop() : a.play()) }, '▶');
     const stop = h('button', { class: 'tbtn stop', 'aria-label': 'Stop', onclick: () => a.stop() }, '■');
     const lcd = h('div', { class: 'lcd', role: 'button', 'aria-label': 'Tempo and transport settings', onclick: () => this.sheets.transport() },
       h('span', { class: 'seg' }, h('span', { class: 'big bpm' }, '120.0')),
-      h('span', { class: 'seg' }, h('span', { class: 'lbl' }, 'BPM')),
+      h('span', { class: 'seg lblbpm' }, h('span', { class: 'lbl' }, 'BPM')),
       h('span', { class: 'seg pos' }, '1.1'),
       h('span', { class: 'seg hide-phone' }, h('span', { class: 'lbl' }, 'SW'), h('span', { class: 'swing' }, '56%')),
       h('span', { class: 'seg hide-phone' }, h('span', { class: 'lbl' }, 'Q'), h('span', { class: 'quant' }, '1/16')),
@@ -69,7 +69,7 @@ export class View {
       BANKS.map((b, i) => h('button', { class: 'bank', role: 'tab', 'aria-label': `Bank ${b}`, onclick: () => this.setBank(i) }, b)));
     const patBtn = h('button', { class: 'pill', 'aria-label': 'Pattern', onclick: () => this.sheets.transport() }, 'PAT ', h('b', { class: 'patn' }, '1'));
     const info = h('div', { class: 'trackinfo', role: 'status' });
-    const soundsBtn = h('button', { class: 'pill', onclick: () => this.sheets.sounds() }, '♫ Sounds');
+    const soundsBtn = h('button', { class: 'pill soundsBtn', onclick: () => this.sheets.sounds() }, '♫ Sounds');
     const track = h('section', { class: 'trackrow' }, patBtn, banks, info, soundsBtn);
     Object.assign(this.els, { banks, info, patBtn });
 
@@ -265,8 +265,8 @@ export class View {
     let size: number;
     if (this.layout === 'phone') {
       if (this.orient === 'landscape') size = Math.min(H - header - actions - 12, W * 0.5);
-      else size = Math.min(W - 16, H - header - actions - 130);
-    } else if (this.orient === 'landscape') size = Math.min(H * 0.58, (W - 290) * 0.75, H - header - 170);
+      else size = Math.min(W - 16, H - header - actions - (H > 760 ? 230 : 120));
+    } else if (this.orient === 'landscape') size = Math.min(H * 0.58, (W - 290) * 0.75, H - header - 290);
     else size = Math.min(W - 24, H * 0.55);
     size = Math.max(220, Math.floor(size));
     r.style.setProperty('--grid', size + 'px');
@@ -286,6 +286,7 @@ export class View {
     (l.querySelector('.quant') as HTMLElement).textContent = a.p.quantize.toUpperCase();
     this.els.rec.classList.toggle('on', a.seq.recording);
     this.els.play.classList.toggle('on', a.seq.playing);
+    if (this.layout === 'phone') this.els.play.textContent = a.seq.playing ? '■' : '▶'; else this.els.play.textContent = '▶';
     this.els.patBtn.querySelector('.patn')!.textContent = String(a.p.currentPattern + 1);
     this.renderLatency(); this.renderLink(); this.renderMidi();
   }
@@ -364,12 +365,19 @@ export class View {
         lane.appendChild(c); this.stepCells.push({ el: c, col });
       }
       ed.appendChild(lane);
+      if (ed.clientHeight > 200 || window.innerHeight > 760) ed.appendChild(this.bankGrid(true));
       return;
     }
-    // tablet: 16-row drum grid for the current bank
+    ed.append(h('div', { class: 'bartabs' }, h('b', {}, `${pat.name}`), ` · ${bars} bar${bars > 1 ? 's' : ''} · grid ${a.p.quantize === 'off' ? '1/16' : a.p.quantize} · swing ${a.p.swing}% · ${pat.events.length} notes`), this.bankGrid(false));
+  }
+
+  /** 16-row drum grid of the current bank (tablet editor; mini overview on tall phones). */
+  private bankGrid(mini: boolean) {
+    const a = this.app; const pat = a.seq.pattern; const st = a.stepTicks(); const perBar = Math.round(4 * PPQ / st); const bars = pat.bars;
+    const beatEvery = Math.max(1, Math.round(PPQ / st));
     const total = perBar * bars;
     const wrap = h('div', { class: 'gridwrap' });
-    const grid = h('div', { class: 'grid', style: { gridTemplateColumns: `86px repeat(${total}, minmax(16px, 1fr))` } });
+    const grid = h('div', { class: 'grid', style: { gridTemplateColumns: `${mini ? 58 : 86}px repeat(${total}, minmax(${mini ? 9 : 16}px, 1fr))` } });
     const byPad = new Map<number, typeof pat.events>();
     for (const e of pat.events) { const l = byPad.get(e.p) || []; l.push(e); byPad.set(e.p, l); }
     for (let r = 15; r >= 0; r--) {
@@ -384,7 +392,7 @@ export class View {
       }
     }
     wrap.appendChild(grid);
-    ed.append(h('div', { class: 'bartabs' }, h('b', {}, `${pat.name}`), ` · ${bars} bar${bars > 1 ? 's' : ''} · grid ${a.p.quantize === 'off' ? '1/16' : a.p.quantize} · swing ${a.p.swing}% · ${pat.events.length} notes`), wrap);
+    return wrap;
   }
 
   renderBrowser() {
