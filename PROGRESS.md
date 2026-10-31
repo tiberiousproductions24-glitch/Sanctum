@@ -31,3 +31,10 @@ All times Pacific (PDT).
 - Fixed: tablet init order bug; splash click-through (now starts audio on click = iOS-safe user activation); phone header compaction; phone mini drum-grid; toast moved to top.
 - Production zip: /workspace/projects/sanctum-build.zip (~21 MB incl. church banks WAV+OGG).
 - Next: README, HTTPS/LAN check, loop decode check, polish.
+
+## Sat Oct 31 2026 00:58 PDT — README + HTTPS/LAN verified
+- README.md written (run/dev/prod/HTTPS/LAN/bridge/Capacitor path/feature table/known limits).
+- Verified HTTPS preview on the LAN IP (https://172.30.0.2:4443 in headless Chrome): secure context, AudioWorklet engine, service worker active, Link via wss same-origin proxy → bridge, Web MIDI API present, all 36 church loops decoded to the exact manifest length (OGG path).
+- Loop rate now corrects for resampling rounding (cycle = beats·60/BPM exactly); Link start/stop sync follows other peers; relay "play" no longer re-requests beat 0 (keeps the shared timeline phase-safe).
+- Smoke re-run 15/15 (smoke waits for headless audio sink to come up — on this shared box it sometimes starts ~1–2 s late).
+- Next: polish pass (phone header, tap-test check), final screenshots + zip.
