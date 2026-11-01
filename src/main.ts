@@ -34,7 +34,7 @@ const startNow = async () => {
 splash.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); startNow(); }, { once: true });
 document.body.appendChild(splash);
 
-if ('serviceWorker' in navigator && window.isSecureContext && import.meta.env.PROD) {
+if ('serviceWorker' in navigator && window.isSecureContext && import.meta.env.PROD && !(window as any).Capacitor?.isNativePlatform?.()) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 (window as any).__sanctum = { app, view, sheets, gate };

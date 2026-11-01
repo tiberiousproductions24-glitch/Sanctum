@@ -110,7 +110,8 @@ export function adaptManifest(m: Manifest, baseUrl: string): SoundBank[] {
       const slot = Math.max(0, Math.min(15, (p.pad ?? i + 1) - 1));
       // Loops: prefer OGG (small) then WAV (sample-accurate master). Never MP3 for loops (encoder padding).
       const ogg = p.web?.ogg ? base + p.web.ogg : undefined;
-      const wav = p.file ? base + p.file : undefined;
+      // Native (APK) build ships OGG only, so never fall back to WAV there.
+      const wav = p.file && !(__OGG_ONLY__ && p.web?.ogg) ? base + p.file : undefined;
       sounds[slot] = {
         id: `ext.${b.id}.${p.id}`, name: p.name, short: shortName(p.name), kind: p.type === 'loop' ? 'loop' : 'oneshot',
         file: ogg || wav, fallbackFile: ogg ? wav : undefined,

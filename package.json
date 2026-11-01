@@ -1,9 +1,9 @@
 {
   "name": "sanctum",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Sanctum \u2014 MPC-style touch drum machine (PWA prototype)",
+  "description": "Sanctum — MPC-style touch drum machine (PWA prototype)",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
@@ -15,12 +15,26 @@
     "bridge:setup": "cd bridge && npm install && bash native/build.sh",
     "bridge:peer": "node bridge/test-peer.js",
     "icons": "node scripts/icons.mjs",
-    "zip": "npm run build && python3 scripts/zip.py"
+    "zip": "npm run build && python3 scripts/zip.py",
+    "build:android": "SANCTUM_TARGET=android npm run build && npx cap sync android",
+    "android:debug": "npm run build:android && cd android && ./gradlew clean assembleDebug",
+    "android:release": "npm run build:android && cd android && ./gradlew clean assembleRelease",
+    "license:invite": "node scripts/license.mjs invite",
+    "license:admin": "node scripts/license.mjs admin",
+    "license:keygen": "node scripts/license.mjs keygen",
+    "license:verify": "node scripts/license.mjs verify"
   },
   "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
+    "@capacitor/cli": "^8.6.0",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
     "puppeteer-core": "^25.16.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.5"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.0"
   }
 }

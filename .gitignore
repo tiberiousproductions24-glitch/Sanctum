@@ -5,3 +5,8 @@ bridge/native/link/
 bridge/native/sanctum-link-relay
 *.log
 content/
+android-signing/
+licensing-keys/
+release/
+sanctum-manual-site.zip
+manual-site/
