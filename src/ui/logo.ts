@@ -1,7 +1,7 @@
 // Brand marks from /mpc-research/branding (Arch Pad = header/splash, Keystone S = app icon).
 // Colors are bound to theme CSS variables so the mark adapts to Dark / Light / Warm.
 export const archPadSvg = (withWord = false) => `
-<svg viewBox="0 0 ${withWord ? 520 : 190} 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sanctum">
+<svg viewBox="0 -8 ${withWord ? 520 : 190} 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sanctum">
  <g transform="translate(15,20)">
   <path d="M0 160 V60 A80 80 0 0 1 160 60 V160 Z" fill="none" stroke="var(--mark-accent)" stroke-width="8"/>
   <g fill="var(--mark)">

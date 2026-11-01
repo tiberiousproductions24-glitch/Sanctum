@@ -22,7 +22,8 @@
     "license:invite": "node scripts/license.mjs invite",
     "license:admin": "node scripts/license.mjs admin",
     "license:keygen": "node scripts/license.mjs keygen",
-    "license:verify": "node scripts/license.mjs verify"
+    "license:verify": "node scripts/license.mjs verify",
+    "android:assets": "node scripts/android-assets.mjs && npx capacitor-assets generate --android --iconBackgroundColor \"#07070C\" --iconBackgroundColorDark \"#07070C\" --splashBackgroundColor \"#07070C\" --splashBackgroundColorDark \"#07070C\" && node scripts/compress-splash.mjs"
   },
   "devDependencies": {
     "@capacitor/assets": "^4.0.0",

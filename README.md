@@ -51,7 +51,7 @@ Plain `http://<LAN-IP>` still plays, through the BufferSource fallback engine. A
 ## What's in it
 | Area | Details |
 |---|---|
-| Pads | 16 velocity-sensitive pads × 8 banks (A–H) = 128 pads, in MPC order (pad 1 bottom-left). Multi-touch through Pointer Events, `touch-action:none`, no scroll, zoom, double-tap delay or callouts. Velocity modes: **Auto** (stylus or 3D-touch force where reported, otherwise contact size + vertical position), Position, Pressure, Fixed, plus a velocity curve. **FULL LVL** and **16 LVL**. Keyboard: `1-4 / Q-R / A-F / Z-V` (Shift = 127), Space = play/stop, Enter = rec, `[ ]` = bank, `N` = note repeat, ↑/↓ = tempo. |
+| Pads | 16 velocity-sensitive pads × 8 banks (A–H) = 128 pads, in MPC order (pad 1 bottom-left). Multi-touch through Pointer Events, `touch-action:none`, no scroll, zoom, double-tap delay or callouts. Velocity modes: **Auto** (stylus or 3D-touch force where reported, otherwise contact size + vertical position), Position, Pressure, Fixed, plus a velocity curve. **FULL** and **16 levels**. Keyboard: `1-4 / Q-R / A-F / Z-V` (Shift = 127), Space = play/stop, Enter = rec, `[ ]` = bank, `N` = note repeat, ↑/↓ = tempo. |
 | Visuals | A flash at velocity brightness fires on raw touch-down, before the audio (pre-light). There's also a pad ring (1.0→1.15 in 180 ms) and a ripple from the touch point. Sequenced notes light **pre-light ms** before they're audible, using `getOutputTimestamp`. Reduce Motion is respected. |
 | Sounds | **Sanctum Foundation Kit** and **Sanctum Stage FX & 808**: two starter banks of 32 sounds, all synthesized in-app (no samples). Church shout banks come from `content/church-banks/manifest.json` (Shout Guitar, Organ, Bass, Percussion → banks C–F). **Coming soon** slots: Sanctuary Tonewheel A-100, Choir Loft, Hymn Roots, Prayer Garden Sessions. Credits screen lists every sound with author, license and source. |
 | Loops | Manifest `type: loop` pads start on the **next bar** (or the next beat, set in Settings). They loop sample-exactly with `playbackRate = projectBPM / loopBPM`. Pads in the same `chokeGroup` replace each other at the bar line, and tapping again stops a loop at the next bar. The first loop played while stopped sets the project tempo to the loop's key tempo (G 132 · C 120 · D 140 · A 150). OGG is tried first. WAV is used if decoding fails or the decoded length differs from the manifest's sample count. MP3 is never used. |
@@ -65,9 +65,9 @@ Plain `http://<LAN-IP>` still plays, through the BufferSource fallback engine. A
 | Brand | **Arch Pad** mark in the header, splash and lock screens. **Keystone S** is the PWA icon set (192, 512, maskable 512, apple-touch, favicon, SVG), rendered from `branding/02-keystone-s.svg` by `npm run icons`. |
 | Layouts | Phone portrait: status strip, bank row, step lane + mini drum grid, 4×4 pads in the thumb zone, action bar, left-hand mirroring. Phone landscape "Studio": pads left, editor right. Tablet landscape "Studio": browser | grid editor | inspector over pads + side actions | macro strip. Tablet portrait "Pad wall": grid above, pads in the lower ~55 %. The layout can be overridden in Settings. |
 | Autosave | Every change is saved to localStorage (debounced), and also on page hide or when the app goes to the background. This covers patterns, bank assignments, per-pad level/pan/tune/mute, tempo, swing, quantize, theme, settings and Timing Lab results. Rolling snapshots keep the last 5, taken at most every 2 minutes, with restore. Projects export as JSON. |
-| Access gating (mock) | UI only, following access-control.md: Locked → "I have an invite" (link entry; a link containing `expired` shows the expired state) → invite redemption (scope, expiry, seats, sign-in mock, "Device registered ✓"). Also Subscribe paywall, Expired, Revoked and the Grace banner. Open it from Menu → **Access preview (dev)** or with `?access=locked\|invite\|paywall\|expired\|revoked\|grace`. Nothing is sent. |
+| Access & licensing | Real gate (see below). Lock screen mounts first; the app/engine module is only imported after an Ed25519-signed code verifies. |
 
-URL helpers: `?theme=dark|light|warm`, `?layout=phone|tablet|auto`, `?access=…`.
+URL helpers: `?code=<access code>` (web activation); dev builds only: `?theme=dark|light|warm`, `?layout=phone|tablet|auto`. The old `?access=` preview bypass is gone.
 
 ## Link bridge notes
 - `bridge/native/link-relay.cpp` is a small native Link peer built against the **current Ableton Link SDK** (cloned to `bridge/native/link`, which is git-ignored). It prints session state as JSON lines and reads commands on stdin, and `bridge/server.js` spawns it.
@@ -92,3 +92,27 @@ screenshots/                phone/tablet × Dark/Light/Warm + Timing Lab, Sounds
 - iOS Safari exposes no touch force on current iPhones, so Auto velocity uses position + contact size.
 - Loops are tempo-synced by resampling, which changes pitch away from the loop's native BPM. Time-stretching is v1.
 - No sampler, recording or chopping, mixer/FX, song mode, MIDI learn or controller profiles yet (MVP roadmap). MIDI 2.0, stems, plugin hosting and DAW import are out of scope.
+
+## Access & licensing
+
+- **Gate:** `src/main.ts` checks the license before anything else; without a valid one only `src/license/gate.ts` (lock screen) is in the DOM. The app (`src/boot-app.ts` → App/View/engine) is a dynamic import that runs only after verification. Re-verified on every launch and every 60 s (expiry locks the app).
+- **Tokens:** `S1-` + base64url(binary payload ‖ Ed25519 signature). Payload: type (invite|purchase|admin), id, issued, optional expiry, optional device binding, plan, optional name. Verified in-app with `@noble/ed25519` against the public key in `src/license/pubkey.ts`.
+- **Keys:** private key only in `licensing-keys/` (gitignored, chmod 600, never in `dist/` or the APK). `npm run license:keygen` creates it once.
+- **Invites:** `npm run license:invite -- --name "X" [--days N] [--uses 1] [--plan full|perform|trial] [--device ID]` prints the code, `sanctum://activate?code=…` (registered in the Android manifest, handled via `@capacitor/app` `appUrlOpen`) and a placeholder `https://sanctum.app/activate?code=…`. Logged to `licensing-keys/issued.jsonl`. On activation the stored license is bound to the device id.
+- **Admin:** `npm run license:admin` → `licensing-keys/ADMIN-TOKEN.txt` (non-expiring admin token; unlocks the hidden Admin panel). No master password exists in the app.
+- **Storage:** native = `@aparajita/capacitor-secure-storage` (Android Keystore-encrypted / iOS Keychain); web = IndexedDB (less secure). Only the signed token is stored, never an "unlocked" flag.
+- **Purchases:** `src/license/providers.ts` has the `LicenseProvider` interface and a `StorePurchaseProvider` stub (Google Play Billing / StoreKit via RevenueCat or cordova-plugin-purchase) — **not wired**. Receipts must be validated by a server that then issues a signed `purchase` token; that backend isn't built.
+- **Revocation:** embedded deny list in `src/license/revocation.ts` + TODO for a signed remote list. Real revocation needs a server.
+- **Gaps:** no server-side receipt validation, no remote revocation, no real store products, `--uses` isn't enforceable offline (use `--device`), iOS build needs a Mac with Xcode.
+
+## Android (Capacitor 8)
+
+```bash
+source ~/android-env.sh                 # JDK 21 + Android SDK (platform 36, build-tools 36)
+npm run android:assets                  # icons + splash from the Keystone S / Arch Pad marks (only when branding changes)
+npm run android:release                 # SANCTUM_TARGET=android build (OGG only, no source maps) → cap sync → gradlew clean assembleRelease
+cp android/app/build/outputs/apk/release/app-release.apk release/Sanctum-v0.2.0.apk
+npm run android:debug                   # debug APK fallback
+```
+Release signing reads `android-signing/keystore.properties` (gitignored). Native MIDI is `android/app/src/main/java/com/tiberiousproductions/sanctum/midi/SanctumMidiPlugin.java` (android.media.midi: USB host, BLE MIDI, USB-peripheral mode). Link in the APK needs a bridge address (Link & MIDI sheet); cleartext ws:// is allowed by the network config but the app only accepts private-LAN hosts.
+

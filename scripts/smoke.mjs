@@ -212,6 +212,15 @@ try {
   await page.evaluate(() => window.__sanctum.sheets.sounds()); await shoot(page, 'phone-dark-sounds');
   await page.evaluate(() => window.__sanctum.sheets.close());
   await page.evaluate(() => window.__sanctum.app.setLink(false));
+  // accessibility tree (what TalkBack/VoiceOver get): named pads, step checkboxes, live region, radio theme picker
+  {
+    const snap = await page.accessibility.snapshot({ interestingOnly: true });
+    const flat = []; const walk = (n) => { if (!n) return; flat.push(n); (n.children || []).forEach(walk); }; walk(snap);
+    const pads = flat.filter((n) => n.role === 'button' && /^Pad \d+, .+, bank [A-H]/.test(n.name || ''));
+    const steps = flat.filter((n) => n.role === 'checkbox' && /step \d+/.test(n.name || ''));
+    const live = await page.evaluate(() => { const l = document.querySelector('[aria-live]'); window.__sanctum.app.play(); return new Promise((r) => setTimeout(() => { const t = l?.textContent; window.__sanctum.app.stop(); r(t); }, 150)); });
+    ok('a11y: 16 named pads + labelled step checkboxes + live announcements', pads.length === 16 && steps.length >= 16 && live === 'Playing', `pads=${pads.length} steps=${steps.length} live=${live} e.g. "${pads[0]?.name}"`);
+  }
   await page.close();
 
   for (const [vp, name] of [[TAB_L, 'tablet-landscape'], [TAB_P, 'tablet-portrait']]) {

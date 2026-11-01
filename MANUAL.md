@@ -93,7 +93,7 @@ Phones need a **secure (HTTPS)** connection before they allow the best audio eng
 You can add these to the end of the address:
 - `?theme=dark`, `?theme=light` or `?theme=warm` (pick a theme)
 - `?layout=phone`, `?layout=tablet` or `?layout=auto` (force a screen layout)
-- `?access=…` (preview the lock screens; see [section 17](#17-access-screens-preview-only))
+- `?code=…` (unlock with an access code; see [section 17](#17-access--licensing)). `?theme=` and `?layout=` only work in the developer build.
 
 ---
 
@@ -116,9 +116,9 @@ You can add these to the end of the address:
 
 **Pads:** a 4×4 grid in MPC order, so **pad 1 is bottom-left** and pad 16 is top-right.
 
-**Action bar:** **NOTE RPT**, **RATE**, **FULL LVL**, **16 LVL**, **PAD edit**, and **⌘ menu**.
+**Action bar:** **REPEAT**, **SPEED**, **FULL volume**, **16 levels**, **EDIT pad**, and **☰ MENU**.
 
-**The menu (⌘ or ⚙)** has: Tempo & Sequencer · Note Repeat · Pad Editor · Sounds · Timing Lab · Link & MIDI · Settings & Theme · Credits · Access preview (dev) · Help.
+**The menu (⌘ or ⚙)** has: Tempo & Sequencer · Note Repeat · Pad Editor · Sounds · Timing Lab · Link & MIDI · Settings & Theme · Credits · Help (plus **Admin** for the owner code).
 
 Panels slide up from the bottom. Close one with **Done**, by tapping outside it, or by pressing **Esc** on a keyboard.
 
@@ -147,9 +147,10 @@ Choose a mode in **Menu → Settings & Theme → Velocity**:
 - With a mouse, loudness depends on where you click. On a keyboard, keys play at 100, and holding **Shift** plays at **127**.
 - Most current iPhones don't report pressure, so Auto uses position and contact size there.
 
-### 3c. FULL LVL and 16 LVL
-- **FULL LVL**: every hit plays at full velocity (127). Steps you enter by hand are also placed at 127.
-- **16 LVL** (16 Levels): spreads the **selected pad's sound** across all 16 pads, each at a different velocity, from pad 1 (softest, about 8) to pad 16 (127). Each pad shows its level number. Use this to play soft ghost notes and loud accents of one sound.
+### 3c. FULL and 16 LEVELS
+(The action-bar buttons read **REPEAT · SPEED · FULL volume · 16 levels · EDIT pad · MENU**.)
+- **FULL** (full volume): every hit plays at full velocity (127). Steps you enter by hand are also placed at 127.
+- **16 LEVELS**: spreads the **selected pad's sound** across all 16 pads, each at a different velocity, from pad 1 (softest, about 8) to pad 16 (127). Each pad shows its level number. Use this to play soft ghost notes and loud accents of one sound.
 - Only one of the two can be on at a time. Tap the button again to turn it off.
 
 ### 3d. Desktop keyboard map
@@ -243,9 +244,9 @@ These are listed in Sounds as **COMING SOON**. They can't be loaded yet:
 ## 5. Themes
 
 Open **Menu → Settings & Theme → Theme** and tap a swatch:
-- **Dark**: the default, for dark stages.
-- **Light**: for bright rooms.
-- **Warm · MPC60**: a beige body, grey rubber-look pads, orange accents and a green-yellow display, like a classic MPC60.
+- **Neon (dark)**: the default flagship look for dark stages — black chassis, chunky raised pads with coloured light strips (orange, pink, violet, cyan rows) that glow when you hit them.
+- **Light**: white keycaps for bright rooms, same chunky pads and coloured strips.
+- **Warm · MPC60**: chunky grey rubber pads that press down, a beige body, grey rubber-look pads, orange accents and a green-yellow display, like a classic MPC60.
 
 The theme is saved with your project. You can also add `?theme=warm` (or `dark` or `light`) to the address.
 
@@ -253,7 +254,9 @@ The theme is saved with your project. You can also add `?theme=warm` (or `dark` 
 
 ## 6. Pad lights: flash and ripple
 
-- When you hit a pad, it **flashes**, and **harder hits flash brighter**.
+- Pads are raised keys: when you hit one it **presses down**, **flashes** and **glows** in its row colour, and **harder hits flash brighter, glow wider and ripple further**.
+- On the Android app each hit also gives a small **vibration** (stronger for harder hits). Turn it off in Settings → Haptics.
+- All of these effects use only the phone's graphics chip (no page re-layout), so they never delay the sound.
 - The pad also shows a **ring** that grows outward and a **ripple** that spreads from where your finger touched.
 - The flash happens the moment you touch, before the sound plays, so the light never lags behind your finger.
 - Pads played by the sequencer light up slightly *before* you hear them, so the light and sound feel together. This is called **pre-light**, and you can adjust it in the Timing Lab (default 8 ms).
@@ -282,7 +285,7 @@ Open it from **Menu → Tempo & Sequencer**, by tapping the LCD display, or by t
 ### 8b. Entering beats by hand (step editor)
 - **Phone:** the lane shows the **selected pad** for one bar. Tap a step to add or remove a note. Use **BAR 1, BAR 2…** to change pages. **⇥** makes the page follow the playhead as it plays. Taller phones also show a mini grid of all 16 pads.
 - **Tablet:** a full grid with one row per pad and all bars shown. Tap any cell to add or remove a note. Tap a row name to select that pad.
-- Hand-entered notes have velocity 100, or 127 with FULL LVL on.
+- Hand-entered notes have velocity 100, or 127 with FULL on.
 - The grid's step size follows the **Quantize** setting (1/16 when quantize is Off).
 
 ### 8c. Recording live
@@ -318,10 +321,10 @@ Every touch has a small delay before you hear it. Sanctum records each hit at th
 
 ## 9. Note repeat
 
-1. Tap **NOTE RPT** to turn it on (or press **N**).
+1. Tap **REPEAT** to turn it on (or press **N**).
 2. **Hold** a pad. It repeats at the chosen rate, in time with the tempo and swing.
 3. Tap **RATE** to step through **1/4, 1/8, 1/8T, 1/16, 1/16T, 1/32, 1/32T**. The current rate shows under the button.
-4. **Long-press NOTE RPT** (or use **Menu → Note Repeat**) to open its panel, which has an on/off switch and a rate picker.
+4. **Long-press REPEAT** (or use **Menu → Note Repeat**) to open its panel, which has an on/off switch and a rate picker.
 
 Notes:
 - Note repeat works whether the sequencer is playing or stopped.
@@ -419,21 +422,45 @@ The app server forwards the connection to the bridge, so the default **Bridge UR
 
 ---
 
-## 13. MIDI (Web MIDI)
+## 13. MIDI — USB, Bluetooth and your DAW
 
-Open **Menu → Link & MIDI → MIDI**. This works with USB, class-compliant MIDI devices in **Chrome or Edge** on Android, desktop or Chromebook, and only over HTTPS or localhost. **It doesn't work in iPhone or iPad Safari**, which shows a message explaining this.
+Open **Menu → Link & MIDI**. Sanctum talks MIDI in two ways:
+- **Android app:** built-in native MIDI (Android's own MIDI system). Works with **USB-C MIDI keyboards/pads/interfaces** (USB host, usually with a USB-C OTG adapter), **Bluetooth MIDI** devices, and the **phone itself as a USB MIDI device** plugged into your computer.
+- **Browser version:** Web MIDI in **Chrome or Edge** (desktop, Android Chrome, Chromebook) over HTTPS/localhost. Not in iPhone/iPad Safari.
 
-1. Tap **Enable MIDI** (it becomes **Rescan MIDI** afterward) and allow access.
-2. Choose an **Output** ("All outputs" by default) and an **Input** ("All inputs (omni)" by default).
-3. Turn on what you need:
-   - **Send MIDI clock + Start/Stop:** Sanctum sets the tempo for other gear.
-   - **Follow MIDI clock in:** other gear sets Sanctum's tempo, and Start, Continue and Stop control it. If Link is on, Link wins on tempo.
-   - **MIDI notes play pads:** on by default. Notes from any channel play pads.
-4. **Clock offset:** −50 to +50 ms. Moves the clock earlier or later to line up with other gear.
+### 13a. Turning it on
+1. Tap **Turn on MIDI** (later: **Look for MIDI devices again**). In the Android app, USB devices that are plugged in are opened automatically.
+2. **Bluetooth (Android app):** tap **Find Bluetooth MIDI**, allow the Bluetooth permission, then tap **Connect** next to your device.
+3. **Phone → computer over USB (Android app):** plug the phone into the computer with a USB-C cable, pull down the notification shade, tap **"Charging this device via USB"** (or "USB preferences"), and choose **MIDI**. The computer now sees a MIDI device called something like **"Android"** or your phone's name. (Menu wording varies by phone brand.)
+4. **Send to / Listen to:** pick one device or leave **All**.
 
-**Note map:** MIDI notes **36–51 play pads 1–16** of the current bank (36 = pad 1, 51 = pad 16). Notes outside that range wrap around onto the 16 pads. The info area shows the inputs and outputs found, the incoming clock tempo, and the last note received.
+### 13b. What gets sent and received
+| What | Out (Sanctum → DAW) | In (DAW/controller → Sanctum) |
+|---|---|---|
+| **Notes** | Turn on **Pads send notes to the computer**. Pad 1–16 = notes **36–51** (C1–D#2), with velocity, on the **MIDI channel** you pick (default 10). Sequencer notes are sent too. | **Notes from MIDI play the pads** (any channel). 36–51 = pads 1–16; other notes wrap onto the 16 pads. |
+| **Knobs (CC)** | Moving Main volume, Swing, Pad level or Pad tune sends the mapped CC (turn off with **Send knob changes out**). | Mapped CCs move those controls. Defaults: **CC 7** main volume, **CC 9** swing, **CC 71** pad level, **CC 74** pad tune; Tempo is unmapped. |
+| **MIDI learn** | — | Tap **Learn** next to a control, then move a knob on your controller or DAW. |
+| **Clock** | **Send tempo clock + Start/Stop**: 24 pulses per beat, scheduled ahead from the audio clock. | **Follow the computer's clock**: tempo follows, Start/Continue/Stop control playback. If Link is on, Link wins. |
+| **Clock offset** | −50…+50 ms to line up with your DAW. | |
 
-Logic Pro can't receive MIDI clock. Use Link, or make Logic the master and turn on **Follow MIDI clock in**.
+Song Position Pointer isn't sent or followed yet (Start always means "from the top").
+
+### 13c. DAW setup guide
+The most reliable setup for every DAW: **let the DAW be the leader** — the DAW sends MIDI clock, Sanctum follows (**Follow the computer's clock** on), and Sanctum's pads send notes to a drum/instrument track. Connect by USB (phone in **MIDI** USB mode) or Bluetooth.
+
+**Bluetooth on a computer:** on a **Mac**, open **Audio MIDI Setup → Window → Show MIDI Studio → Bluetooth** (the Bluetooth icon), find the phone and click **Connect**. On **Windows**, most DAWs can't see Bluetooth MIDI on their own; install a BLE-MIDI utility/driver (for example **KORG BLE-MIDI Driver** or **MIDIberry** + loopMIDI) first. USB is simpler and has less delay than Bluetooth.
+
+- **Ableton Live** — Best: **Link** (see section 12; needs the Sanctum bridge on the computer). Or MIDI: *Settings → Link, Tempo & MIDI*: for the Sanctum/Android port turn on **Track** (notes in) and **Remote** (knobs) for Input; turn on **Sync** for Output to send clock to Sanctum (or Sync on Input to make Live follow Sanctum's clock). Arm a Drum Rack track with *MIDI From* = the Sanctum port.
+- **FL Studio** — *Options → MIDI settings*: enable the Sanctum port under **Input** (pick a port number) and **Output** (same port number). Tick **Send master sync** on the output to send clock to Sanctum, or set *Sync* to **External** to make FL follow Sanctum. Map knobs with right-click → *Link to controller*.
+- **Logic Pro (Mac)** — *Logic Pro → Settings → MIDI*: make sure the port is enabled; notes arrive on any armed software instrument (e.g. Drum Machine Designer). **Logic can't follow incoming MIDI clock**, so let Logic lead: *File → Project Settings → Synchronization → MIDI* → tick **Transmit MIDI Clock** to the Sanctum port, and turn on Sanctum's **Follow the computer's clock**. Use *Logic Pro → Control Surfaces → Learn Assignment* for knobs.
+- **Pro Tools** — *Setup → MIDI → Input Devices*: tick the Sanctum port. Create a MIDI or instrument track with input = the port, record-enable it. Clock out: *Setup → Peripherals → Synchronization* / *Setup → MIDI → MIDI Beat Clock* → enable and tick the Sanctum port. Pro Tools doesn't follow MIDI clock, so Pro Tools leads.
+- **Cubase** — *Studio → Studio Setup → MIDI Port Setup*: make sure the port is active and "In All MIDI Inputs" is ticked. Clock out: *Transport → Project Synchronization Setup* → **MIDI Clock Destinations** → tick the Sanctum port. Cubase leads (it doesn't follow external MIDI clock). Knobs: *Studio → Generic Remote* or Quick Controls.
+- **REAPER** — *Options → Preferences → Audio → MIDI Devices*: enable the Sanctum input (**Enable input**, and *for control messages* if you want knobs) and output. Clock out: right-click the output → **Send clock/SPP**. REAPER leads. Arm a track with input = the Sanctum port.
+- **Studio One** — *Studio One → Options → External Devices → Add…* → **New Keyboard** (for notes in) and/or **New Instrument** (to send clock): choose the Sanctum port; on the instrument tick **Send MIDI Clock**. Studio One leads.
+
+If timing feels a bit early or late, adjust **Clock offset**. If two notes play for every hit, you have a loop: turn off **Pads send notes** or disable *MIDI Thru/echo* for that track in the DAW.
+
+**Verified vs not verified (honest):** the MIDI byte handling, clock, note and CC logic is tested in the browser build. The Android native MIDI plugin compiles and is in the APK, but **no USB or Bluetooth MIDI hardware or DAW has been tested yet** (none was available while building). The DAW menu paths above come from each DAW's current documentation and may differ slightly by version.
 
 ---
 
@@ -460,7 +487,7 @@ In **Menu → Settings & Theme**:
 - **Haptics (Android vibrate):** a small buzz on pad hits, stronger for harder hits
 - **Reduce motion**
 - **Master:** overall volume, 0–100% (default 85%)
-- **Developer → Access preview (lock screens)**
+- **Access**: shows how this device was unlocked and until when.
 
 ---
 
@@ -475,21 +502,23 @@ Sanctum picks a layout from your screen size. Screens at least 600 px on the sho
 
 ---
 
-## 17. Access screens (preview only)
+## 17. Access & licensing
 
-> **Important:** these screens are a **design preview (mock) only**. There's **no real subscription, payment, invite system or sign-in**. Nothing is sent anywhere and no account is created. Normally you never see them. The app opens unlocked.
+Sanctum is private. When it opens it checks for a valid **access code** before anything else loads — without one you only see the lock screen (no pads, sounds or settings are loaded at all).
 
-To preview them:
-- **Menu → Access preview (dev)** (or **Settings → Developer → Access preview (lock screens)**), then pick **Owner (unlocked), Locked, Invite redemption, Expired invite, Revoked, Subscribe / paywall** or **Grace banner**.
-- Or add `?access=locked` (or `invite`, `paywall`, `expired`, `revoked`, `grace`, `owner`) to the address.
+**Getting in:** tap **I have a code** and paste the code (or just tap the link Lawrence sent — on an Android phone with Sanctum installed, a `sanctum://activate?code=…` link opens the app and unlocks it). The code is checked on the phone with a digital signature, so no internet is needed. After unlocking, the code is kept in the phone's secure storage (Android Keystore; iPhone Keychain later; in a web browser it's kept in the browser's storage, which is less secure) and is re-checked every time Sanctum opens.
 
-What each screen shows:
-- **Locked:** **I have an invite** (paste a link; a link containing "expired" shows the Expired screen), **Subscribe**, **Sign in**, **Help**.
-- **Invite redemption:** invite details, then mock **Sign in with Apple / Google / Email magic link**, which leads to "Device registered ✓".
-- **Expired**, **Revoked** (mock Export projects / Subscribe), and **Paywall** ("Monthly · price TBD"; the **Continue on web** button is disabled).
-- **Grace banner:** a "Payment issue…" strip at the top.
+- **Expired:** you'll see "Your access has expired" — ask Lawrence for a new code.
+- **This code is for another device:** some invites only work on one phone. Help shows your **Device ID**; send it to Lawrence.
+- **Subscribe:** shows the plan; store billing isn't connected yet.
 
-To get back: tap the gold **DEV PREVIEW** tag and choose **Owner (unlocked)**. Lock screens stop playback.
+**For Lawrence (owner)** — on the computer that holds the keys, in the Sanctum folder:
+- `npm run license:invite -- --name "Alice" --days 30` makes an invite code plus a tap-to-open link. Add `--device XXXX-XXXX-XXXX-XXXX` (their Device ID) to lock it to one phone. Leave out `--days` for no end date.
+- `npm run license:admin` makes your own owner code (saved to `licensing-keys/ADMIN-TOKEN.txt`). It unlocks everything plus the hidden **Menu → Admin** panel (license details, lock-screen previews, remove license).
+- Every code you make is logged in `licensing-keys/issued.jsonl`.
+- The signing key lives only in `licensing-keys/` on that computer. **Never share that folder or put it in the app** — anyone with it can make codes. Back it up somewhere safe.
+
+**Limits today:** codes can't be taken back remotely yet (revoking means adding the code's id to the app's built-in deny list and shipping an update), a code without `--device` can be used on more than one phone, and subscriptions need a server that isn't built yet.
 
 ---
 
@@ -506,15 +535,15 @@ To get back: tap the gold **DEV PREVIEW** tag and choose **Owner (unlocked)**. L
 |---|---|---|
 | Start audio | **Tap to start** | (click) |
 | Play a pad | Tap a pad | `Z X C V` / `A S D F` / `Q W E R` / `1 2 3 4` (bottom → top rows) |
-| Full-velocity hit | **FULL LVL** | Hold `Shift` |
+| Full-velocity hit | **FULL** | Hold `Shift` |
 | Play / stop | **▶** (■ on phone while playing) | `Space` |
 | Stop | **■** | `Space` |
 | Record | **REC** | `Enter` |
 | Previous / next bank | **A–H** buttons | `[` / `]` |
-| Note repeat on/off | **NOTE RPT** | `N` |
-| Note repeat rate | **RATE** (or long-press NOTE RPT) | – |
+| Note repeat on/off | **REPEAT** | `N` |
+| Note repeat rate | **SPEED** (or long-press REPEAT) | – |
 | Tempo ±1 / ±10 | Tempo & Sequencer | `↑` `↓` / `Shift+↑` `Shift+↓` |
-| 16 Levels | **16 LVL** | – |
+| 16 Levels | **16 levels** | – |
 | Edit pad | **PAD edit** | – |
 | Load soundbank | **♫ Sounds** | – |
 | Tempo, pattern, swing, quantize | Tap LCD or **PAT** | – |
@@ -576,5 +605,24 @@ Sanctum is a **prototype** (version 0.1.0). It has been tested only in desktop C
 | **"Web MIDI is not available"** | Use Chrome or Edge on Android or desktop. iPhone/iPad Safari has no Web MIDI. |
 | **"Web MIDI needs a secure context"** | Open the app over HTTPS (`npm run dev:https`) or on `localhost`. |
 | **Loopback test: "Only N/6 impulses detected"** | Turn the volume up, move the speaker closer to the mic, or use a loopback cable. Don't use headphones. |
-| **The app is locked or shows a paywall** | You're in the access preview. Tap **DEV PREVIEW** and choose **Owner (unlocked)**, or remove `?access=` from the address. |
+| **The app is locked or shows a paywall** | You need an access code from Lawrence (see section 17). If you're the owner previewing lock screens from Admin, tap **CLOSE PREVIEW**. |
 | **I lost my work** | **Settings → Restore last snapshot**. Export JSON regularly as a backup. |
+
+---
+
+## 22. The Android app (APK)
+
+- Install `Sanctum-v0.2.0.apk` on Android 7.0 or newer (allow "Install unknown apps" for your file manager or browser when asked).
+- It runs fully offline: all sounds (OGG), the sequencer, themes and the Timing Lab are inside the app. Only Link needs the bridge on a computer on the same Wi-Fi.
+- The app goes full screen (swipe from an edge to see the system bars), keeps the screen awake while playing, and on phones stays in portrait (tablets can rotate).
+- **Link in the app:** open **Link & MIDI**, type the address the bridge prints on the computer (for example `192.168.1.20`) into **Bridge address**, and turn Link on. If there's no address, Link shows "unavailable on this device" instead of an error. For safety only local-network addresses are allowed for unencrypted connections.
+- **Microphone:** only asked for when you run the Timing Lab loopback test.
+
+## 23. Latency on Android — honest numbers
+
+Sanctum's sound engine runs in the phone's web engine (Android System WebView, the same engine as Chrome). Chrome on Android plays through AAudio with a low-latency buffer of about 256 frames (≈5 ms at 48 kHz), but the phone's own output path adds more on top. In practice, **touch-to-sound through the WebView is usually about 20–50 ms or more** depending on the phone, and Bluetooth headphones add 150–300 ms (Sanctum warns about Bluetooth). **A round trip under 10 ms is generally not reachable through the WebView.** The latency chip and the Timing Lab show the real numbers on your phone — trust those.
+
+What we do now: request the lowest-latency audio mode (`latencyHint: "interactive"`, or the smallest buffer you choose on the slider), schedule sequencer notes ahead on the audio clock (so the beat itself doesn't jitter), and light pads instantly.
+
+**The route to sub-10 ms (next step, not built yet):** a native Capacitor plugin that plays the pads through Google's **Oboe** library (AAudio, LowLatency performance mode, Exclusive sharing, 48 kHz, double-buffered callback — Google's *DrumThumper* sample is the model), triggered straight from the native touch event. On phones that report Android's **"Pro Audio"** feature (`android.hardware.audio.pro`, which promises a short round trip — about 20 ms or less in the Android compatibility rules) this can get output latency near 10 ms; on other phones it will still beat the WebView. Sources: Android low-latency audio guide (developer.android.com/games/sdk/oboe/low-latency-audio), Oboe DrumThumper sample (github.com/google/oboe/tree/main/samples/drumthumper).
+
