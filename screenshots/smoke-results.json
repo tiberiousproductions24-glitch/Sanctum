@@ -1,6 +1,41 @@
 {
-  "at": "Sat Oct 31 2026 00:59:16 GMT-0700 (Pacific Daylight Time)",
+  "at": "Sun Nov 01 2026 12:24:19 GMT-0800 (Pacific Standard Time)",
   "results": [
+    {
+      "name": "locked: only the lock screen mounts (no pads, no app/engine)",
+      "pass": true,
+      "info": "{\"screen\":\"locked\",\"pads\":0,\"app\":false,\"ctx\":\"undefined\"}"
+    },
+    {
+      "name": "garbage code is rejected",
+      "pass": true,
+      "info": "That isn't a Sanctum code. Check you copied all of it."
+    },
+    {
+      "name": "expired token shows the expired screen and stays locked",
+      "pass": true,
+      "info": "{\"screen\":\"expired\",\"pads\":0,\"app\":false}"
+    },
+    {
+      "name": "tampered (bad signature) code is rejected",
+      "pass": true,
+      "info": "This code isn't valid (signature check failed)."
+    },
+    {
+      "name": "invite code unlocks (welcome → app mounts with 16 pads)",
+      "pass": true,
+      "info": "{\"app\":true,\"pads\":16,\"type\":\"invite\"}"
+    },
+    {
+      "name": "admin token unlocks and shows the hidden Admin panel",
+      "pass": true,
+      "info": "{\"type\":\"admin\",\"hasAdmin\":true,\"panel\":true}"
+    },
+    {
+      "name": "invite license does not see the Admin panel",
+      "pass": true,
+      "info": ""
+    },
     {
       "name": "audio engine starts (render thread running)",
       "pass": true,
@@ -54,7 +89,7 @@
     {
       "name": "Timing Lab tap test measures input offset and sets recording correction",
       "pass": true,
-      "info": "{\"off\":30.370000002978514,\"jit\":0.31821790517904447,\"comp\":30.4}"
+      "info": "{\"off\":25.26433333631317,\"jit\":0.4810105083190074,\"comp\":25.3}"
     },
     {
       "name": "autosave restores project on reload",
@@ -64,17 +99,17 @@
     {
       "name": "Link: bridge connected, peer visible, tempo follows peer (97)",
       "pass": true,
-      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":2.0975501526987483,\"rtt\":1.2999999970197678,\"chip\":\"LINK1\"}"
+      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":2.0339929279627396,\"rtt\":4.300000011920929,\"chip\":\"LINK1\"}"
     },
     {
       "name": "Link: phase error < 5 ms",
       "pass": true,
-      "info": "offset=2.10 ms"
+      "info": "offset=2.03 ms"
     },
     {
       "name": "Link: app tempo change propagates to the other peer",
       "pass": true,
-      "info": "[peer] t=1793433546734 peers=1 bpm=111.00 beat=40.382 phase=0.382"
+      "info": "[peer] t=1793564651074 peers=1 bpm=111.00 beat=49.961 phase=1.961"
     },
     {
       "name": "no console errors",

@@ -6,6 +6,9 @@
 import puppeteer from 'puppeteer-core';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
+const mint = (...a) => execFileSync('node', ['scripts/license.mjs', 'mint', '--nolog', ...a]).toString().trim();
+const ADMIN = fs.readFileSync('licensing-keys/ADMIN-TOKEN.txt', 'utf8').trim();
 
 const CHROME = process.env.CHROME || '/usr/bin/google-chrome';
 const PORT = 4173; const BASE = `http://localhost:${PORT}/`;
@@ -34,16 +37,70 @@ async function newPage(vp) {
   page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
   return page;
 }
+const shoot = async (pg, name) => { await sleep(250); await pg.evaluate(() => document.querySelectorAll('.toast').forEach((t) => (t.style.display = 'none'))); await pg.screenshot({ path: `${SHOTS}/${name}.png` }); };
 const PHONE = { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 const TAB_L = { width: 1180, height: 820, deviceScaleFactor: 1, isMobile: true, hasTouch: true };
 const TAB_P = { width: 820, height: 1180, deviceScaleFactor: 1, isMobile: true, hasTouch: true };
 
 try {
-  // ---------- phone: core checks ----------
+  // ---------- license gate ----------
   const page = await newPage(PHONE);
-  await page.goto(BASE + '?layout=auto', { waitUntil: 'networkidle0' });
-  await page.evaluate(() => localStorage.clear());
   await page.goto(BASE, { waitUntil: 'networkidle0' });
+  await page.evaluate(() => new Promise((r) => { localStorage.clear(); const q = indexedDB.deleteDatabase('sanctum-license'); q.onsuccess = q.onerror = q.onblocked = () => r(); }));
+  await page.goto(BASE, { waitUntil: 'networkidle0' });
+  await page.waitForSelector('.overlay.lock');
+  const locked = await page.evaluate(() => ({ screen: document.querySelector('.overlay.lock')?.dataset.screen, pads: document.querySelectorAll('.pad').length, app: !!window.__sanctum, ctx: typeof window.__sanctum?.app?.engine }));
+  ok('locked: only the lock screen mounts (no pads, no app/engine)', locked.screen === 'locked' && locked.pads === 0 && !locked.app, JSON.stringify(locked));
+  await shoot(page, 'phone-lock');
+  const enterCode = async (pg, code) => {
+    await pg.evaluate(() => [...document.querySelectorAll('.overlay.lock .btn')].find((b) => /have a (new )?code/i.test(b.textContent)).click());
+    await pg.waitForSelector('.overlay.lock textarea');
+    await pg.$eval('.overlay.lock textarea', (t, c) => { t.value = c; }, code);
+    await pg.evaluate(() => [...document.querySelectorAll('.overlay.lock .btn')].find((b) => b.textContent === 'Unlock').click());
+    await sleep(400);
+  };
+  await enterCode(page, 'S1-notarealcode');
+  const bad = await page.evaluate(() => ({ err: document.querySelector('.overlay.lock .err')?.textContent, pads: document.querySelectorAll('.pad').length }));
+  ok('garbage code is rejected', !!bad.err && bad.pads === 0, bad.err);
+  await page.evaluate(() => [...document.querySelectorAll('.overlay.lock .btn')].find((b) => b.textContent === 'Back').click());
+  await enterCode(page, mint('--type', 'invite', '--days', '-1', '--name', 'Expired Test'));
+  const exp = await page.evaluate(() => ({ screen: document.querySelector('.overlay.lock')?.dataset.screen, pads: document.querySelectorAll('.pad').length, app: !!window.__sanctum }));
+  ok('expired token shows the expired screen and stays locked', exp.screen === 'expired' && exp.pads === 0 && !exp.app, JSON.stringify(exp));
+  await shoot(page, 'phone-lock-expired');
+  await page.evaluate(() => [...document.querySelectorAll('.overlay.lock .btn')].find((b) => /Subscribe/.test(b.textContent)).click()); await shoot(page, 'phone-lock-paywall');
+  await page.evaluate(() => [...document.querySelectorAll('.overlay.lock a')].find((b) => b.textContent === 'Back').click());
+  // tampered invite (flip a char in the signature) must fail
+  const inv = mint('--type', 'invite', '--days', '30', '--name', 'Smoke Test');
+  const tampered = inv.slice(0, -3) + (inv.at(-3) === 'A' ? 'B' : 'A') + inv.slice(-2);
+  await enterCode(page, tampered);
+  const tam = await page.evaluate(() => ({ err: document.querySelector('.overlay.lock .err')?.textContent, app: !!window.__sanctum }));
+  ok('tampered (bad signature) code is rejected', /signature/i.test(tam.err || '') && !tam.app, tam.err);
+  await page.evaluate(() => [...document.querySelectorAll('.overlay.lock .btn')].find((b) => b.textContent === 'Back').click());
+  await enterCode(page, inv);
+  const wel = await page.evaluate(() => document.querySelector('.overlay.lock')?.dataset.screen);
+  await shoot(page, 'phone-lock-welcome');
+  await page.evaluate(() => [...document.querySelectorAll('.overlay.lock .btn')].find((b) => b.textContent === 'Open Sanctum').click());
+  await page.waitForFunction(() => window.__sanctum?.app && document.querySelectorAll('.pad').length === 16, { timeout: 8000 }).catch(() => {});
+  const unl = await page.evaluate(() => ({ app: !!window.__sanctum, pads: document.querySelectorAll('.pad').length, type: window.__sanctum?.app?.license?.type }));
+  ok('invite code unlocks (welcome → app mounts with 16 pads)', wel === 'welcome' && unl.app && unl.pads === 16 && unl.type === 'invite', JSON.stringify(unl));
+  // admin token via link (?code=… — same path as the sanctum://activate deep link) in a fresh profile
+  {
+    const ctx = await browser.createBrowserContext();
+    const ap = await ctx.newPage(); await ap.setViewport(PHONE);
+    ap.on('pageerror', (e) => errors.push('pageerror(admin): ' + e.message));
+    await ap.goto(BASE + '?code=' + encodeURIComponent(ADMIN), { waitUntil: 'networkidle0' });
+    await ap.waitForSelector('.overlay.lock[data-screen="welcome"]', { timeout: 5000 }).catch(() => {});
+    await ap.evaluate(() => [...document.querySelectorAll('.overlay.lock .btn')].find((b) => b.textContent === 'Open Sanctum')?.click());
+    await ap.waitForFunction(() => window.__sanctum?.app, { timeout: 8000 }).catch(() => {});
+    const ad = await ap.evaluate(() => { const s = window.__sanctum; if (!s) return null; s.sheets.menu(); const hasAdmin = [...document.querySelectorAll('.menu-grid button')].some((b) => b.textContent === 'Admin'); s.sheets.admin(); return { type: s.app.license.type, hasAdmin, panel: !!document.querySelector('.sheet') && /Token id/.test(document.body.textContent) }; });
+    ok('admin token unlocks and shows the hidden Admin panel', !!ad && ad.type === 'admin' && ad.hasAdmin && ad.panel, JSON.stringify(ad));
+    await ap.evaluate(() => document.querySelectorAll('.overlay.start').forEach((e) => e.remove())); await shoot(ap, 'phone-dark-admin');
+    await ctx.close();
+  }
+  const noAdmin = await page.evaluate(() => { window.__sanctum.sheets.menu(); const r = [...document.querySelectorAll('.menu-grid button')].some((b) => b.textContent === 'Admin'); window.__sanctum.sheets.close(); return r; });
+  ok('invite license does not see the Admin panel', !noAdmin);
+
+  // ---------- phone: core checks ----------
   await page.touchscreen.tap(195, 600); // splash "tap to start"
   await page.waitForFunction(() => window.__sanctum.app.started && window.__sanctum.app.engine.ctx, { timeout: 8000 });
   // headless Chrome's audio sink can take a moment to come up on this shared box
@@ -148,17 +205,13 @@ try {
 
   // ---------- screenshots ----------
   const themes = ['dark', 'light', 'warm'];
-  const shoot = async (pg, name) => { await sleep(250); await pg.evaluate(() => document.querySelectorAll('.toast').forEach((t) => (t.style.display = 'none'))); await pg.screenshot({ path: `${SHOTS}/${name}.png` }); };
   const setTheme = (pg, t) => pg.evaluate((t) => { const a = window.__sanctum.app; a.p.theme = t; a.emit('theme'); }, t);
   for (const t of themes) { await setTheme(page, t); await shoot(page, `phone-${t}`); }
   await setTheme(page, 'dark');
   await page.evaluate(() => window.__sanctum.sheets.timingLab()); await shoot(page, 'phone-dark-timing-lab');
   await page.evaluate(() => window.__sanctum.sheets.sounds()); await shoot(page, 'phone-dark-sounds');
   await page.evaluate(() => window.__sanctum.sheets.close());
-  for (const st of ['locked', 'invite', 'paywall', 'expired']) {
-    await page.evaluate((st) => { const a = window.__sanctum.app; a.p.access = st; a.emit('access'); }, st); await shoot(page, `phone-dark-access-${st}`);
-  }
-  await page.evaluate(() => { const a = window.__sanctum.app; a.p.access = 'owner'; a.setLink(false); a.emit('access'); });
+  await page.evaluate(() => window.__sanctum.app.setLink(false));
   await page.close();
 
   for (const [vp, name] of [[TAB_L, 'tablet-landscape'], [TAB_P, 'tablet-portrait']]) {

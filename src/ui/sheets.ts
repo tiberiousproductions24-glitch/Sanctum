@@ -1,10 +1,14 @@
 // Bottom sheets: transport/sequencer, note repeat, pad editor, sounds + credits, settings, sync (Link/MIDI), menu.
 import { App } from '../app';
-import { BANKS, QUANT_TICKS, listSnapshots, resetProject, type QuantizeKey, type AccessState, type Theme } from '../state';
+import { BANKS, QUANT_TICKS, listSnapshots, resetProject, type QuantizeKey, type Theme } from '../state';
 import { h, seg, toggle, slider, toast } from './dom';
 import { LinkClient } from '../sync/link';
 import type { View } from './view';
 import { timingLabBody } from './timinglab';
+import { LockScreen, type GateScreen } from '../license/gate';
+import { clearLicense } from '../license/license';
+import { storageKind } from '../license/store';
+import { REVOKED_IDS } from '../license/revocation';
 
 const QOPTS: { v: QuantizeKey; label: string }[] = (['off', '1/8', '1/8T', '1/16', '1/16T', '1/32', '1/32T'] as QuantizeKey[]).map((v) => ({ v, label: v.toUpperCase() }));
 const ROPTS: { v: QuantizeKey; label: string }[] = (['1/4', '1/8', '1/8T', '1/16', '1/16T', '1/32', '1/32T'] as QuantizeKey[]).map((v) => ({ v, label: v.toUpperCase() }));
@@ -32,7 +36,7 @@ export class Sheets {
     const items: [string, () => void][] = [
       ['Tempo & Sequencer', () => this.transport()], ['Note Repeat', () => this.noteRepeat()], ['Pad Editor', () => this.padEditor(this.app.p.selectedPad)],
       ['Sounds', () => this.sounds()], ['Timing Lab', () => this.timingLab()], ['Link & MIDI', () => this.sync()],
-      ['Settings & Theme', () => this.settings()], ['Credits', () => this.credits()], ['Access preview (dev)', () => this.accessPreview()], ['Help', () => this.help()],
+      ['Settings & Theme', () => this.settings()], ['Credits', () => this.credits()], ['Help', () => this.help()], ...(this.app.isAdmin ? [['Admin', () => this.admin()] as [string, () => void]] : []),
     ];
     this.open('Sanctum', h('div', { class: 'menu-grid' }, items.map(([l, f]) => h('button', { onclick: f }, l))));
   }
@@ -155,19 +159,28 @@ export class Sheets {
         h('button', { class: 'btn', onclick: () => { const blob = new Blob([JSON.stringify(a.p, null, 2)], { type: 'application/json' }); const u = URL.createObjectURL(blob); const l = h('a', { href: u, download: 'sanctum-project.json' }); l.click(); } }, 'Export project JSON'),
         snaps.length ? h('button', { class: 'btn', onclick: () => { if (confirm(`Restore snapshot from ${new Date(snaps[0].at).toLocaleString()}?`)) { localStorage.setItem('sanctum.project.v1', snaps[0].json); location.reload(); } } }, 'Restore last snapshot') : null,
         h('button', { class: 'btn danger', onclick: () => { if (confirm('Reset project to defaults?')) { resetProject(); location.reload(); } } }, 'Reset project')),
-      h('h3', {}, 'Developer'),
-      h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => this.accessPreview() }, 'Access preview (lock screens)'))));
+      h('h3', {}, 'Access'),
+      h('p', { class: 'note' }, `Unlocked with ${a.license.type === 'admin' ? 'the owner (admin) code' : a.license.type === 'invite' ? 'an invite code' : 'a subscription'}${a.license.expiry ? ', until ' + new Date(a.license.expiry * 1000).toLocaleDateString() : ''}.`)));
   }
 
-  accessPreview() {
-    const a = this.app;
-    const states: { v: AccessState; label: string }[] = [
-      { v: 'owner', label: 'Owner (unlocked)' }, { v: 'locked', label: 'Locked' }, { v: 'invite', label: 'Invite redemption' },
-      { v: 'expired', label: 'Expired invite' }, { v: 'revoked', label: 'Revoked' }, { v: 'paywall', label: 'Subscribe / paywall' }, { v: 'grace', label: 'Grace banner' }];
-    this.open('Access preview (dev only)', h('div', {},
-      h('p', { class: 'note' }, 'UI-only mock of access-control.md — no real auth, no network calls, nothing is sent. Pick a state to preview it; a gold DEV tag on lock screens returns here. Also reachable via ?access=locked in the URL.'),
-      h('div', { class: 'menu-grid' }, states.map((s) => h('button', { class: a.p.access === s.v ? 'on' : '', onclick: () => { a.p.access = s.v; a.save(); this.close(); a.emit('access'); } }, s.label)))));
+  /** Hidden owner panel: only listed in the menu when the verified license is type "admin". */
+  admin() {
+    const a = this.app; if (!a.isAdmin) return;
+    const L = a.license; const st = a.licenseState;
+    const kv = (rows: [string, string][]) => h('div', { class: 'kv' }, rows.flatMap(([k, v]) => [h('div', {}, k), h('div', { class: 'mono' }, v)]));
+    const screens: [GateScreen, string][] = [['locked', 'Lock screen'], ['enter', 'Enter code'], ['expired', 'Expired'], ['revoked', 'Revoked'], ['wrong-device', 'Other device'], ['paywall', 'Subscribe'], ['help', 'Help']];
+    this.open('Admin', h('div', {},
+      h('h3', {}, 'This license'),
+      kv([['Type', L.type], ['Plan', L.plan], ['Token id', L.id], ['Issued', new Date(L.issued * 1000).toLocaleString()], ['Expires', L.expiry ? new Date(L.expiry * 1000).toLocaleString() : 'never'],
+        ['Device binding', L.deviceBinding ? 'yes' : 'no'], ['This device id', st.deviceId], ['Activated', st.stored?.activatedAt ? new Date(st.stored.activatedAt).toLocaleString() : '—'], ['Stored in', storageKind()], ['Revoked ids in build', String(REVOKED_IDS.length)]]),
+      h('h3', {}, 'Issue invites'),
+      h('p', { class: 'note' }, 'Invites are minted on the computer that holds the private key: npm run license:invite -- --name "Name" --days 30. The app never contains the private key.'),
+      h('h3', {}, 'Preview lock screens'),
+      h('div', { class: 'menu-grid' }, screens.map(([v, l]) => h('button', { onclick: () => { this.close(); new LockScreen(st, () => {}, { preview: true }).render(v); } }, l))),
+      h('h3', {}, 'Sign out'),
+      h('button', { class: 'btn danger', onclick: async () => { if (confirm('Remove the license from this device? You will need a code to get back in.')) { a.save(); await clearLicense(); location.reload(); } } }, 'Remove license from this device')));
   }
+
 
   sync() {
     const a = this.app; const s = a.p.settings;

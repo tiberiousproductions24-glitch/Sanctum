@@ -1,40 +1,58 @@
+// Entry: license gate first. The app/engine/pads module is only imported after a valid license.
 import './styles.css';
-import { App } from './app';
-import { View } from './ui/view';
-import { Sheets } from './ui/sheets';
-import { AccessGate } from './ui/access';
-import { h } from './ui/dom';
-import { archPadSvg } from './ui/logo';
-import type { AccessState } from './state';
+import { Capacitor } from '@capacitor/core';
+import { checkLicense, activate } from './license/license';
+import { LockScreen } from './license/gate';
+import { extractCode } from './license/token';
+import type { LicensePayload } from './license/token';
 
-const app = new App();
-const view = new View(app);
-const sheets = new Sheets(app, view);
-view.sheets = sheets;
-view.renderAll();
-const gate = new AccessGate(app, () => sheets.accessPreview());
+try { const t = JSON.parse(localStorage.getItem('sanctum.project.v1') || '{}').theme; if (['dark', 'light', 'warm'].includes(t)) document.documentElement.dataset.theme = t; } catch {}
 
-const q = new URLSearchParams(location.search);
-const qa = q.get('access') as AccessState | null;
-if (qa && ['owner', 'locked', 'invite', 'expired', 'revoked', 'paywall', 'grace'].includes(qa)) app.p.access = qa;
-if (q.get('theme') && ['dark', 'light', 'warm'].includes(q.get('theme')!)) { app.p.theme = q.get('theme') as any; app.emit('theme'); }
-if (q.get('layout') && ['phone', 'tablet', 'auto'].includes(q.get('layout')!)) { app.p.settings.deviceClass = q.get('layout') as any; app.emit('layout'); }
-gate.render();
+let mounted = false;
+let lock: LockScreen | null = null;
+let pendingCode: string | null = null;
 
-// Audio needs a user gesture: "tap to start" splash (also the brand splash).
-const splash = h('div', { class: 'overlay start', role: 'button', 'aria-label': 'Tap to start Sanctum' },
-  h('div', { class: 'archmark', html: archPadSvg(false) }), h('h1', {}, 'SANCTUM'),
-  h('p', {}, app.restored ? 'Project restored from autosave.' : 'Foundation Kit · Stage FX · Church shout banks'),
-  h('button', { class: 'btn primary', style: { height: '56px', width: 'min(320px, 80vw)', fontSize: '18px', borderRadius: '14px' } }, 'Tap to start'));
-const startNow = async () => {
-  splash.remove();
-  try { await app.start(); } catch (e) { console.error(e); alert('Audio failed to start: ' + (e as Error).message); }
-};
-// 'click' (not pointerdown): counts as a user activation on iOS (touchend) and avoids click-through to pads below.
-splash.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); startNow(); }, { once: true });
-document.body.appendChild(splash);
+async function mount(p: LicensePayload, st: Awaited<ReturnType<typeof checkLicense>>) {
+  if (mounted) return; mounted = true;
+  const { mountApp } = await import('./boot-app');
+  mountApp(p, st);
+}
 
-if ('serviceWorker' in navigator && window.isSecureContext && import.meta.env.PROD && !(window as any).Capacitor?.isNativePlatform?.()) {
+async function handleUrl(url: string) {
+  if (!/^sanctum:\/\/activate|\/activate\?/.test(url)) return;
+  const code = extractCode(url);
+  if (!code) return;
+  if (lock) { lock.render('enter'); await lock.tryCode(code); return; }
+  if (!mounted) { pendingCode = code; return; }
+  // Already unlocked: a new code (e.g. renewal) replaces the stored one if it verifies.
+  const st = await checkLicense();
+  const r = await activate(code, st.deviceId);
+  alert(r.status === 'valid' ? 'New code saved. Sanctum will restart.' : 'That code could not be used (' + r.status + ').');
+  if (r.status === 'valid') location.reload();
+}
+
+async function boot() {
+  if (Capacitor.isNativePlatform()) {
+    const { App: CapApp } = await import('@capacitor/app');
+    CapApp.addListener('appUrlOpen', (e) => handleUrl(e.url));
+    const launch = await CapApp.getLaunchUrl(); if (launch?.url) await handleUrl(launch.url);
+  } else if (location.search.includes('code=')) pendingCode = extractCode(location.search);
+  const st = await checkLicense();
+  try { const { SplashScreen } = await import('@capacitor/splash-screen'); SplashScreen.hide(); } catch {}
+  if (st.result?.status === 'valid') return mount(st.result.payload, st);
+  lock = new LockScreen(st, (p) => { lock = null; mount(p, st); });
+  if (pendingCode) { lock.render('enter'); await lock.tryCode(pendingCode); pendingCode = null; }
+  else lock.render();
+}
+boot().catch((e) => { console.error(e); document.body.textContent = 'Sanctum failed to start: ' + (e as Error).message; });
+
+// Re-check once a minute so an expiring license locks the app (after saving).
+setInterval(async () => {
+  if (!mounted) return;
+  const st = await checkLicense();
+  if (st.result?.status !== 'valid') { (window as any).__sanctum?.app?.save?.(); location.reload(); }
+}, 60_000);
+
+if ('serviceWorker' in navigator && window.isSecureContext && import.meta.env.PROD && !Capacitor.isNativePlatform()) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
-(window as any).__sanctum = { app, view, sheets, gate };

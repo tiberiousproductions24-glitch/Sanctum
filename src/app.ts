@@ -7,6 +7,9 @@ import { LinkClient } from './sync/link';
 import { Midi } from './sync/midi';
 import { loadProject, saveProject, PPQ, QUANT_TICKS, type Project, type NoteEvent } from './state';
 import { toast } from './ui/dom';
+import { hitHaptic } from './native';
+import type { LicensePayload } from './license/token';
+import type { LicenseState } from './license/license';
 
 export interface LoopState { sound: SoundDef; at: number; startBeat: number }
 export interface LatencyReport {
@@ -24,6 +27,8 @@ export const IS_ANDROID = /Android/.test(ua);
 
 export class App {
   p: Project; restored: boolean;
+  license!: LicensePayload; licenseState!: LicenseState;
+  get isAdmin() { return this.license?.type === 'admin'; }
   engine = new Engine();
   seq: Sequencer;
   link: LinkClient;
@@ -183,11 +188,11 @@ export class App {
     else if (this.p.settings.velocityMode === 'fixed' && src === 'touch') vel = this.p.settings.fixedVelocity;
     if (!this.sixteenLevels && this.p.selectedPad !== global) { this.p.selectedPad = global; this.emit('select'); }
     this.flash(pad16, vel, x, y); // pre-light: visual on raw touch-down, same frame, never waits for audio
-    if (this.p.settings.haptics && src === 'touch' && navigator.vibrate) { try { navigator.vibrate(Math.round(4 + vel / 127 * 10)); } catch {} }
     const s = this.soundOf(global);
     if (!s) return;
-    if (s.kind === 'loop') { this.toggleLoop(global); return; }
+    if (s.kind === 'loop') { this.toggleLoop(global); if (this.p.settings.haptics && src === 'touch') hitHaptic(vel); return; }
     this.voice(global, vel, 0, 'live');
+    if (this.p.settings.haptics && src === 'touch') hitHaptic(vel); // after the voice is queued: never delays audio
     const comp = src === 'midi' ? 0 : undefined;
     this.recordHit(global, vel, perfMs, comp);
     if (this.seq.noteRepeat) this.seq.holdStart(pointerId, global, vel);
