@@ -3,6 +3,27 @@
 // phase-locked to the Link timeline.
 import type { Engine } from '../audio/engine';
 import type { Clock } from '../seq/transport';
+import { Capacitor } from '@capacitor/core';
+
+const NATIVE = Capacitor.isNativePlatform();
+export const LINK_UNAVAILABLE = 'Link is unavailable on this device until you enter the bridge address (the Sanctum bridge must run on a computer on the same Wi-Fi).';
+/** Private-LAN hosts only for cleartext ws:// (10/8, 172.16/12, 192.168/16, 169.254/16, localhost, *.local). */
+export function isLanHost(host: string) {
+  host = host.replace(/^\[|\]$/g, '').toLowerCase();
+  if (host === 'localhost' || host.endsWith('.local') || host === '::1') return true;
+  const m = host.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/); if (!m) return /^f[cd]|^fe80/.test(host);
+  const [a, b] = [Number(m[1]), Number(m[2])];
+  return a === 10 || a === 127 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254);
+}
+/** Accepts '192.168.1.20', '192.168.1.20:20809', 'ws://…', 'wss://…'. Returns a ws URL or an error. */
+export function normalizeBridgeUrl(input: string): { url?: string; error?: string } {
+  let s = input.trim(); if (!s) return {};
+  if (!/^wss?:\/\//i.test(s)) s = 'ws://' + s;
+  let u: URL; try { u = new URL(s); } catch { return { error: 'That doesn\'t look like an address. Example: 192.168.1.20' }; }
+  if (!u.port && u.protocol === 'ws:') u.port = '20809';
+  if (u.protocol === 'ws:' && !isLanHost(u.hostname)) return { error: 'For safety, unencrypted ws:// is only allowed to computers on your local network (e.g. 192.168.x.x or 10.x.x.x).' };
+  return { url: u.toString() };
+}
 
 export interface LinkState { connected: boolean; available: boolean; peers: number; bpm: number; beat: number; phase: number; quantum: number; playing: boolean; backend?: string; error?: string; rttMs: number; offsetMs: number }
 
@@ -21,6 +42,7 @@ export class LinkClient {
   constructor(private engine: Engine, private clock: Clock, private urlFn: () => string) {}
 
   static defaultUrl() {
+    if (NATIVE) return ''; // no same-origin bridge inside the APK
     const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
     return `${proto}//${location.host}/link`;
   }
@@ -33,7 +55,10 @@ export class LinkClient {
   private connect() {
     clearTimeout(this.retry);
     if (this.ws) return;
-    let url = this.urlFn() || LinkClient.defaultUrl();
+    const n = normalizeBridgeUrl(this.urlFn());
+    if (n.error) { this.state = { ...this.state, connected: false, available: false, error: n.error }; this.onState?.(this.state); return; }
+    let url = n.url || LinkClient.defaultUrl();
+    if (!url) { this.state = { ...this.state, connected: false, available: false, error: LINK_UNAVAILABLE }; this.onState?.(this.state); return; }
     let ws: WebSocket;
     try { ws = new WebSocket(url); } catch (e) { this.state = { ...this.state, connected: false, error: String(e) }; this.onState?.(this.state); return; }
     this.ws = ws;
@@ -47,7 +72,7 @@ export class LinkClient {
       this.state = { ...this.state, connected: false, peers: 0 }; this.onState?.(this.state);
       if (this.enabled) this.retry = window.setTimeout(() => this.connect(), 1500);
     };
-    ws.onerror = () => { this.state = { ...this.state, error: `Can't reach Link bridge at ${url} — start it with "npm run bridge"` }; this.onState?.(this.state); };
+    ws.onerror = () => { this.state = { ...this.state, error: `Can't reach the Link bridge at ${url}. Check the computer is on the same Wi-Fi and the bridge is running ("npm run bridge"). Retrying…` }; this.onState?.(this.state); };
   }
 
   private disconnect() { clearTimeout(this.retry); clearInterval(this.pingTimer); this.ws?.close(); this.ws = null; this.state = { ...this.state, connected: false, peers: 0 }; this.onState?.(this.state); }

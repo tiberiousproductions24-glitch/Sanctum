@@ -19,7 +19,7 @@ export interface Settings {
   metronome: boolean; countIn: boolean; haptics: boolean; reduceMotion: boolean;
   handedness: 'right' | 'left';
   linkEnabled: boolean; linkUrl: string; linkQuantum: number;
-  midiClockOut: boolean; midiClockIn: boolean; midiNotesIn: boolean; midiOutId: string; midiInId: string; midiClockOffsetMs: number;
+  midiClockOut: boolean; midiClockIn: boolean; midiNotesIn: boolean; midiNotesOut: boolean; midiChannel: number; ccMap: Record<string, string>; ccOut: boolean; midiOutId: string; midiInId: string; midiClockOffsetMs: number;
   loopLaunch: 'bar' | 'beat';
   deviceClass: 'auto' | 'phone' | 'tablet';
   master: number;
@@ -50,7 +50,7 @@ export function defaultProject(): Project {
       latencyHint: 0, touchCompMs: 0, preLightMs: 8,
       metronome: false, countIn: false, haptics: true, reduceMotion: false, handedness: 'right',
       linkEnabled: false, linkUrl: '', linkQuantum: 4,
-      midiClockOut: false, midiClockIn: false, midiNotesIn: true, midiOutId: '', midiInId: '', midiClockOffsetMs: 0,
+      midiClockOut: false, midiClockIn: false, midiNotesIn: true, midiNotesOut: false, midiChannel: 10, ccMap: { '7': 'master', '9': 'swing', '71': 'padLevel', '74': 'padTune' }, ccOut: true, midiOutId: '', midiInId: '', midiClockOffsetMs: 0,
       loopLaunch: 'bar', deviceClass: 'auto', master: 0.85,
     },
     lab: { roundTripMs: null, roundTripJitterMs: null, tapOffsetMs: null, tapJitterMs: null, measuredAt: null, route: 'default output' },

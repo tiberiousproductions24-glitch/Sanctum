@@ -1,5 +1,5 @@
 {
-  "at": "Sun Nov 01 2026 12:24:19 GMT-0800 (Pacific Standard Time)",
+  "at": "Sun Nov 01 2026 12:32:30 GMT-0800 (Pacific Standard Time)",
   "results": [
     {
       "name": "locked: only the lock screen mounts (no pads, no app/engine)",
@@ -39,7 +39,7 @@
     {
       "name": "audio engine starts (render thread running)",
       "pass": true,
-      "info": "{\"mode\":\"worklet\",\"sr\":48000,\"state\":\"running\",\"t\":0.096,\"frame\":4608,\"lat\":{\"base\":0.010666666666666666,\"output\":0.032,\"sampleRate\":48000,\"hint\":\"interactive\",\"mode\":\"worklet\",\"state\":\"running\"}}"
+      "info": "{\"mode\":\"worklet\",\"sr\":48000,\"state\":\"running\",\"t\":0.10666666666666667,\"frame\":4608,\"lat\":{\"base\":0.010666666666666666,\"output\":0.032,\"sampleRate\":48000,\"hint\":\"interactive\",\"mode\":\"worklet\",\"state\":\"running\"}}"
     },
     {
       "name": "AudioWorklet engine active",
@@ -54,7 +54,7 @@
     {
       "name": "pad tap produces audio (worklet voices/peak)",
       "pass": true,
-      "info": "{\"voices\":1,\"late\":0,\"peak\":0.3121374630142748,\"frame\":16896,\"queued\":0}"
+      "info": "{\"voices\":1,\"late\":0,\"peak\":0.31209224829554555,\"frame\":16896,\"queued\":0}"
     },
     {
       "name": "multi-touch (2 pads) triggers",
@@ -64,7 +64,7 @@
     {
       "name": "sequencer plays pattern",
       "pass": true,
-      "info": "{\"playing\":true,\"tick\":2125.5679999999993,\"voices\":6,\"late\":0,\"events\":14}"
+      "info": "{\"playing\":true,\"tick\":2125.5679999999993,\"voices\":5,\"late\":0,\"events\":14}"
     },
     {
       "name": "no late (unscheduled) events",
@@ -84,12 +84,12 @@
     {
       "name": "loop pad launches on next bar, tempo-synced rate",
       "pass": true,
-      "info": "{\"at\":3.3513623188405797,\"now\":3.018666666666667,\"startRel\":0,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
+      "info": "{\"at\":3.3940289855072465,\"now\":3.0613333333333332,\"startRel\":0,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
     },
     {
       "name": "Timing Lab tap test measures input offset and sets recording correction",
       "pass": true,
-      "info": "{\"off\":25.26433333631317,\"jit\":0.4810105083190074,\"comp\":25.3}"
+      "info": "{\"off\":33.436666666670334,\"jit\":0.4246805962881,\"comp\":33.4}"
     },
     {
       "name": "autosave restores project on reload",
@@ -99,17 +99,17 @@
     {
       "name": "Link: bridge connected, peer visible, tempo follows peer (97)",
       "pass": true,
-      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":2.0339929279627396,\"rtt\":4.300000011920929,\"chip\":\"LINK1\"}"
+      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":1.6053626908926517,\"rtt\":384.30000001192093,\"chip\":\"LINK1\"}"
     },
     {
       "name": "Link: phase error < 5 ms",
       "pass": true,
-      "info": "offset=2.03 ms"
+      "info": "offset=1.61 ms"
     },
     {
       "name": "Link: app tempo change propagates to the other peer",
       "pass": true,
-      "info": "[peer] t=1793564651074 peers=1 bpm=111.00 beat=49.961 phase=1.961"
+      "info": "[peer] t=1793565141206 peers=1 bpm=111.00 beat=50.847 phase=2.847"
     },
     {
       "name": "no console errors",

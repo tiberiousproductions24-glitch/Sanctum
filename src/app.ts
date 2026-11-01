@@ -4,7 +4,7 @@ import { GENERATORS } from './audio/synth';
 import { BUILTIN_BANKS, COMING_SOON, METRONOME, loadManifestBanks, type SoundBank, type SoundDef } from './audio/kits';
 import { Sequencer } from './seq/transport';
 import { LinkClient } from './sync/link';
-import { Midi } from './sync/midi';
+import { Midi, type CcTarget } from './sync/midi';
 import { loadProject, saveProject, PPQ, QUANT_TICKS, type Project, type NoteEvent } from './state';
 import { toast } from './ui/dom';
 import { hitHaptic } from './native';
@@ -46,6 +46,8 @@ export class App {
   flash: (pad16: number, vel: number, x?: number, y?: number) => void = () => {};
   scheduleFlash: (globalPad: number, vel: number, perfMs: number) => void = () => {};
   private warned = '';
+  fromMidi = false;
+  midiLearn: CcTarget | null = null;
 
   constructor() {
     const { project, restored } = loadProject();
@@ -86,7 +88,12 @@ export class App {
     this.midi.onNote = (note, vel, on, ts) => {
       if (!this.p.settings.midiNotesIn) return;
       const pad16 = note >= 36 && note <= 51 ? note - 36 : ((note % 16) + 16) % 16;
-      if (on) this.padDown(pad16, vel, ts, 5000 + note, undefined, undefined, 'midi'); else this.padUp(5000 + note);
+      this.fromMidi = true;
+      try { if (on) this.padDown(pad16, vel, ts, 5000 + note, undefined, undefined, 'midi'); else this.padUp(5000 + note); } finally { this.fromMidi = false; }
+    };
+    this.midi.onCC = (cc, val) => {
+      if (this.midiLearn) { const t = this.midiLearn; for (const k of Object.keys(this.p.settings.ccMap)) if (this.p.settings.ccMap[k] === t) delete this.p.settings.ccMap[k]; this.p.settings.ccMap[String(cc)] = t; this.midiLearn = null; this.save(); toast(`CC ${cc} now controls ${t}`); this.emit('midi'); return; }
+      const t = this.p.settings.ccMap[String(cc)] as CcTarget | undefined; if (t) this.applyCC(t, val / 127, true);
     };
     document.addEventListener('visibilitychange', () => { if (document.hidden) saveProject(this.p, true); });
     window.addEventListener('pagehide', () => saveProject(this.p, true));
@@ -107,7 +114,7 @@ export class App {
     this.generateSynth();
     this.seq.startTimer();
     if (this.p.settings.linkEnabled) this.setLink(true);
-    if (this.p.settings.midiClockOut || this.p.settings.midiClockIn) this.midi.enable();
+    if (this.p.settings.midiClockOut || this.p.settings.midiClockIn || this.p.settings.midiNotesOut || this.midi.isNative) this.midi.enable();
     this.emit('started');
     this.loadExternal();
     // ensure every assigned bank is loaded
@@ -212,7 +219,29 @@ export class App {
     const bank = Math.floor(global / 16);
     this.engine.trigger({ at, id: s.id, vel: this.velGain(vel), gain: slot.gain, pan: slot.pan, rate: Math.pow(2, slot.tune / 12),
       choke: s.choke ? `${bank}:${s.choke}` : undefined, key: 'p' + global });
+    if (this.p.settings.midiNotesOut && !this.fromMidi) this.midi.sendNote(36 + (global % 16), vel, at ? this.engine.ctxToPerf(at) + this.p.settings.midiClockOffsetMs : undefined, (this.p.settings.midiChannel - 1) & 15);
     if (src !== 'live') this.scheduleFlash(global, vel, this.engine.ctxToPerf(at) - this.p.settings.preLightMs);
+  }
+
+  // ---------- MIDI CC (in + out) ----------
+  /** v01: 0..1. fromMidi=true: came in from a controller/DAW (don't echo it back). */
+  applyCC(t: CcTarget, v01: number, fromMidi = false) {
+    const p = this.p; const pad = p.pads[p.selectedPad];
+    if (t === 'master') { p.settings.master = v01; this.engine.setMaster(v01); }
+    else if (t === 'swing') p.swing = Math.round(50 + v01 * 25);
+    else if (t === 'padLevel') pad.gain = Math.round(v01 * 150) / 100;
+    else if (t === 'padTune') pad.tune = Math.round(v01 * 24 - 12); if (this.loops.has(p.selectedPad)) this.updateLoopRates();
+    else if (t === 'tempo') { this.setTempo(Math.round(60 + v01 * 127)); }
+    this.save(); this.emit(fromMidi ? 'cc' : 'cc-local');
+    if (!fromMidi) this.ccOut(t);
+  }
+  /** Send the current value of a mapped target out as CC (UI change → DAW). */
+  ccOut(t: CcTarget) {
+    if (!this.p.settings.ccOut || !this.midi.status.enabled) return;
+    const cc = Object.keys(this.p.settings.ccMap).find((k) => this.p.settings.ccMap[k] === t); if (cc == null) return;
+    const p = this.p; const pad = p.pads[p.selectedPad];
+    const v = t === 'master' ? p.settings.master : t === 'swing' ? (p.swing - 50) / 25 : t === 'padLevel' ? pad.gain / 1.5 : t === 'padTune' ? (pad.tune + 12) / 24 : (p.bpm - 60) / 127;
+    this.midi.sendCC(Number(cc), Math.max(0, Math.min(1, v)) * 127, (p.settings.midiChannel - 1) & 15);
   }
 
   // ---------- loops (tempo-synced, bar-quantized, choke groups) ----------

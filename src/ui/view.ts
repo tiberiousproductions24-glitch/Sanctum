@@ -20,8 +20,13 @@ export class View {
   orient: 'portrait' | 'landscape' = 'portrait';
   private els: Record<string, HTMLElement> = {};
   private macro: Record<string, any> = {};
+  private live = h('div', { class: 'sr-only', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' });
+  private tempoT = 0;
+  /** Screen-reader announcement (polite live region). */
+  announce(msg: string) { this.live.textContent = ''; requestAnimationFrame(() => { this.live.textContent = msg; }); }
 
   constructor(public app: App) {
+    document.body.appendChild(this.live);
     app.flash = (pad16, vel, x, y) => this.flash(pad16, vel, x, y);
     app.scheduleFlash = (g, vel, t) => { if (Math.floor(g / 16) === app.p.currentBank || app.sixteenLevels) this.visQ.push({ pad: g % 16, vel, t }); };
     this.build();
@@ -66,7 +71,7 @@ export class View {
 
     // track row
     const banks = h('div', { class: 'banks', role: 'tablist', 'aria-label': 'Pad banks' },
-      BANKS.map((b, i) => h('button', { class: 'bank', role: 'tab', 'aria-label': `Bank ${b}`, onclick: () => this.setBank(i) }, b)));
+      BANKS.map((b, i) => h('button', { class: 'bank', role: 'tab', 'aria-label': `Bank ${b}`, 'aria-selected': 'false', onclick: () => this.setBank(i) }, b)));
     const patBtn = h('button', { class: 'pill', 'aria-label': 'Pattern', onclick: () => this.sheets.transport() }, 'PAT ', h('b', { class: 'patn' }, '1'));
     const info = h('div', { class: 'trackinfo', role: 'status' });
     const soundsBtn = h('button', { class: 'pill soundsBtn', onclick: () => this.sheets.sounds() }, '♫ Sounds');
@@ -82,8 +87,11 @@ export class View {
     this.pads = [];
     for (let i = 0; i < 16; i++) {
       const idx = PAD_ORDER[i];
-      const p = h('div', { class: 'pad', role: 'button', tabindex: '-1', 'data-pad': idx },
-        h('span', { class: 'num' }, String(idx + 1)), h('span', { class: 'tag' }), h('span', { class: 'name' }, ''), h('span', { class: 'flash' }), h('span', { class: 'ring' }));
+      // .pad = static well (fixed shadow); .cap = raised face that travels (transform only); glow/flash = opacity only
+      const p = h('div', { class: 'pad', role: 'button', tabindex: '0', 'data-pad': idx, 'data-row': String(Math.floor(idx / 4)) },
+        h('span', { class: 'cap' }, h('span', { class: 'num', 'aria-hidden': 'true' }, String(idx + 1)), h('span', { class: 'tag', 'aria-hidden': 'true' }), h('span', { class: 'name', 'aria-hidden': 'true' }, ''),
+          h('span', { class: 'flash' }), h('span', { class: 'ring' }), h('span', { class: 'led', 'aria-hidden': 'true' })),
+        h('span', { class: 'glow', 'aria-hidden': 'true' }));
       this.pads[idx] = p; padsEl.appendChild(p);
     }
     this.padEvents(padsEl);
@@ -110,16 +118,16 @@ export class View {
 
   private buildActions(host: HTMLElement) {
     const a = this.app;
-    const nr = h('button', { class: 'act nr', 'aria-label': 'Note repeat', onclick: () => { a.seq.noteRepeat = !a.seq.noteRepeat; this.updateActs(); } }, 'NOTE RPT', h('small', { class: 'rate' }, a.p.noteRepeatRate));
+    const nr = h('button', { class: 'act nr', 'aria-label': 'Repeat: hold a pad to repeat it in time. Long-press for options', 'aria-pressed': 'false', onclick: () => { a.seq.noteRepeat = !a.seq.noteRepeat; this.updateActs(); this.announce(a.seq.noteRepeat ? 'Repeat on' : 'Repeat off'); } }, 'REPEAT', h('small', { class: 'rate' }, a.p.noteRepeatRate));
     let pressT = 0;
     nr.addEventListener('pointerdown', () => { pressT = window.setTimeout(() => { pressT = 0; this.sheets.noteRepeat(); }, 550); });
     nr.addEventListener('pointerup', () => clearTimeout(pressT));
     nr.addEventListener('pointerleave', () => clearTimeout(pressT));
-    const rate = h('button', { class: 'act rateBtn', 'aria-label': 'Note repeat rate', onclick: () => this.cycleRate() }, 'RATE', h('small', { class: 'rate' }, a.p.noteRepeatRate));
-    const full = h('button', { class: 'act full', 'aria-label': 'Full level', onclick: () => { a.fullLevel = !a.fullLevel; if (a.fullLevel) a.sixteenLevels = false; this.updateActs(); this.renderPads(); } }, 'FULL LVL');
-    const six = h('button', { class: 'act six', 'aria-label': '16 levels', onclick: () => { a.sixteenLevels = !a.sixteenLevels; if (a.sixteenLevels) a.fullLevel = false; this.updateActs(); this.renderPads(); } }, '16 LVL');
-    const edit = h('button', { class: 'act edit', 'aria-label': 'Edit pad', onclick: () => this.sheets.padEditor(a.p.selectedPad) }, 'PAD', h('small', {}, 'edit'));
-    const more = h('button', { class: 'act', 'aria-label': 'Menu', onclick: () => this.sheets.menu() }, '⌘', h('small', {}, 'menu'));
+    const rate = h('button', { class: 'act rateBtn', 'aria-label': 'Repeat speed', onclick: () => this.cycleRate() }, 'SPEED', h('small', { class: 'rate' }, a.p.noteRepeatRate));
+    const full = h('button', { class: 'act full', 'aria-label': 'Full volume: every hit at full strength', 'aria-pressed': 'false', onclick: () => { a.fullLevel = !a.fullLevel; if (a.fullLevel) a.sixteenLevels = false; this.updateActs(); this.renderPads(); } }, 'FULL', h('small', {}, 'volume'));
+    const six = h('button', { class: 'act six', 'aria-label': '16 levels: the selected sound on all pads, soft to loud', 'aria-pressed': 'false', onclick: () => { a.sixteenLevels = !a.sixteenLevels; if (a.sixteenLevels) a.fullLevel = false; this.updateActs(); this.renderPads(); } }, '16', h('small', {}, 'levels'));
+    const edit = h('button', { class: 'act edit', 'aria-label': 'Edit the selected pad', onclick: () => this.sheets.padEditor(a.p.selectedPad) }, 'EDIT', h('small', {}, 'pad'));
+    const more = h('button', { class: 'act', 'aria-label': 'Menu', onclick: () => this.sheets.menu() }, '☰', h('small', {}, 'menu'));
     host.append(nr, rate, full, six, edit, more);
   }
 
@@ -131,7 +139,9 @@ export class View {
 
   updateActs() {
     const a = this.app;
-    this.root.querySelectorAll('.act.nr').forEach((e) => e.classList.toggle('on', a.seq.noteRepeat));
+    this.root.querySelectorAll('.act.nr').forEach((e) => { e.classList.toggle('on', a.seq.noteRepeat); e.setAttribute('aria-pressed', String(a.seq.noteRepeat)); });
+    this.root.querySelectorAll('.act.full').forEach((e) => e.setAttribute('aria-pressed', String(a.fullLevel)));
+    this.root.querySelectorAll('.act.six').forEach((e) => e.setAttribute('aria-pressed', String(a.sixteenLevels)));
     this.root.querySelectorAll('.act .rate').forEach((e) => (e.textContent = a.p.noteRepeatRate));
     this.root.querySelectorAll('.act.full').forEach((e) => e.classList.toggle('on', a.fullLevel));
     this.root.querySelectorAll('.act.six').forEach((e) => e.classList.toggle('on', a.sixteenLevels));
@@ -164,6 +174,7 @@ export class View {
       active.set(e.pointerId, idx);
       const r = pad.getBoundingClientRect();
       this.app.padDown(idx, velocityOf(e, pad), e.timeStamp, e.pointerId, e.clientX - r.left, e.clientY - r.top, 'touch');
+      pad.classList.add('down');
       if (this.app.seq.noteRepeat) pad.classList.add('held');
     }, { passive: false });
     el.addEventListener('pointermove', (e) => {
@@ -173,10 +184,21 @@ export class View {
     const up = (e: PointerEvent) => {
       const idx = active.get(e.pointerId); if (idx == null) return;
       active.delete(e.pointerId); this.app.padUp(e.pointerId);
-      if (![...active.values()].includes(idx)) this.pads[idx].classList.remove('held');
+      if (![...active.values()].includes(idx)) this.pads[idx].classList.remove('held', 'down');
     };
     el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up);
     el.addEventListener('contextmenu', (e) => e.preventDefault());
+    // Screen readers / switch access: a focused pad plays on Enter or Space (TalkBack double-tap sends a click).
+    el.addEventListener('keydown', (e) => {
+      const pad = (e.target as HTMLElement).closest('.pad') as HTMLElement | null; if (!pad || (e.key !== 'Enter' && e.key !== ' ')) return;
+      e.preventDefault(); e.stopPropagation(); if (e.repeat) return;
+      const idx = Number(pad.dataset.pad); this.app.padDown(idx, 100, e.timeStamp, 20000 + idx, undefined, undefined, 'key'); setTimeout(() => this.app.padUp(20000 + idx), 120);
+    });
+    el.addEventListener('click', (e) => { // TalkBack/VoiceOver activation arrives as a click with no preceding pointerdown
+      if ((e as PointerEvent).pointerId > 0 || e.detail > 0) return;
+      const pad = (e.target as HTMLElement).closest('.pad') as HTMLElement | null; if (!pad) return;
+      const idx = Number(pad.dataset.pad); this.app.padDown(idx, 100, e.timeStamp, 20000 + idx, undefined, undefined, 'key'); setTimeout(() => this.app.padUp(20000 + idx), 120);
+    });
     el.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false }); // kills iOS double-tap zoom / 300ms delay / callout
   }
 
@@ -184,8 +206,10 @@ export class View {
     const down = new Set<string>();
     window.addEventListener('keydown', (e) => {
       if ((e.target as HTMLElement)?.closest('input,select,textarea')) return;
+      if ((e.code === 'Space' || e.code === 'Enter') && (e.target as HTMLElement)?.closest('button,[role=button],[role=checkbox],[role=radio],[role=tab]')) return;
       if (e.code in KEYMAP) { if (e.repeat || down.has(e.code)) return; down.add(e.code); e.preventDefault();
         const pad16 = KEYMAP[e.code]; this.app.padDown(pad16, e.shiftKey ? 127 : 100, e.timeStamp, 10000 + pad16, undefined, undefined, 'key');
+        this.pads[pad16].classList.add('down');
         if (this.app.seq.noteRepeat) this.pads[pad16].classList.add('held'); return; }
       if (e.code === 'Space') { e.preventDefault(); this.app.seq.playing ? this.app.stop() : this.app.play(); }
       else if (e.code === 'Enter') { e.preventDefault(); this.app.toggleRecord(); }
@@ -197,27 +221,33 @@ export class View {
       else if (e.code === 'Escape') this.sheets.close();
     });
     window.addEventListener('keyup', (e) => {
-      if (e.code in KEYMAP) { down.delete(e.code); const pad16 = KEYMAP[e.code]; this.app.padUp(10000 + pad16); this.pads[pad16].classList.remove('held'); }
+      if (e.code in KEYMAP) { down.delete(e.code); const pad16 = KEYMAP[e.code]; this.app.padUp(10000 + pad16); this.pads[pad16].classList.remove('held', 'down'); }
     });
   }
 
-  setBank(i: number) { this.app.p.currentBank = i; this.app.p.selectedPad = i * 16 + (this.app.p.selectedPad % 16); this.app.save(); this.renderAll(); }
+  setBank(i: number) { this.app.p.currentBank = i; this.app.p.selectedPad = i * 16 + (this.app.p.selectedPad % 16); this.app.save(); this.renderAll(); const b = this.app.bank(this.app.p.bankSources[i]); this.announce(`Bank ${BANKS[i]}, ${b ? b.name : 'empty'}`); }
 
   // ---------- visuals ----------
   flash(pad16: number, vel: number, x?: number, y?: number) {
     const pad = this.pads[pad16]; if (!pad) return;
-    const a = 0.22 + 0.78 * (vel / 127);
+    const k = vel / 127; const a = 0.25 + 0.75 * k;
     const reduce = document.body.classList.contains('reduce-motion');
-    const fl = pad.children[3] as HTMLElement, ring = pad.children[4] as HTMLElement;
-    fl.animate([{ opacity: a }, { opacity: 0 }], { duration: reduce ? 90 : 140, easing: 'cubic-bezier(.2,.7,.3,1)' });
+    const cap = pad.firstElementChild as HTMLElement;
+    const fl = cap.children[3] as HTMLElement, ring = cap.children[4] as HTMLElement, glow = pad.children[1] as HTMLElement;
+    // GPU-cheap: opacity + transform only (no layout, no box-shadow animation)
+    fl.animate([{ opacity: a }, { opacity: 0 }], { duration: reduce ? 90 : 120 + 120 * k, easing: 'cubic-bezier(.2,.7,.3,1)' });
+    glow.animate([{ opacity: 0.35 + 0.65 * k, transform: `scale(${1 + 0.06 * k})` }, { opacity: 0, transform: 'scale(1)' }], { duration: reduce ? 120 : 220 + 260 * k, easing: 'cubic-bezier(.15,.7,.3,1)' });
     if (reduce) return;
-    ring.animate([{ opacity: a, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(1.15)' }], { duration: 180, easing: 'ease-out' });
-    const w = pad.clientWidth, hgt = pad.clientHeight;
+    ring.animate([{ opacity: a, transform: 'scale(1)' }, { opacity: 0, transform: `scale(${1.04 + 0.12 * k})` }], { duration: 200, easing: 'ease-out' });
+    const w = cap.clientWidth, hgt = cap.clientHeight;
     const cx = x ?? w / 2, cy = y ?? hgt / 2;
     const rp = document.createElement('span'); rp.className = 'ripple'; rp.style.left = cx + 'px'; rp.style.top = cy + 'px';
-    pad.appendChild(rp);
+    cap.appendChild(rp);
     const maxR = Math.hypot(Math.max(cx, w - cx), Math.max(cy, hgt - cy)) / 10;
-    rp.animate([{ opacity: 0.9 * a, transform: 'scale(0.4)', borderWidth: '3px' }, { opacity: 0, transform: `scale(${maxR})`, borderWidth: '0.5px' }], { duration: 420, easing: 'cubic-bezier(.1,.6,.3,1)' }).onfinish = () => rp.remove();
+    rp.animate([{ opacity: 0.95 * a, transform: 'scale(0.4)' }, { opacity: 0, transform: `scale(${maxR * (0.6 + 0.4 * k)})` }], { duration: 300 + 220 * k, easing: 'cubic-bezier(.1,.6,.3,1)' }).onfinish = () => rp.remove();
+    if (!pad.classList.contains('down')) { // sequenced / MIDI / keyboard hits: short press-travel blip
+      cap.animate([{ transform: 'translateY(var(--travel))' }, { transform: 'translateY(0)' }], { duration: 110, easing: 'ease-out' });
+    }
   }
 
   private frame = (now: number) => {
@@ -284,8 +314,9 @@ export class View {
     (l.querySelector('.bpm') as HTMLElement).textContent = a.p.bpm.toFixed(1);
     (l.querySelector('.swing') as HTMLElement).textContent = a.p.swing + '%';
     (l.querySelector('.quant') as HTMLElement).textContent = a.p.quantize.toUpperCase();
-    this.els.rec.classList.toggle('on', a.seq.recording);
-    this.els.play.classList.toggle('on', a.seq.playing);
+    this.els.rec.classList.toggle('on', a.seq.recording); this.els.rec.setAttribute('aria-pressed', String(a.seq.recording));
+    this.els.play.classList.toggle('on', a.seq.playing); this.els.play.setAttribute('aria-label', a.seq.playing ? 'Stop' : 'Play');
+    this.els.lcd.setAttribute('aria-label', `Tempo ${a.p.bpm.toFixed(1)} BPM, swing ${a.p.swing} percent. Open tempo and sequencer settings`);
     if (this.layout === 'phone') this.els.play.textContent = a.seq.playing ? '■' : '▶'; else this.els.play.textContent = '▶';
     this.els.patBtn.querySelector('.patn')!.textContent = String(a.p.currentPattern + 1);
     this.renderLatency(); this.renderLink(); this.renderMidi();
@@ -328,12 +359,13 @@ export class View {
       const g = a.p.currentBank * 16 + i; const pad = this.pads[i];
       const showG = a.sixteenLevels ? a.p.selectedPad : g;
       const s = a.soundOf(showG); const slot = a.p.pads[showG];
-      (pad.children[2] as HTMLElement).textContent = a.sixteenLevels ? `${s?.short || '—'} ${Math.round((i + 1) * 127 / 16)}` : (s?.short || '—');
-      (pad.children[1] as HTMLElement).textContent = s?.kind === 'loop' ? `LOOP${s.bars ? ' ' + s.bars + 'B' : ''}` : (s?.choke ? 'CHK' : '');
+      const cap = pad.firstElementChild as HTMLElement;
+      (cap.children[2] as HTMLElement).textContent = a.sixteenLevels ? `${s?.short || '—'} ${Math.round((i + 1) * 127 / 16)}` : (s?.short || '—');
+      (cap.children[1] as HTMLElement).textContent = s?.kind === 'loop' ? `LOOP${s.bars ? ' ' + s.bars + 'B' : ''}` : (s?.choke ? 'CHK' : '');
       pad.classList.toggle('empty', !s);
       pad.classList.toggle('sel', !a.sixteenLevels && g === a.p.selectedPad);
       pad.classList.toggle('muted', !!slot?.mute);
-      pad.setAttribute('aria-label', `Pad ${i + 1}, ${s ? s.name : 'empty'}, Bank ${BANKS[a.p.currentBank]}${s?.kind === 'loop' ? ', loop' : ''}`);
+      pad.setAttribute('aria-label', `Pad ${i + 1}, ${s ? s.name : 'empty'}, bank ${BANKS[a.p.currentBank]}${s?.kind === 'loop' ? ', loop' : ''}${a.loops.has(g) ? ', playing' : ''}${slot?.mute ? ', muted' : ''}`);
       const lp = a.loops.get(g);
       const queued = !!lp && lp.at > a.engine.now + 0.01;
       pad.classList.toggle('looping', !!lp && !queued); pad.classList.toggle('queued', queued);
@@ -360,8 +392,10 @@ export class View {
       for (let i = 0; i < perBar; i++) {
         const col = this.barPage * perBar + i; const t0 = col * st;
         const ev = evs.find((e) => e.t >= t0 && e.t < t0 + st);
-        const c = h('div', { class: 'step' + (i % beatEvery === 0 ? ' beat' : '') + (ev ? ' on' : ''), role: 'button', 'aria-label': `Step ${i + 1}${ev ? ' on' : ''}`, style: ev ? { '--v': `${Math.round(ev.v / 127 * 100)}%` } : {} });
+        const c = h('div', { class: 'step' + (i % beatEvery === 0 ? ' beat' : '') + (ev ? ' on' : ''), role: 'checkbox', tabindex: '0', 'aria-checked': ev ? 'true' : 'false', 'aria-label': `Bar ${this.barPage + 1}, step ${i + 1}${s ? ', ' + s.name : ''}`, style: ev ? { '--v': `${Math.round(ev.v / 127 * 100)}%` } : {} });
         c.addEventListener('pointerdown', (e) => { e.preventDefault(); a.toggleStep(sel, t0, st); });
+        c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); a.toggleStep(sel, t0, st); } });
+        c.addEventListener('click', (e) => { if (e.detail === 0) a.toggleStep(sel, t0, st); });
         lane.appendChild(c); this.stepCells.push({ el: c, col });
       }
       ed.appendChild(lane);
@@ -386,8 +420,10 @@ export class View {
       const evs = byPad.get(g) || [];
       for (let col = 0; col < total; col++) {
         const t0 = col * st; const ev = evs.find((e) => e.t >= t0 && e.t < t0 + st);
-        const c = h('div', { class: 'step' + (col % beatEvery === 0 ? ' beat' : '') + (col % perBar === 0 && col ? ' barline' : '') + (ev ? ' on' : ''), style: ev ? { '--v': `${Math.round(ev.v / 127 * 100)}%` } : {} });
+        const c = h('div', { class: 'step' + (col % beatEvery === 0 ? ' beat' : '') + (col % perBar === 0 && col ? ' barline' : '') + (ev ? ' on' : ''), role: 'checkbox', tabindex: mini ? '-1' : '0', 'aria-checked': ev ? 'true' : 'false', 'aria-label': `Pad ${r + 1}${s ? ' ' + s.name : ''}, bar ${Math.floor(col / perBar) + 1}, step ${(col % perBar) + 1}`, style: ev ? { '--v': `${Math.round(ev.v / 127 * 100)}%` } : {} });
         c.addEventListener('pointerdown', (e) => { e.preventDefault(); a.toggleStep(g, t0, st); });
+        c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); a.toggleStep(g, t0, st); } });
+        c.addEventListener('click', (e) => { if (e.detail === 0) a.toggleStep(g, t0, st); });
         grid.appendChild(c); this.stepCells.push({ el: c, col });
       }
     }
@@ -419,23 +455,24 @@ export class View {
     const a = this.app; const m = this.els.macro; m.innerHTML = '';
     m.append(h('div', { class: 'panel-title' }, 'Macro strip'));
     this.macro.tempo = slider('Tempo', 30, 300, 0.5, a.p.bpm, (v) => v.toFixed(1), (v) => a.setTempo(v));
-    this.macro.swing = slider('Swing', 50, 75, 1, a.p.swing, (v) => v + '%', (v) => { a.p.swing = v; a.save(); this.renderHeader(); });
-    this.macro.master = slider('Master', 0, 1, 0.01, a.p.settings.master, (v) => Math.round(v * 100) + '%', (v) => { a.p.settings.master = v; a.engine.setMaster(v); a.save(); });
+    this.macro.swing = slider('Swing', 50, 75, 1, a.p.swing, (v) => v + '%', (v) => { a.p.swing = v; a.save(); a.ccOut('swing'); this.renderHeader(); });
+    this.macro.master = slider('Master', 0, 1, 0.01, a.p.settings.master, (v) => Math.round(v * 100) + '%', (v) => { a.p.settings.master = v; a.engine.setMaster(v); a.save(); a.ccOut('master'); });
     const sel = a.p.pads[a.p.selectedPad];
-    this.macro.gain = slider('Pad level', 0, 1.5, 0.01, sel.gain, (v) => Math.round(v * 100) + '%', (v) => { a.p.pads[a.p.selectedPad].gain = v; a.save(); });
-    this.macro.tune = slider('Pad tune', -12, 12, 1, sel.tune, (v) => (v > 0 ? '+' : '') + v + ' st', (v) => { a.p.pads[a.p.selectedPad].tune = v; a.save(); });
+    this.macro.gain = slider('Pad level', 0, 1.5, 0.01, sel.gain, (v) => Math.round(v * 100) + '%', (v) => { a.p.pads[a.p.selectedPad].gain = v; a.save(); a.ccOut('padLevel'); });
+    this.macro.tune = slider('Pad tune', -12, 12, 1, sel.tune, (v) => (v > 0 ? '+' : '') + v + ' st', (v) => { a.p.pads[a.p.selectedPad].tune = v; a.save(); a.ccOut('padTune'); });
     m.append(this.macro.tempo, this.macro.swing, this.macro.master, this.macro.gain, this.macro.tune,
       h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => this.sheets.timingLab() }, 'Timing Lab'), h('button', { class: 'btn', onclick: () => this.sheets.sync() }, 'Link / MIDI'), h('button', { class: 'btn', onclick: () => this.sheets.settings() }, 'Settings')));
   }
 
   private onEvent(w: string) {
     switch (w) {
-      case 'transport': this.renderHeader(); if (!this.app.seq.playing) { this.headCol = -2; this.updatePosition(); } break;
-      case 'tempo': this.renderHeader(); this.macro.tempo?.set(this.app.p.bpm); this.renderPads(); break;
+      case 'transport': this.announce(this.app.seq.playing ? (this.app.seq.recording ? 'Recording' : 'Playing') : this.app.seq.recording ? 'Record armed' : 'Stopped'); this.renderHeader(); if (!this.app.seq.playing) { this.headCol = -2; this.updatePosition(); } break;
+      case 'tempo': clearTimeout(this.tempoT); this.tempoT = window.setTimeout(() => this.announce(`Tempo ${this.app.p.bpm} beats per minute`), 600); this.renderHeader(); this.macro.tempo?.set(this.app.p.bpm); this.renderPads(); break;
       case 'pattern': this.renderSteps(); this.renderHeader(); break;
       case 'select': this.renderBanks(); this.renderPads(); if (this.layout === 'phone') this.renderSteps(); else { this.renderSteps(); this.renderInspector(); this.renderMacro(); } break;
       case 'banks': this.renderBanks(); this.renderPads(); if (this.layout === 'tablet') { this.renderBrowser(); this.renderSteps(); } break;
       case 'loops': this.renderPads(); break;
+      case 'cc': this.renderHeader(); if (this.layout === 'tablet') { this.renderMacro(); this.renderInspector(); } break;
       case 'link': this.renderLink(); break;
       case 'midi': this.renderMidi(); break;
       case 'stats': case 'latency': case 'started': this.renderLatency(); if (w !== 'stats') this.app.checkLatencyLimits(); break;

@@ -45,10 +45,10 @@ export function toggle(label: string, value: boolean, onChange: (v: boolean) => 
 }
 export function slider(label: string, min: number, max: number, step: number, value: number, fmt: (v: number) => string, onInput: (v: number) => void, onChange?: (v: number) => void) {
   const out = h('output', {}, fmt(value));
-  const inp = h('input', { type: 'range', min, max, step, value, 'aria-label': label });
-  inp.addEventListener('input', () => { const v = Number(inp.value); out.textContent = fmt(v); onInput(v); });
+  const inp = h('input', { type: 'range', min, max, step, value, 'aria-label': label, 'aria-valuetext': fmt(value) });
+  inp.addEventListener('input', () => { const v = Number(inp.value); out.textContent = fmt(v); inp.setAttribute('aria-valuetext', fmt(v)); onInput(v); });
   if (onChange) inp.addEventListener('change', () => onChange(Number(inp.value)));
   const row = h('div', { class: 'knobrow' }, h('span', {}, label), inp, out);
-  (row as any).set = (v: number) => { inp.value = String(v); out.textContent = fmt(v); };
+  (row as any).set = (v: number) => { inp.value = String(v); out.textContent = fmt(v); inp.setAttribute('aria-valuetext', fmt(v)); };
   return row as unknown as HTMLElement & { set(v: number): void };
 }

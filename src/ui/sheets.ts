@@ -2,7 +2,8 @@
 import { App } from '../app';
 import { BANKS, QUANT_TICKS, listSnapshots, resetProject, type QuantizeKey, type Theme } from '../state';
 import { h, seg, toggle, slider, toast } from './dom';
-import { LinkClient } from '../sync/link';
+import { LinkClient, normalizeBridgeUrl } from '../sync/link';
+import { CC_TARGETS, type CcTarget } from '../sync/midi';
 import type { View } from './view';
 import { timingLabBody } from './timinglab';
 import { LockScreen, type GateScreen } from '../license/gate';
@@ -50,7 +51,7 @@ export class Sheets {
       if (taps.length >= 3) { const d = (taps[taps.length - 1] - taps[0]) / (taps.length - 1); a.setTempo(Math.round(60000 / d * 10) / 10); tempo.set(a.p.bpm); }
     } }, 'TAP');
     const nudge = (d: number) => h('button', { class: 'btn', onclick: () => { a.setTempo(a.p.bpm + d); tempo.set(a.p.bpm); } }, (d > 0 ? '+' : '') + d);
-    const swing = slider('Swing', 50, 75, 1, p.swing, (v) => v + '%', (v) => { p.swing = v; a.save(); this.view.renderHeader(); }, () => this.view.renderSteps());
+    const swing = slider('Swing', 50, 75, 1, p.swing, (v) => v + '%', (v) => { p.swing = v; a.save(); a.ccOut('swing'); this.view.renderHeader(); }, () => this.view.renderSteps());
     return h('div', {},
       tempo, h('div', { class: 'row' }, nudge(-1), nudge(-0.1), nudge(0.1), nudge(1), tap),
       h('div', { class: 'row' }, h('label', {}, 'Pattern'), seg(p.patterns.map((_, i) => ({ v: i, label: String(i + 1) })), p.currentPattern, (v) => { p.currentPattern = v; a.save(); a.emit('pattern'); })),
@@ -86,9 +87,9 @@ export class Sheets {
     return h('div', {},
       h('div', { class: 'row' }, h('b', {}, `Bank ${BANKS[Math.floor(global / 16)]} · Pad ${(global % 16) + 1}`), s?.kind === 'loop' ? h('span', { class: 'note' }, `Loop · ${s.bars} bars · ${s.bpm} BPM · key ${s.key ?? '–'} · choke ${s.choke ?? '–'}`) : s?.choke ? h('span', { class: 'note' }, `Choke group: ${s.choke}`) : null),
       h('div', { class: 'row' }, sel),
-      compact ? null : slider('Level', 0, 1.5, 0.01, slot.gain, (v) => Math.round(v * 100) + '%', (v) => { slot.gain = v; a.save(); }),
+      compact ? null : slider('Level', 0, 1.5, 0.01, slot.gain, (v) => Math.round(v * 100) + '%', (v) => { slot.gain = v; a.save(); a.ccOut('padLevel'); }),
       slider('Pan', -1, 1, 0.05, slot.pan, (v) => (v === 0 ? 'C' : v < 0 ? 'L' + Math.round(-v * 100) : 'R' + Math.round(v * 100)), (v) => { slot.pan = v; a.save(); }),
-      compact ? null : slider('Tune', -12, 12, 1, slot.tune, (v) => (v > 0 ? '+' : '') + v + ' st', (v) => { slot.tune = v; a.save(); if (a.loops.has(global)) a.updateLoopRates(); }),
+      compact ? null : slider('Tune', -12, 12, 1, slot.tune, (v) => (v > 0 ? '+' : '') + v + ' st', (v) => { slot.tune = v; a.save(); a.ccOut('padTune'); if (a.loops.has(global)) a.updateLoopRates(); }),
       h('div', { class: 'row' }, toggle('Mute (pad dims to 30%)', slot.mute, (v) => { slot.mute = v; a.save(); a.emit('banks'); }),
         h('button', { class: 'btn', onclick: () => a.voice(global, 110, 0, 'live') }, 'Preview')),
       s ? h('p', { class: 'note' }, `Credit: ${s.credit.author} — ${s.credit.license}`) : null);
@@ -136,9 +137,9 @@ export class Sheets {
   settings() {
     const a = this.app; const s = a.p.settings;
     const themes: { v: Theme; label: string; bg: string; fg: string; acc: string }[] = [
-      { v: 'dark', label: 'Dark', bg: '#0B0B0F', fg: '#F2EEE6', acc: '#FF6A13' }, { v: 'light', label: 'Light', bg: '#F5F5F2', fg: '#14141A', acc: '#D9530A' }, { v: 'warm', label: 'Warm · MPC60', bg: '#D9D3C7', fg: '#2B2724', acc: '#FF6A13' }];
-    const sw = h('div', { class: 'themes' });
-    const renderSw = () => { sw.innerHTML = ''; for (const t of themes) sw.append(h('button', { class: 'swatch' + (a.p.theme === t.v ? ' on' : ''), style: { background: t.bg, color: t.fg }, onclick: () => { a.p.theme = t.v; a.save(); a.emit('theme'); renderSw(); } }, t.label, h('span', { style: { height: '8px', borderRadius: '4px', background: t.acc, display: 'block' } }))); };
+      { v: 'dark', label: 'Neon (dark)', bg: '#07070C', fg: '#F2EEE6', acc: '#FF2D95' }, { v: 'light', label: 'Light', bg: '#F5F5F2', fg: '#14141A', acc: '#D9530A' }, { v: 'warm', label: 'Warm · MPC60', bg: '#D9D3C7', fg: '#2B2724', acc: '#FF6A13' }];
+    const sw = h('div', { class: 'themes', role: 'radiogroup', 'aria-label': 'Theme' });
+    const renderSw = () => { sw.innerHTML = ''; for (const t of themes) sw.append(h('button', { class: 'swatch' + (a.p.theme === t.v ? ' on' : ''), role: 'radio', 'aria-checked': a.p.theme === t.v ? 'true' : 'false', 'aria-label': `${t.label} theme`, style: { background: t.bg, color: t.fg }, onclick: () => { a.p.theme = t.v; a.save(); a.emit('theme'); renderSw(); } }, t.label, h('span', { style: { height: '8px', borderRadius: '4px', background: t.acc, display: 'block' } }))); };
     renderSw();
     const snaps = listSnapshots();
     this.open('Settings', h('div', {},
@@ -152,7 +153,7 @@ export class Sheets {
       h('div', { class: 'row' }, h('label', {}, 'Layout'), seg([{ v: 'auto', label: 'Auto' }, { v: 'phone', label: 'Phone' }, { v: 'tablet', label: 'Tablet' }] as any, s.deviceClass, (v: any) => { s.deviceClass = v; a.save(); a.emit('layout'); })),
       h('div', { class: 'row' }, h('label', {}, 'Dominant hand'), seg([{ v: 'right', label: 'Right' }, { v: 'left', label: 'Left' }] as any, s.handedness, (v: any) => { s.handedness = v; a.save(); a.emit('layout'); })),
       h('div', { class: 'row' }, toggle('Haptics (Android vibrate)', s.haptics, (v) => { s.haptics = v; a.save(); }), toggle('Reduce motion', s.reduceMotion, (v) => { s.reduceMotion = v; a.save(); a.emit('theme'); })),
-      slider('Master', 0, 1, 0.01, s.master, (v) => Math.round(v * 100) + '%', (v) => { s.master = v; a.engine.setMaster(v); a.save(); }),
+      slider('Master', 0, 1, 0.01, s.master, (v) => Math.round(v * 100) + '%', (v) => { s.master = v; a.engine.setMaster(v); a.save(); a.ccOut('master'); }),
       h('h3', {}, 'Project'),
       h('p', { class: 'note' }, `Autosaved continuously to this device (localStorage). Last save: ${a.p.savedAt ? new Date(a.p.savedAt).toLocaleString() : '—'}. ${snaps.length} rolling snapshot(s).`),
       h('div', { class: 'row' },
@@ -186,7 +187,11 @@ export class Sheets {
     const a = this.app; const s = a.p.settings;
     const linkInfo = h('div', { class: 'kv' }); const phase = h('div', { class: 'phasebar' }); const linkMsg = h('div', {});
     const midiInfo = h('div', {});
-    const urlIn = h('input', { type: 'text', value: s.linkUrl, placeholder: LinkClient.defaultUrl(), 'aria-label': 'Bridge URL', onchange: () => { s.linkUrl = urlIn.value.trim(); a.save(); if (s.linkEnabled) { a.setLink(false); a.setLink(true); } } });
+    const urlErr = h('div', { role: 'alert' });
+    const urlIn = h('input', { type: 'text', inputmode: 'url', value: s.linkUrl, placeholder: LinkClient.defaultUrl() || 'Computer address, e.g. 192.168.1.20', 'aria-label': 'Link bridge address', onchange: () => {
+      const n = normalizeBridgeUrl(urlIn.value); urlErr.innerHTML = '';
+      if (n.error) { urlErr.append(h('div', { class: 'banner bad' }, n.error)); return; }
+      s.linkUrl = urlIn.value.trim(); a.save(); if (s.linkEnabled) { a.setLink(false); a.setLink(true); } } });
     const update = () => {
       const L = a.link.state;
       linkInfo.innerHTML = '';
@@ -218,24 +223,57 @@ export class Sheets {
     fillSel();
     const offs = a.on((w) => { if (w === 'midi') fillSel(); });
     update();
+    const ccList = h('div', { class: 'kv cc-map' });
+    const fillCC = () => {
+      ccList.innerHTML = '';
+      for (const t of CC_TARGETS) {
+        const cc = Object.keys(s.ccMap).find((k) => s.ccMap[k] === t.v);
+        const learning = a.midiLearn === t.v;
+        ccList.append(h('div', {}, t.label), h('div', { class: 'row' }, h('span', { class: 'mono' }, cc != null ? `CC ${cc}` : '—'),
+          h('button', { class: 'btn' + (learning ? ' on' : ''), 'aria-pressed': learning ? 'true' : 'false', 'aria-label': `Learn MIDI CC for ${t.label}`, onclick: () => { a.midiLearn = learning ? null : (t.v as CcTarget); if (!a.midi.status.enabled) a.midi.enable(); fillCC(); } }, learning ? 'Move a knob…' : 'Learn')));
+      }
+    };
+    fillCC();
+    const offCC = a.on((w) => { if (w === 'midi') fillCC(); });
+    const native = a.midi.isNative;
+    const ble = h('div', {});
+    const fillBle = () => {
+      ble.innerHTML = '';
+      if (!native) return;
+      const m = a.midi.status;
+      ble.append(h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => a.midi.scanBle() }, m.scanning ? 'Searching…' : 'Find Bluetooth MIDI')));
+      for (const d of m.ble) ble.append(h('div', { class: 'row' }, h('span', {}, d.name), h('button', { class: 'btn primary', onclick: () => a.midi.connectBle(d.address) }, 'Connect')));
+      if (m.scanning && !m.ble.length) ble.append(h('p', { class: 'note' }, 'Turn on the Bluetooth MIDI device (or put your computer\'s Bluetooth MIDI in advertise mode).'));
+    };
+    fillBle();
+    const offBle = a.on((w) => { if (w === 'midi') fillBle(); });
     this.open('Link & MIDI Sync', h('div', {},
-      h('h3', {}, 'Ableton Link'),
-      h('div', { class: 'row' }, toggle('Link (via Sanctum bridge)', s.linkEnabled, (v) => { a.setLink(v); update(); }),
-        h('label', {}, 'Quantum'), seg([2, 4, 8].map((v) => ({ v, label: String(v) })), s.linkQuantum, (v) => { s.linkQuantum = v; a.link.setQuantum(v); a.save(); })),
+      h('h3', {}, 'Ableton Link (Wi-Fi tempo sync)'),
+      h('div', { class: 'row' }, toggle('Link on', s.linkEnabled, (v) => { a.setLink(v); update(); }),
+        h('label', {}, 'Bar length'), seg([2, 4, 8].map((v) => ({ v, label: String(v) })), s.linkQuantum, (v) => { s.linkQuantum = v; a.link.setQuantum(v); a.save(); })),
       linkMsg, phase, linkInfo,
-      h('div', { class: 'row' }, h('label', {}, 'Bridge URL'), urlIn),
-      h('p', { class: 'note' }, 'Browsers can\'t join Link directly (UDP multicast), so run the bridge on a computer on the same network: "npm run bridge". The dev/preview server proxies /link to it, so the default URL works from phones too. Tempo changes here are proposed to the whole Link session; Play starts on the next quantum boundary.'),
-      h('h3', {}, 'MIDI (Web MIDI — USB / class-compliant)'),
-      h('div', { class: 'row' }, h('button', { class: 'btn primary', onclick: async () => { await a.midi.enable(); fillSel(); update(); } }, a.midi.status.enabled ? 'Rescan MIDI' : 'Enable MIDI')),
-      midiInfo,
-      h('div', { class: 'row' }, h('label', {}, 'Output'), outSel), h('div', { class: 'row' }, h('label', {}, 'Input'), inSel),
-      h('div', { class: 'row' }, toggle('Send MIDI clock + Start/Stop', s.midiClockOut, (v) => { s.midiClockOut = v; a.save(); if (v) a.midi.enable(); }),
-        toggle('Follow MIDI clock in', s.midiClockIn, (v) => { s.midiClockIn = v; a.midi.clockIn = v; a.save(); if (v) a.midi.enable(); }),
-        toggle('MIDI notes play pads (omni, 36–51 = pads 1–16)', s.midiNotesIn, (v) => { s.midiNotesIn = v; a.save(); })),
+      h('div', { class: 'row' }, h('label', {}, 'Bridge address'), urlIn), urlErr,
+      h('p', { class: 'note' }, native
+        ? 'Phones can\'t join Link on their own from this app yet. On a computer on the same Wi-Fi run the Sanctum bridge ("npm run bridge"), then type the computer\'s address shown by the bridge (for example 192.168.1.20). Leave it empty if you don\'t use Link.'
+        : 'Browsers can\'t join Link directly, so run the bridge on a computer on the same network: "npm run bridge". The preview server forwards /link to it, so leaving the address empty works.'),
+      h('h3', {}, native ? 'MIDI (USB cable or Bluetooth)' : 'MIDI (Web MIDI — USB / class-compliant)'),
+      h('div', { class: 'row' }, h('button', { class: 'btn primary', onclick: async () => { await a.midi.enable(); fillSel(); update(); } }, a.midi.status.enabled ? 'Look for MIDI devices again' : 'Turn on MIDI')),
+      midiInfo, ble,
+      h('div', { class: 'row' }, h('label', {}, 'Send to'), outSel), h('div', { class: 'row' }, h('label', {}, 'Listen to'), inSel),
+      h('div', { class: 'row' }, toggle('Pads send notes to the computer', s.midiNotesOut, (v) => { s.midiNotesOut = v; a.save(); if (v) a.midi.enable(); }),
+        toggle('Notes from MIDI play the pads', s.midiNotesIn, (v) => { s.midiNotesIn = v; a.save(); })),
+      h('div', { class: 'row' }, h('label', {}, 'MIDI channel'), seg([1, 2, 10, 16].map((v) => ({ v, label: String(v) })), s.midiChannel, (v) => { s.midiChannel = v; a.save(); })),
+      h('div', { class: 'row' }, toggle('Send tempo clock + Start/Stop', s.midiClockOut, (v) => { s.midiClockOut = v; a.save(); if (v) a.midi.enable(); }),
+        toggle('Follow the computer\'s clock', s.midiClockIn, (v) => { s.midiClockIn = v; a.midi.clockIn = v; a.save(); if (v) a.midi.enable(); })),
       slider('Clock offset', -50, 50, 1, s.midiClockOffsetMs, (v) => v + ' ms', (v) => { s.midiClockOffsetMs = v; a.save(); }),
-      h('p', { class: 'note' }, 'Clock out is scheduled ahead with Web MIDI timestamps from the audio clock (no callback jitter). Logic can\'t receive MIDI clock — use Link, or make Logic the master and enable "Follow MIDI clock in". No MIDI 2.0 in this prototype.')),
+      h('h3', {}, 'Knobs (MIDI CC)'),
+      h('p', { class: 'note' }, 'Tap Learn, then move a knob on your controller or in your DAW. Changes you make here are also sent out on the same CC.'),
+      ccList,
+      h('div', { class: 'row' }, toggle('Send knob changes out', s.ccOut, (v) => { s.ccOut = v; a.save(); })),
+      native ? h('p', { class: 'note' }, 'Use the phone as a USB MIDI device for your computer: plug in the USB-C cable, pull down the notification "Charging this device via USB", tap it, and choose "MIDI". The computer then sees an "Android" MIDI device, and it appears in the lists above.') : null,
+      h('p', { class: 'note' }, 'Pads send notes 36–51 (pad 1 = C1/36). Clock is 24 pulses per beat, scheduled ahead from the audio clock. Logic Pro can\'t follow incoming MIDI clock — use Link, or let Logic lead and turn on "Follow the computer\'s clock". See the manual for each DAW.')),
       () => { update(); });
-    const prevClose = this.unsub; this.unsub = () => { offs(); prevClose?.(); };
+    const prevClose = this.unsub; this.unsub = () => { offs(); offCC(); offBle(); a.midiLearn = null; prevClose?.(); };
   }
 
   timingLab() { const { el, update } = timingLabBody(this.app); this.open('Timing Lab', el, update); }

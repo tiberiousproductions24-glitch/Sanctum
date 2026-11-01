@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sanctum: HTTPS everywhere, except cleartext ws:// to a Link bridge on the local network.
+     Android's config can't express IP ranges, so cleartext is permitted at the platform level and the app
+     itself (src/sync/link.ts) only allows ws:// to private LAN addresses (10/8, 172.16/12, 192.168/16, *.local). -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors><certificates src="system" /></trust-anchors>
+    </base-config>
+</network-security-config>

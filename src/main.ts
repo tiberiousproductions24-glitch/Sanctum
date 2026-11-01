@@ -1,5 +1,6 @@
 // Entry: license gate first. The app/engine/pads module is only imported after a valid license.
 import './styles.css';
+import './hardware.css';
 import { Capacitor } from '@capacitor/core';
 import { checkLicense, activate } from './license/license';
 import { LockScreen } from './license/gate';
