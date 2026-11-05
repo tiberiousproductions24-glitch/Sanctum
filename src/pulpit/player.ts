@@ -5,7 +5,7 @@ import { chordIn, parseKey, keyName, shiftKey, KEY_NAMES, type Key, type Chord }
 import { PROGRESSIONS, FEELS, type Progression, type Step } from './library';
 import { renderChord, drumBar, organRun } from './tones';
 
-export type BandMode = 'full' | 'duo';
+export type BandMode = 'full' | 'duo' | 'modern';
 export type PulpitLane = 'none' | 'shout' | 'worship';
 
 export interface PulpitState {
@@ -55,7 +55,7 @@ export class PulpitPlayer {
       const o = JSON.parse(raw);
       const key = parseKey(o.keyName || 'Ab') || { tonic: 8, mode: 'major' as const };
       return {
-        open: false, key, pendingKey: null, bpm: o.bpm || 92, band: o.band === 'duo' ? 'duo' : 'full',
+        open: false, key, pendingKey: null, bpm: o.bpm || 92, band: o.band === 'duo' || o.band === 'modern' ? o.band : 'full',
         progressionId: o.progressionId || 'whoop-14', stepIndex: 0,
         customSteps: Array.isArray(o.customSteps) ? o.customSteps : null,
         shoutLevel: o.shoutLevel | 0, worshipLevel: o.worshipLevel | 0,
@@ -112,7 +112,7 @@ export class PulpitPlayer {
   private rebuildDrums() {
     const s = this.state;
     const intensity = Math.max(s.shoutLevel, s.worshipLevel) / 4;
-    const feel = s.shoutLevel > 0 ? 'shout' : s.worshipLevel > 0 ? (s.worshipLevel >= 3 ? 'praise' : 'worship') : 'hold';
+    const feel = s.band === 'modern' ? 'modern' : s.shoutLevel > 0 ? 'shout' : s.worshipLevel > 0 ? (s.worshipLevel >= 3 ? 'praise' : 'worship') : 'hold';
     const key = `${feel}:${s.bpm}:${intensity.toFixed(2)}`;
     if (this.drumFeel === key && this.drumId) return;
     const id = 'pulpit.drums.' + (++this.sampleN);
@@ -259,7 +259,11 @@ export class PulpitPlayer {
     this.drumFeel = null; this.rebuildDrums();
     this.save(); this.emit(`${bpm.toFixed(0)} BPM`);
   }
-  setBand(b: BandMode) { this.state.band = b; this.save(); this.emit(b === 'full' ? 'Full Band' : 'Organ + Drums'); }
+  setBand(b: BandMode) {
+    const was = this.state.band; this.state.band = b;
+    if ((was === 'modern') !== (b === 'modern') && this.ready) { this.drumFeel = null; this.rebuildDrums(); }
+    this.save(); this.emit(b === 'full' ? 'Full Band' : b === 'modern' ? 'Modern (808 + trap groove)' : 'Organ + Drums');
+  }
   setShout(level: number) {
     level = Math.max(0, Math.min(4, level | 0));
     this.state.shoutLevel = level;

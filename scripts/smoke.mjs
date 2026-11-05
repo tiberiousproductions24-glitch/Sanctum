@@ -11,7 +11,7 @@ const mint = (...a) => execFileSync('node', ['scripts/license.mjs', 'mint', '--n
 const ADMIN = fs.readFileSync('licensing-keys/ADMIN-TOKEN.txt', 'utf8').trim();
 
 const CHROME = process.env.CHROME || '/usr/bin/google-chrome';
-const PORT = 4173; const BASE = `http://localhost:${PORT}/`;
+const PORT = Number(process.env.SMOKE_PORT || 4173); const BASE = `http://localhost:${PORT}/`;
 const SHOTS = 'screenshots'; fs.mkdirSync(SHOTS, { recursive: true });
 const procs = [];
 const run = (cmd, args, name) => { const p = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] }); p.stdout.on('data', (d) => process.env.VERBOSE && process.stdout.write(`[${name}] ${d}`)); p.stderr.on('data', (d) => process.stdout.write(`[${name}!] ${d}`)); procs.push(p); return p; };
@@ -111,6 +111,46 @@ try {
   await page.waitForFunction(() => [...window.__sanctum.app.bankLoad.values()].length >= 4 && [...window.__sanctum.app.bankLoad.values()].every((v) => v === 'ready'), { timeout: 20000 }).catch(() => {});
   const banks = await page.evaluate(() => { const a = window.__sanctum.app; return { sources: a.p.bankSources, load: Object.fromEntries(a.bankLoad), samples: a.engine.samples.size }; });
   ok('church manifest banks loaded into C–F', banks.sources.slice(2, 6).every((s) => s && s.startsWith('ext.')) && Object.values(banks.load).every((v) => v === 'ready'), JSON.stringify(banks));
+
+  // ---------- v0.3.1 modern banks: present, load (OGG decode), pads play, loops carry BPM ----------
+  {
+    const MODERN = ['ext.trap-sanctuary', 'ext.drill-pulpit', 'ext.amapiano-praise', 'ext.neo-soul-sunday', 'ext.stage-fx-modern'];
+    await page.evaluate((ids) => { const a = window.__sanctum.app; for (const id of ids) a.ensureBankLoaded(id); }, MODERN);
+    await page.waitForFunction((ids) => ids.every((id) => window.__sanctum.app.bankLoad.get(id) === 'ready'), { timeout: 30000 }, MODERN).catch(() => {});
+    const mb = await page.evaluate((ids) => {
+      const a = window.__sanctum.app;
+      return ids.map((id) => { const b = a.bank(id); const ss = b ? b.sounds.filter(Boolean) : [];
+        const reg = ss.filter((s) => a.engine.has(s.id));
+        const silent = reg.filter((s) => { const c = a.engine.samples.get(s.id).ch[0]; let m = 0; for (let i = 0; i < c.length; i += 7) m = Math.max(m, Math.abs(c[i])); return m < 0.05; }).length;
+        const clipped = reg.filter((s) => { for (const c of a.engine.samples.get(s.id).ch) for (let i = 0; i < c.length; i++) if (Math.abs(c[i]) > 0.9) return true; return false; }).length;
+        const loops = ss.filter((s) => s.kind === 'loop');
+        const badLen = loops.filter((s) => a.engine.samples.get(s.id)?.ch[0].length !== Math.round(s.samples * a.engine.sampleRate / s.fileSampleRate)).length;
+        return { id, name: b?.name, group: b?.group, pads: ss.length, registered: reg.length, load: a.bankLoad.get(id), silent, clipped, loops: loops.length, loopsWithBpm: loops.filter((s) => s.bpm > 0).length, badLen };
+      });
+    }, MODERN);
+    ok('modern banks: 5 banks × 16 pads present (group=modern)', mb.every((b) => b.pads === 16 && b.group === 'modern'), mb.map((b) => `${b.name}:${b.pads}`).join(', '));
+    ok('modern banks: all 80 sounds decode + register (none silent, none > -0.9 dBFS)', mb.every((b) => b.load === 'ready' && b.registered === 16 && b.silent === 0 && b.clipped === 0), JSON.stringify(mb.map((b) => [b.name, b.load, b.registered, b.silent, b.clipped])));
+    ok('modern banks: tempo-synced loops carry BPM and decode to exact loop length', mb.filter((b) => b.loops).every((b) => b.loopsWithBpm === b.loops && b.badLen === 0) && mb.reduce((n, b) => n + b.loops, 0) >= 14, JSON.stringify(mb.map((b) => [b.name, b.loops, b.badLen])));
+    const srcs = await page.evaluate(() => window.__sanctum.app.p.bankSources.slice(6, 8));
+    ok('first run puts Trap Sanctuary in G and Drill Pulpit in H', srcs[0] === 'ext.trap-sanctuary' && srcs[1] === 'ext.drill-pulpit', JSON.stringify(srcs));
+    // play pad 1 of every modern bank through the engine and watch the render thread
+    const plays = [];
+    for (const id of MODERN) {
+      const r = await page.evaluate(async (id) => { const a = window.__sanctum.app; const s = a.bank(id).sounds[0];
+        a.engine.trigger({ at: 0, id: s.id, vel: 1 }); await new Promise((r) => setTimeout(r, 160)); return { id, sound: s.name, voices: a.engine.stats.voices, peak: a.engine.stats.peak }; }, id);
+      plays.push(r);
+    }
+    ok('modern banks: pad 1 of each bank plays (render-thread voices/peak)', plays.every((p) => p.voices > 0 || p.peak > 0.01), JSON.stringify(plays.map((p) => [p.sound, p.voices, +p.peak.toFixed(3)])));
+    // real touch on bank G (Trap Sanctuary) pad 9 = 808 F
+    await page.evaluate(() => window.__sanctum.view.setBank(6));
+    const b9 = await page.evaluate(() => { const r = document.querySelector('.pad[data-pad="8"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 3 }; });
+    await sleep(300);
+    await page.touchscreen.tap(b9.x, b9.y);
+    await sleep(150);
+    const t9 = await page.evaluate(() => { const a = window.__sanctum.app; return { name: a.soundOf(6 * 16 + 8)?.name, voices: a.engine.stats.voices, peak: a.engine.stats.peak }; });
+    ok('touch Trap Sanctuary pad 9 (808 F Dist) plays', /808 F/.test(t9.name || '') && (t9.voices > 0 || t9.peak > 0.01), JSON.stringify(t9));
+    await page.evaluate(() => window.__sanctum.view.setBank(0));
+  }
 
   // tap pad 1 (kick) with a real touch event
   const box = await page.evaluate(() => { const r = document.querySelector('.pad[data-pad="0"]').getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 3 }; });
@@ -218,6 +258,14 @@ try {
   await setTheme(page, 'dark');
   await page.evaluate(() => window.__sanctum.sheets.timingLab()); await shoot(page, 'phone-dark-timing-lab');
   await page.evaluate(() => window.__sanctum.sheets.sounds()); await shoot(page, 'phone-dark-sounds');
+  await page.evaluate(() => { window.__sanctum.sheets.close(); window.__sanctum.view.setBank(6); window.__sanctum.sheets.sounds(); });
+  await sleep(300);
+  await page.evaluate(() => document.querySelector('.bankitem[data-bank="ext.trap-sanctuary"]')?.scrollIntoView({ block: 'start' }));
+  await shoot(page, 'phone-dark-bank-picker-modern');
+  await page.evaluate(() => document.querySelector('.bankitem[data-bank="ext.stage-fx-modern"]')?.scrollIntoView({ block: 'center' }));
+  await shoot(page, 'phone-dark-bank-picker-modern-2');
+  await page.evaluate(() => { window.__sanctum.sheets.close(); }); await shoot(page, 'phone-dark-trap-sanctuary-pads');
+  await page.evaluate(() => window.__sanctum.view.setBank(0));
   await page.evaluate(() => window.__sanctum.sheets.close());
   await page.evaluate(() => window.__sanctum.app.setLink(false));
 
@@ -253,6 +301,13 @@ try {
     await page.evaluate(() => { const pl = window.__sanctum.app.pulpit.player; pl.setCustomSteps([{ c: 'I' }, { c: 'IV' }, { c: 'V7' }, { c: 'I' }]); });
     const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sanctum.pulpit.v1') || '{}'));
     ok('Pulpit autosaves custom progression', Array.isArray(saved.customSteps) && saved.customSteps.length === 4 && saved.customSteps[2].c === 'V7', JSON.stringify(saved.customSteps));
+    // Modern band mode: 808 bass + trap groove
+    await page.evaluate(() => { const pl = window.__sanctum.app.pulpit.player; pl.setMusicMute(false); pl.setDrumsMute(false); pl.setBand('modern'); pl.start(); pl.easyPlay(); });
+    await sleep(400);
+    const modern = await page.evaluate(() => { const pl = window.__sanctum.app.pulpit.player; return { band: pl.state.band, feel: pl.drumFeel, playing: pl.state.playing, voices: window.__sanctum.app.engine.stats.voices, btn: !!document.querySelector('.pulpit-band .band.on[data-band="modern"]') }; });
+    ok('Pulpit Modern band: 808 + trap groove plays', modern.band === 'modern' && /^modern:/.test(modern.feel || '') && modern.playing && modern.voices > 0, JSON.stringify(modern));
+    await shoot(page, 'phone-dark-pulpit-modern');
+    await page.evaluate(() => { const pl = window.__sanctum.app.pulpit.player; pl.setBand('full'); pl.stop(); });
     // Screenshots: Pulpit in Neon + Warm, phone + tablet later
     await page.evaluate(() => { const a = window.__sanctum.app; a.p.theme = 'neon'; a.emit('theme'); window.__sanctum.app.pulpit.player.setMusicMute(false); window.__sanctum.app.pulpit.player.setDrumsMute(false); });
     await sleep(200);
@@ -282,6 +337,7 @@ try {
     await tp.evaluate(() => { const a = window.__sanctum.app; a.play(); });
     await sleep(900);
     for (const t of themes) { await setTheme(tp, t); await shoot(tp, `${name}-${t}`); }
+    if (name === 'tablet-landscape') { await setTheme(tp, 'neon'); await tp.evaluate(() => { window.__sanctum.view.setBank(6); window.__sanctum.sheets.sounds(); }); await sleep(300); await tp.evaluate(() => document.querySelector('.bankitem[data-bank="ext.trap-sanctuary"]')?.scrollIntoView({ block: 'start' })); await shoot(tp, `${name}-neon-bank-picker-modern`); await tp.evaluate(() => { window.__sanctum.sheets.close(); }); await shoot(tp, `${name}-neon-trap-sanctuary`); await tp.evaluate(() => window.__sanctum.view.setBank(0)); }
     if (name === 'tablet-landscape') { await setTheme(tp, 'warm'); await tp.evaluate(() => window.__sanctum.sheets.timingLab()); await shoot(tp, `${name}-warm-timing-lab`); }
     await tp.evaluate(() => window.__sanctum.app.stop());
     await tp.close();

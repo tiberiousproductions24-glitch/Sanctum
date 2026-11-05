@@ -141,6 +141,7 @@ button, select, input { font: inherit; color: inherit; }
 .bankitem b { font-size: 13px; } .bankitem span { font-size: 11px; color: var(--muted); }
 .bankitem.soon { opacity: .6; cursor: default; border-style: dashed; }
 .bankitem .badge { align-self: flex-start; font-size: 9px; font-weight: 800; letter-spacing: .08em; padding: 2px 6px; border-radius: 4px; background: var(--gold); color: #fff; margin-top: 2px; }
+.bankitem .badge.new { background: var(--accent, #FF2D95); }
 .bankitem.cur { border-color: var(--accent); }
 
 /* ===== layouts ===== */
@@ -291,6 +292,7 @@ body.pulpit-open { overflow: hidden; }
 .lvl-col.shout .lvl.on { background: #e11d48; color: #fff; border-color: transparent; }
 .lvl-col.worship .lvl.on { background: #2563eb; color: #fff; border-color: transparent; }
 .pulpit-band, .pulpit-mutes, .pulpit-runs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pulpit-band { grid-template-columns: 1fr 1fr 1fr; }
 .pulpit-mutes { grid-template-columns: repeat(4, 1fr); }
 .pulpit-band .band, .pulpit-mutes button, .pulpit-runs button {
   min-height: 52px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font-weight: 700; font-size: 14px;

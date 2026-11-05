@@ -1,6 +1,6 @@
 {
   "name": "sanctum",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "description": "Sanctum \u2014 MPC-style touch drum machine (PWA prototype)",

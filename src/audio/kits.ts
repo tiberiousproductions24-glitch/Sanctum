@@ -21,6 +21,8 @@ export interface SoundBank {
   id: string; name: string; status: 'ready' | 'coming-soon' | 'external';
   description: string; sounds: (SoundDef | null)[]; // 16 slots
   source?: string;
+  group?: string;        // e.g. 'modern' (v0.3.1 Trap / Drill / Amapiano / Neo-Soul / Stage FX)
+  key?: string | null; bpm?: number | null;
 }
 
 const SYNTH: Credit = { author: 'Sanctum built-in synthesis (generated in-app at load time)', license: 'Original work — no samples, no third-party content', source: 'src/audio/synth.ts' };
@@ -97,7 +99,7 @@ interface ManifestPad {
   chokeGroup?: string | null; file: string; web?: { ogg?: string; mp3?: string }; samples?: number; sampleRate?: number;
   author?: string; license?: string; attribution?: string; source?: string; url?: string; pad?: number; trigger?: string; description?: string;
 }
-interface Manifest { name?: string; basePath?: string; license?: string; sampleRate?: number; banks: { id: string; name: string; pads: ManifestPad[] }[] }
+interface Manifest { name?: string; basePath?: string; license?: string; sampleRate?: number; banks: { id: string; name: string; description?: string; group?: string; key?: string | null; bpm?: number | null; pads: ManifestPad[] }[] }
 
 const shortName = (n: string) => n.replace(/\(.*?\)/g, '').trim().toUpperCase().slice(0, 14);
 
@@ -120,7 +122,8 @@ export function adaptManifest(m: Manifest, baseUrl: string): SoundBank[] {
         credit: { author: p.author || 'Unknown', license: p.license || m.license || 'See manifest', url: p.url, source: p.source, note: p.attribution || p.description },
       };
     });
-    return { id: `ext.${b.id}`, name: b.name, status: 'external', description: `${m.name || 'External bank'} — ${b.pads.length} pads`, sounds, source: m.name };
+    const description = b.description ? `${b.description} ${b.pads.length} pads.` : `${m.name || 'External bank'} — ${b.pads.length} pads`;
+    return { id: `ext.${b.id}`, name: b.name, status: 'external', description, sounds, source: m.name, group: b.group, key: b.key ?? null, bpm: b.bpm ?? null };
   });
 }
 

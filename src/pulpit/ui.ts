@@ -98,6 +98,7 @@ export class PulpitUI {
     const band = h('div', { class: 'pulpit-band' },
       h('button', { class: 'band', 'data-band': 'full', onclick: () => this.player.setBand('full') }, 'Full Band'),
       h('button', { class: 'band', 'data-band': 'duo', onclick: () => this.player.setBand('duo') }, 'Organ + Drums'),
+      h('button', { class: 'band', 'data-band': 'modern', 'aria-label': 'Modern band: 808 bass and trap groove', onclick: () => this.player.setBand('modern') }, 'Modern 808'),
     );
 
     const mutes = h('div', { class: 'pulpit-mutes' },

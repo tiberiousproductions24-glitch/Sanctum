@@ -117,9 +117,16 @@ export class Sheets {
       list.append(h('h3', {}, 'Starter banks (built-in, synthesized)'));
       for (const b of a.banks.filter((b) => b.status === 'ready')) list.append(this.bankItem(b.id, b.name, b.description, () => { a.assignBank(cur, b.id); render(); }));
       const ext = a.banks.filter((b) => b.status === 'external');
-      list.append(h('h3', {}, 'Extra banks (content/church-banks/manifest.json)'));
+      const modern = ext.filter((b) => b.group === 'modern'), church = ext.filter((b) => b.group !== 'modern');
+      const extItem = (b: typeof ext[number]) => this.bankItem(b.id, b.name, `${b.description} · ${a.bankLoad.get(b.id) || 'not loaded'}`, () => { a.assignBank(cur, b.id); render(); }, b.group === 'modern' ? 'NEW' : undefined);
       if (!ext.length) list.append(h('p', { class: 'note' }, 'No external manifest found.'));
-      for (const b of ext) list.append(this.bankItem(b.id, b.name, `${b.description} · ${a.bankLoad.get(b.id) || 'not loaded'} · loops start on the next bar, follow project tempo (playbackRate = project BPM / loop BPM), choke groups cut at the bar line`, () => { a.assignBank(cur, b.id); render(); }));
+      if (modern.length) {
+        list.append(h('h3', {}, 'Modern banks (new in v0.3.1 · synthesized by Tiberious Productions / Sanctum)'));
+        for (const b of modern) list.append(extItem(b));
+      }
+      list.append(h('h3', {}, 'Church shout banks'));
+      for (const b of church) list.append(extItem(b));
+      if (ext.length) list.append(h('p', { class: 'note' }, 'Loop pads start on the next bar and follow the project tempo (playbackRate = project BPM / loop BPM); pads in the same choke group cut each other at the bar line.'));
       list.append(h('h3', {}, 'Coming soon'));
       for (const b of a.comingSoon) list.append(h('div', { class: 'bankitem soon', 'aria-disabled': 'true' }, h('b', {}, b.name), h('span', {}, b.description), h('span', { class: 'badge' }, 'COMING SOON')));
       list.append(h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => this.credits() }, 'Credits & licenses')));
@@ -127,15 +134,15 @@ export class Sheets {
     render();
     this.open('Sounds', list);
   }
-  private bankItem(id: string, name: string, desc: string, onClick: () => void) {
+  private bankItem(id: string, name: string, desc: string, onClick: () => void, badge?: string) {
     const cur = this.app.p.bankSources[this.app.p.currentBank] === id;
-    return h('div', { class: 'bankitem' + (cur ? ' cur' : ''), role: 'button', onclick: () => { onClick(); toast(`${name} → Bank ${BANKS[this.app.p.currentBank]}`); } }, h('b', {}, name), h('span', {}, desc));
+    return h('div', { class: 'bankitem' + (cur ? ' cur' : ''), role: 'button', 'data-bank': id, onclick: () => { onClick(); toast(`${name} → Bank ${BANKS[this.app.p.currentBank]}`); } }, h('b', {}, name), h('span', {}, desc), badge ? h('span', { class: 'badge new' }, badge) : null);
   }
 
   credits() {
     const a = this.app;
     const body = h('div', { class: 'credits' },
-      h('p', { class: 'note' }, 'Bundled-bank policy (soundbanks.md): only owned, CC0, or cleared content. No Splice / Loopmasters content ships in Sanctum. Freesound was not used tonight (downloads need an API key/account), so both starter banks are synthesized in-app.'));
+      h('p', { class: 'note' }, 'Bundled-bank policy (soundbanks.md): only owned, CC0, or cleared content. No Splice / Loopmasters content ships in Sanctum. Freesound was not used tonight (downloads need an API key/account), so both starter banks are synthesized in-app. The v0.3.1 modern banks (Trap Sanctuary, Drill Pulpit, Amapiano Praise, Neo-Soul Sunday, Stage FX Modern) are synthesized by Tiberious Productions / Sanctum — no samples, no recorded voices.'));
     for (const b of a.banks) {
       body.append(h('h3', {}, b.name));
       body.append(h('ul', { class: 'list' }, b.sounds.filter(Boolean).map((s) => h('li', {}, h('b', {}, s!.name), ` — ${s!.credit.author}. License: ${s!.credit.license}.`,

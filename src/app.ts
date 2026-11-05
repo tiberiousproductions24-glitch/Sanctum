@@ -139,7 +139,9 @@ export class App {
     this.extBanks = ext;
     for (const b of ext) { this.banks.push(b); for (const s of b.sounds) if (s) this.sounds.set(s.id, s); }
     // First run (or banks C–F still empty): drop the church shout banks into C–F.
-    ext.slice(0, 4).forEach((b, i) => { const slot = 2 + i; if (!this.p.bankSources[slot]) this.assignBank(slot, b.id, false); });
+    ext.filter((b) => b.group !== 'modern').slice(0, 4).forEach((b, i) => { const slot = 2 + i; if (!this.p.bankSources[slot]) this.assignBank(slot, b.id, false); });
+    // v0.3.1 modern banks: Trap Sanctuary → G, Drill Pulpit → H when those slots are still empty.
+    ext.filter((b) => b.group === 'modern').slice(0, 2).forEach((b, i) => { const slot = 6 + i; if (!this.p.bankSources[slot]) this.assignBank(slot, b.id, false); });
     for (const id of new Set(this.p.bankSources)) if (id) this.ensureBankLoaded(id);
     this.save();
     this.emit('banks');

@@ -190,7 +190,7 @@ Tap a pad to select it, then tap **PAD edit** (or open **Menu → Pad Editor**):
 
 Open **♫ Sounds** (or **Menu → Sounds**). Tap a soundbank to load it into the **current** bank letter. The panel also lists which bank is loaded in each letter.
 
-**Default setup:** A = Foundation Kit, B = Stage FX & 808, C–F = church shout banks, G and H = empty (load anything you like).
+**Default setup:** A = Foundation Kit, B = Stage FX & 808, C–F = church shout banks, G = **Trap Sanctuary**, H = **Drill Pulpit** (new in v0.3.1). Load any bank into any letter you like. If you used Sanctum before v0.3.1 and already filled G or H, your choice is kept. Load the new banks from **♫ Sounds → Modern banks**.
 
 ### 4a. Starter banks (built in)
 - **Sanctum Foundation Kit:** Kick Deep, Kick Tight, Snare, Snare Fat, Clap, Rimshot, Closed Hat, Pedal Hat, Open Hat, Tom Low/Mid/High, Crash, Ride, Tambourine, Shaker.
@@ -231,6 +231,108 @@ All loops are in 4/4 and are 1, 2 or 4 bars long. Some pairs are made to go toge
 - **REC doesn't record loop pads.** Only one-shots go into patterns.
 - Pressing **Stop** stops all loops.
 - Church banks load when they're first needed, and the info line shows "(loading…)". If you tap a loop before it has loaded, you'll see "Loading…". Tap again in a moment.
+
+### 4b-2. Modern banks (new in v0.3.1)
+
+These five banks give you today's church-production sound: gospel trap, drill, amapiano praise, neo-soul Sunday service, and big stage effects. **Every sound is synthesized from scratch by Tiberious Productions / Sanctum.** No samples, no recorded voices, and nothing copied from YouTube or anywhere else. In ♫ Sounds they're listed under **Modern banks** with a **NEW** badge.
+
+Each bank has one key and one tempo, so its loops all line up. Tap a loop (marked LOOP) and it starts on the next bar. The first loop you start sets the tempo for you.
+
+**Trap Sanctuary** (F minor, 140 BPM, felt half-time). Hard-hitting gospel trap.
+
+| Pad | Sound | What it is |
+|---|---|---|
+| 1 | Kick Punch | Short, clicky trap kick |
+| 2 | Snare Crack | Bright, cracking snare |
+| 3 | Clap Stack | Three claps stacked together, wide |
+| 4 | Rim Knock | Woody rim for bounce |
+| 5 | Closed Hat | Tight hi-hat |
+| 6 | Open Hat | Open hi-hat (the closed hat cuts it off) |
+| 7 | Hat Roll 1/32 | Fast hi-hat roll lasting one beat |
+| 8 | Hat Roll Triplet | Triplet hi-hat roll lasting one beat |
+| 9–12 | 808 F / Ab / C / Db Dist | Distorted 808 bass notes in the key. The low end stays clean, and the grit lets them come through on phone speakers |
+| 13 | Trap Drums 140 | LOOP: the full trap beat with rolls |
+| 14 | 808 Line Fm 140 | LOOP: an 808 bass line that locks to the Trap Drums kicks |
+| 15 | Sanctuary Keys Fm 140 | LOOP (4 bars): dark electric piano with a synthesized "ooh" choir |
+| 16 | Riser 2 Bars 140 | A build that lasts exactly 2 bars. Tap it 2 bars before the drop |
+
+**Drill Pulpit** (G minor, 142 BPM). Gospel drill with sliding bass.
+
+| Pad | Sound | What it is |
+|---|---|---|
+| 1 | Drill Kick | Kick for sparse drill patterns |
+| 2 | Drill Snare | Short, bright snare |
+| 3 | Ghost Snare | Quiet snare for fills |
+| 4 | Rim Click | High rim click |
+| 5 | Drill Hat | Very tight hi-hat |
+| 6 | Hat Triplet Roll | Triplet roll lasting one beat |
+| 7 | Perc Clack | Dry clacky percussion |
+| 8 | Reverse Snare | A snare that swells in backwards. It ends where the hit lands |
+| 9 | 808 G Slide 5th | 808 that slides from G up to D |
+| 10 | 808 G Slide Oct | 808 that slides up an octave |
+| 11 | 808 Bb Long | Long, sustained 808 |
+| 12 | 808 Eb Electro | Extra-distorted "electric" 808 |
+| 13 | Drill Drums 142 | LOOP: drill beat with the snare pushed late in bar 2 |
+| 14 | 808 Slides Gm 142 | LOOP: long sliding 808 line |
+| 15 | Dark Choir Gm 142 | LOOP (4 bars): synthesized "aah" choir with bell plinks |
+| 16 | Drill Hats 3-3-2 142 | LOOP: the drill hi-hat rhythm on its own |
+
+**Amapiano Praise** (D minor, 112 BPM). South-African-style praise groove.
+
+| Pad | Sound | What it is |
+|---|---|---|
+| 1 | Piano Kick | Soft, round kick |
+| 2–6 | Log Drum D / F / G / A / C | The bouncy "log drum" bass hit, tuned to the key |
+| 7 | Shaker | Shaker stroke |
+| 8 | Wood Block | Bright wood block |
+| 9 | Rim Shot | Dry rim |
+| 10 | Open Hat | Offbeat open hat |
+| 11 | Conga | High conga |
+| 12 | Soft Clap | Wide, soft clap |
+| 13 | Amapiano Drums 112 | LOOP: swung shakers, offbeat hats, rims, wood and conga |
+| 14 | Log Drum Line Dm 112 | LOOP: a walking log-drum bass line |
+| 15 | Praise Keys Dm 112 | LOOP (4 bars): bouncy electric-piano chords over a soft pad |
+| 16 | Deep Sub D | Deep, round sub bass note |
+
+**Neo-Soul Sunday** (E-flat, 84 BPM). Laid-back Sunday-service keys and brushes.
+
+| Pad | Sound | What it is |
+|---|---|---|
+| 1 | Brush Kick | Soft felt kick |
+| 2 | Brush Snare | Brush slap |
+| 3 | Rim Click | Cross-stick click |
+| 4 | Brush Swirl | Brushes circling on the snare |
+| 5 | Soft Hat | Dark, soft hi-hat |
+| 6 | Sub Eb | Warm sub bass note |
+| 7–10 | Rhodes Ebmaj9 / Cm11 / Fm9 / Bb13sus | Rich electric-piano chords that all share the same top note, so they flow into each other |
+| 11 | Organ Abmaj9 Stab | Organ chord stab |
+| 12 | Organ Shout Chop | Short, growling organ "chop" |
+| 13 | Neo-Soul Drums 84 | LOOP: lazy swung brush groove with a touch of tape and vinyl crackle |
+| 14 | Rhodes Changes Eb 84 | LOOP (4 bars): Ebmaj9, Cm11, Abmaj9, Bb13sus |
+| 15 | Sub Line Eb 84 | LOOP (4 bars): sub bass that follows the Rhodes Changes |
+| 16 | Sunday Organ Eb 84 | LOOP (4 bars): organ pad with spinning-speaker motion and shout chops |
+
+**Stage FX Modern** (key of C where it matters). Effects for transitions, altar calls and big moments.
+
+| Pad | Sound | What it is |
+|---|---|---|
+| 1 | Impact Boom | Huge low hit with a long tail |
+| 2 | Impact Crack | Brighter, tighter hit |
+| 3 | Sub Drop | Bass that falls away under you |
+| 4 | Reverse Swell | A chord that swells in backwards and peaks at the end |
+| 5 | Tape Stop | A band hit that slows down and stops, like a tape machine powering off |
+| 6 | Riser 4 s | 4-second build |
+| 7 | Riser 8 s | 8-second build |
+| 8 | Downlifter | A falling sweep for after a drop |
+| 9–12 | Choir Ooh C / Aah C / Ooh F / Aah G | Synthesized choir pads. They imitate "ooh" and "aah" vowels, but no real voices are used |
+| 13 | Supersaw Pad C | Wide, bright synth pad |
+| 14 | Reese Bass C | Thick, growling synth bass |
+| 15 | Shimmer Swell | High, glassy pad that blooms in |
+| 16 | Choir Stab Aah | Short choir hit |
+
+Tips: in each bank, the drum loop + bass loop + keys loop are built to be played together. Start the drums, then add the bass, then the keys. For a drop, tap the riser, hit **Stop** on the last beat, and then hit an Impact on the 1.
+
+The modern banks are 48 kHz files. Every one-shot is trimmed so the sound starts immediately, and everything peaks below −1 dB, so they're loud without clipping.
 
 ### 4c. Coming soon
 These are listed in Sounds as **COMING SOON**. They can't be loaded yet:
@@ -532,7 +634,7 @@ Sanctum is private. When it opens it checks for a valid **access code** before a
 
 ## 18. Credits and licensing
 
-- **Every sound in Sanctum is synthesized.** The starter banks are generated inside the app, and the church shout banks are original synthesis made for Sanctum. **No third-party samples are used**, so no attribution is needed.
+- **Every sound in Sanctum is synthesized.** The starter banks are generated inside the app, and the church shout banks are original synthesis made for Sanctum, and the v0.3.1 modern banks (Trap Sanctuary, Drill Pulpit, Amapiano Praise, Neo-Soul Sunday, Stage FX Modern) are **synthesized by Tiberious Productions / Sanctum**. **No third-party samples are used**, so no attribution is needed.
 - **Menu → Credits** (or the **Credits & licenses** button in Sounds) lists every sound with its author and license, plus the software used: the Ableton Link SDK (bridge only; GPLv2+ or a commercial license from Ableton), ws (MIT), Vite (MIT) and TypeScript (Apache-2.0).
 
 ---
@@ -643,7 +745,7 @@ Pulpit is for Sunday morning when you need a band behind the Word and you only h
 3. Tap **EASY PLAY** on every phrase. Each tap plays the next chord of the progression. You do not need to know music theory.
 4. Swipe or tap **SHOUT 1–4** when the room gets hot; swipe or tap **WORSHIP 1–4** for softer altar moments. **Drums** and **Music** mute buttons cut those layers without stopping.
 5. **HIT** is a short stab for band hits. **STOP** cuts now; **FADE** softens out.
-6. **Full Band** vs **Organ + Drums** changes the texture. Organ run buttons add a short fill.
+6. **Full Band**, **Organ + Drums**, or **Modern 808** changes the texture. **Modern 808** (new in v0.3.1) swaps the organ for electric piano, an airy pad and a distorted 808 bass, and plays a trap-gospel drum groove with hi-hat rolls. Organ run buttons add a short fill.
 7. **STAGE** locks the screen so a pocket bump cannot leave Pulpit mid-service. Hold/unlock Stage to go back.
 8. **Follow Voice** (optional): turns the mic into an automatic trigger. It listens for syllables and pitch on the device only (nothing is uploaded). It will place hits on phrase pauses, nudge shout/worship level slowly, and suggest chords that fit the sung note. **Your taps always win.** Keep the phone away from the speakers — loud PA into the mic will confuse it and can feedback. In a very loud room, prefer Easy Play.
 

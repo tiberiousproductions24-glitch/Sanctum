@@ -60,6 +60,22 @@ export function bassTone(sr: number, midi: number, dur = 1.6, vel = 1): Channels
   return normalize([o], 0.8);
 }
 
+/** Modern distorted 808: clean sine sub + parallel mid-band drive + click (stays in key: odd harmonics only). */
+export function bass808(sr: number, midi: number, dur = 1.4, vel = 1, drive = 3.2): Channels {
+  const o = buf(sr, dur + 0.05); const f = midiHz(midi); let ph = 0;
+  for (let i = 0; i < o.length; i++) {
+    const t = i / sr;
+    const fr = f * (1 + 1.3 * Math.exp(-t / 0.02));
+    ph += 2 * Math.PI * fr / sr;
+    const e = Math.min(1, t / 0.0015) * Math.exp(-t / (dur * 0.6)) * (t > dur ? Math.max(0, 1 - (t - dur) / 0.04) : 1) * vel;
+    const x = Math.sin(ph) * e;
+    const d = Math.tanh(x * drive) - x * 0.9; // mostly the added harmonics
+    const click = t < 0.004 ? rnd() * (1 - t / 0.004) * 0.25 : 0;
+    o[i] = sat(x + 0.55 * d + click, 1.2);
+  }
+  return normalize([o], 0.85);
+}
+
 /** Soft pad / string cluster for worship. */
 export function padTone(sr: number, midi: number, dur = 3.2, vel = 0.7): Channels {
   const L = buf(sr, dur + 0.4), R = buf(sr, dur + 0.4);
@@ -76,7 +92,7 @@ export function padTone(sr: number, midi: number, dur = 3.2, vel = 0.7): Channel
 }
 
 /** Mix chord voices into one stereo buffer for immediate trigger. */
-export function renderChord(sr: number, ch: Chord, band: 'full' | 'duo', intensity: number, hit = false): Channels {
+export function renderChord(sr: number, ch: Chord, band: 'full' | 'duo' | 'modern', intensity: number, hit = false): Channels {
   const notes = voice(ch, 52, 5);
   const bass = bassNote(ch, 31);
   const dur = hit ? 0.55 : 2.6;
@@ -85,6 +101,13 @@ export function renderChord(sr: number, ch: Chord, band: 'full' | 'duo', intensi
     const n = Math.min(L.length, src[0].length);
     for (let i = 0; i < n; i++) { L[i] += src[0][i] * g; R[i] += (src[1] ? src[1][i] : src[0][i]) * g; }
   };
+  if (band === 'modern') {
+    // Modern: Rhodes + airy pad + distorted 808 bass (no organ), trap-gospel colour.
+    for (const n of notes.slice(0, 5)) mix(rhodesNote(sr, n, dur * 0.8, 0.6 + intensity * 0.25), 0.3);
+    mix(padTone(sr, notes[0] + 12, dur, 0.3 + intensity * 0.2), 0.28);
+    mix(bass808(sr, bassNote(ch, 28), dur * 0.85, 0.8 + intensity * 0.2), 0.75);
+    return normalize([L, R], 0.82);
+  }
   // Organ always (duo and full)
   const intervals = notes.map((n) => n - notes[0]);
   mix(organChord(sr, { note: notes[0], dur: dur * 0.92, chord: intervals.join(',') }), 0.55 + intensity * 0.15);
@@ -118,7 +141,7 @@ export function organRun(sr: number, fromMidi: number, semis: number, dur = 0.55
 }
 
 /** One bar drum groove at `bpm`, intensity 0..1 (shout/worship level mapping). */
-export function drumBar(sr: number, bpm: number, intensity: number, feel: 'hold' | 'worship' | 'shout' | 'praise' = 'hold'): Channels {
+export function drumBar(sr: number, bpm: number, intensity: number, feel: 'hold' | 'worship' | 'shout' | 'praise' | 'modern' = 'hold'): Channels {
   const beats = 4; const barSec = beats * 60 / bpm; const L = buf(sr, barSec), R = buf(sr, barSec);
   const place = (src: Channels, beat: number, g: number) => {
     const pos = Math.floor(beat * 60 / bpm * sr);
@@ -133,7 +156,18 @@ export function drumBar(sr: number, bpm: number, intensity: number, feel: 'hold'
   const hh = hat(sr, { decay: 0.04 + intensity * 0.02 });
   const oh = hat(sr, { decay: 0.22, fc: 7500 });
   const cl = clap(sr, { decay: 0.18 });
-  if (feel === 'hold' || feel === 'worship') {
+  if (feel === 'modern') {
+    // Trap-gospel groove (half-time feel): clicky kick, clap+snare on beat 3, 1/8 hats with 1/32 + triplet rolls.
+    const k2 = kick(sr, { f0: 210, f1: 50, decay: 0.2, click: 0.9, drive: 2.6 });
+    place(k2, 0, 0.9); place(k2, 1.75, 0.6); place(k2, 2.5, 0.7);
+    if (intensity > 0.4) place(k2, 3.25, 0.55);
+    place(s, 2, 0.6); place(cl, 2, 0.6);
+    if (intensity > 0.6) place(s, 3.75, 0.25);
+    for (let b = 0; b < 8; b++) if (b !== 3 && b !== 7) place(hh, b * 0.5, 0.3 + (b % 2 ? 0 : 0.05));
+    for (let r = 0; r < 4; r++) place(hh, 1.5 + r * 0.125, 0.18 + r * 0.05);       // 1/32 roll into beat 3
+    for (let r = 0; r < 3; r++) place(hh, 3.5 + r / 6, 0.2 + r * 0.06);            // triplet roll at the end
+    if (intensity > 0.5) place(oh, 3.5, 0.18);
+  } else if (feel === 'hold' || feel === 'worship') {
     place(k, 0, 0.55 + intensity * 0.2);
     if (intensity > 0.25) place(k, 2, 0.4);
     if (intensity > 0.55) place(s, 2, 0.35);

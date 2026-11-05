@@ -77,3 +77,12 @@ All times Pacific (PDT).
 - Built `src/chords/`: detect (reuses Pulpit chroma), live mic detector, offline import, pluggable source adapters (file/url/church-banks + SC/Spotify/Apple/Bandcamp stubs), theory-ext (12 keys, diatonic, relatives, gospel/jazz subs, Markov; Beat Theory schema — maps not found on disk), Chords sheet UI + optional Lampstand push via `screen.ts`.
 - Tests: `npm run chords:test`; screenshots `screenshots/chords-*.png`. Menu hookup edits in `src/ui/sheets.ts` left uncommitted (concurrent modern-banks edits in that file).
 - Recommendation: ship on-device chroma+templates+Viterbi for live/import; keep large-vocab BTC/madmom as future server option.
+
+## Thu Nov 5 2026 09:05 PST — v0.3.1 Modern banks (Trap / Drill / Amapiano / Neo-Soul / Stage FX) + Pulpit Modern 808
+- Research (web, functional/sonic reference only): `docs/modern-sound-research.md`, covering gospel trap 808 design (clean sub + parallel mid drive), drill 3-3-2 hats and sliding 808s, the amapiano FM log drum recipe, neo-soul 9/11/13sus voicings with a common top tone, Hammond drawbars + Leslie growl, supersaw/reese, riser/impact/tape-stop, and choir formants.
+- `content/church-banks/_build/synth_modern.py` (numpy/scipy, 48 kHz) renders 5 banks × 16 pads = 80 original sounds (WAV + OGG q5) and `_build/banks_modern.json`. `make_manifest.py` merges them (group `modern`, bank descriptions, key/BPM). Mastering: 4× true peak ≤ −1.05 dBTP on WAV and decoded OGG, one-shot lead silence trimmed (0–1 ms; risers and reverse FX keep their length), loops sample-exact. Pitches verified by FFT (808 F 43.8 Hz, log drum D 73.4 Hz, slide ends on D2).
+- App: manifest adapter carries group/key/bpm/description; first run puts Trap Sanctuary in G and Drill Pulpit in H; ♫ Sounds has a "Modern banks" section with NEW badges. Pulpit **Modern 808** band (Rhodes + pad + distorted 808 + trap groove).
+- Smoke 38/38 (7 new checks). pulpit-test PASS. Demo `release/Sanctum-modern-banks-demo.mp3` (36.6 s, ≈ −9.5 LUFS, −1.5 dBTP).
+- APK `release/Sanctum-v0.3.1.apk` (versionCode 4, 11.3 MB, v2 signature CN=Sanctum, O=Tiberious Productions). Web deployed to https://tiberious-sanctum.netlify.app (200).
+- Release + deploy were built from a clean git worktree of the v0.3.1 commit. That commit includes the already-committed Chords and Acrylic Kit work, but not the uncommitted edits from the concurrent session (e.g. the Chords menu hookup in `src/ui/sheets.ts`), which were left untouched in the working tree.
+
