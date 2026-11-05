@@ -1,5 +1,13 @@
 # Sanctum Prototype — Progress Log
 
+## Thu Nov 5 2026 09:12 PST — v0.3.2 Chords menu hookup + signed APK
+- Kept the uncommitted `src/ui/sheets.ts` change from the concurrent Chords session: imports `ChordsUI`, adds **Menu → Chords**, and `chords()` opens the sheet. No other uncommitted half-finished work was present.
+- Smoke: 3 new checks (menu lists Chords, opens `#sanctum-chords` with title Chords, no console errors). **41/41** pass. `pulpit-test` PASS. `chords:test` 32/32.
+- Neon screenshots: `screenshots/phone-neon-chords.png`, `screenshots/tablet-landscape-neon-chords.png` (seeded live Bbmaj7 state).
+- versionName 0.3.2 / versionCode 5. Signed APK `release/Sanctum-v0.3.2.apk` (~10.8 MB, apksigner v2 OK, CN=Sanctum, O=Tiberious Productions).
+- Web rebuild deployed to https://tiberious-sanctum.netlify.app (HTTP 200, lock screen `data-screen=locked`).
+- MANUAL § Chords already documented Menu → Chords; left wording, confirmed it matches the wired button.
+
 All times Pacific (PDT).
 
 ## Thu Nov 5 2026 — Acrylic Kit pad skin (Stage Glass)

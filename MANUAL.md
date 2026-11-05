@@ -760,7 +760,7 @@ Pulpit tempo follows the project tempo and Ableton Link when Link is on.
 
 ## Chords — live detection & import
 
-Open **Menu → Chords** (Sanctum Chords sheet).
+Open **Menu → Chords** (tap **⌘ menu** / **MENU**, then **Chords**). The Chords sheet has three tabs: **Live**, **Import**, and **Theory**.
 
 ### Live
 1. Tap **Start mic / line-in** (needs HTTPS / secure context and mic permission).

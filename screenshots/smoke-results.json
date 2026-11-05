@@ -1,5 +1,5 @@
 {
-  "at": "Thu Nov 05 2026 09:03:26 GMT-0800 (Pacific Standard Time)",
+  "at": "Thu Nov 05 2026 09:10:42 GMT-0800 (Pacific Standard Time)",
   "results": [
     {
       "name": "locked: only the lock screen mounts (no pads, no app/engine)",
@@ -39,7 +39,7 @@
     {
       "name": "audio engine starts (render thread running)",
       "pass": true,
-      "info": "{\"mode\":\"worklet\",\"sr\":48000,\"state\":\"running\",\"t\":0.10666666666666667,\"frame\":4608,\"lat\":{\"base\":0.010666666666666666,\"output\":0.032,\"sampleRate\":48000,\"hint\":\"interactive\",\"mode\":\"worklet\",\"state\":\"running\"}}"
+      "info": "{\"mode\":\"worklet\",\"sr\":48000,\"state\":\"running\",\"t\":0.256,\"frame\":8704,\"lat\":{\"base\":0.010666666666666666,\"output\":0.032,\"sampleRate\":48000,\"hint\":\"interactive\",\"mode\":\"worklet\",\"state\":\"running\"}}"
     },
     {
       "name": "AudioWorklet engine active",
@@ -74,17 +74,17 @@
     {
       "name": "modern banks: pad 1 of each bank plays (render-thread voices/peak)",
       "pass": true,
-      "info": "[[\"Kick Punch\",1,0.329],[\"Drill Kick\",2,0.734],[\"Piano Kick\",3,0.998],[\"Brush Kick\",4,0.594],[\"Impact Boom\",4,0.57]]"
+      "info": "[[\"Kick Punch\",1,0.362],[\"Drill Kick\",2,0.748],[\"Piano Kick\",3,0.912],[\"Brush Kick\",4,0.997],[\"Impact Boom\",4,0.893]]"
     },
     {
       "name": "touch Trap Sanctuary pad 9 (808 F Dist) plays",
       "pass": true,
-      "info": "{\"name\":\"808 F Dist\",\"voices\":2,\"peak\":0.4021383884361259}"
+      "info": "{\"name\":\"808 F Dist\",\"voices\":2,\"peak\":0.42306075119140835}"
     },
     {
       "name": "pad tap produces audio (worklet voices/peak)",
       "pass": true,
-      "info": "{\"voices\":3,\"late\":0,\"peak\":0.3762257123064995,\"frame\":107008,\"queued\":0}"
+      "info": "{\"voices\":3,\"late\":0,\"peak\":0.42136700533178956,\"frame\":127488,\"queued\":0}"
     },
     {
       "name": "multi-touch (2 pads) triggers",
@@ -94,7 +94,7 @@
     {
       "name": "sequencer plays pattern",
       "pass": true,
-      "info": "{\"playing\":true,\"tick\":2125.5679999999993,\"voices\":6,\"late\":0,\"events\":14}"
+      "info": "{\"playing\":true,\"tick\":2141.2693333333336,\"voices\":5,\"late\":0,\"events\":14}"
     },
     {
       "name": "no late (unscheduled) events",
@@ -114,12 +114,12 @@
     {
       "name": "loop pad launches on next bar, tempo-synced rate",
       "pass": true,
-      "info": "{\"at\":5.388695652173913,\"now\":5.12,\"startRel\":0,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
+      "info": "{\"at\":5.804695652173914,\"now\":5.664,\"startRel\":8.881784197001252e-16,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
     },
     {
       "name": "Timing Lab tap test measures input offset and sets recording correction",
       "pass": true,
-      "info": "{\"off\":28.189000000004683,\"jit\":3.44098172089955,\"comp\":28.2}"
+      "info": "{\"off\":25.815666666664683,\"jit\":0.6992372550547997,\"comp\":25.8}"
     },
     {
       "name": "autosave restores project on reload",
@@ -129,17 +129,17 @@
     {
       "name": "Link: bridge connected, peer visible, tempo follows peer (97)",
       "pass": true,
-      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":-1.2797877321910394,\"rtt\":500.09999999403954,\"chip\":\"LINK1\"}"
+      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":-3.49236527014178,\"rtt\":76.60000002384186,\"chip\":\"LINK1\"}"
     },
     {
       "name": "Link: phase error < 5 ms",
       "pass": true,
-      "info": "offset=-1.28 ms"
+      "info": "offset=-3.49 ms"
     },
     {
       "name": "Link: app tempo change propagates to the other peer",
       "pass": true,
-      "info": "[peer] t=1793898183772 peers=1 bpm=111.00 beat=56.503 phase=0.503"
+      "info": "[peer] t=1793898620658 peers=1 bpm=111.00 beat=58.181 phase=2.181"
     },
     {
       "name": "Pulpit screen opens",
@@ -149,7 +149,7 @@
     {
       "name": "Easy Play advances chords and produces audio",
       "pass": true,
-      "info": "{\"before\":{\"idx\":0,\"chord\":null,\"peak\":0,\"voices\":0},\"afterEasy\":{\"idx\":1,\"chord\":\"Ab9\",\"peak\":0.624386903643608,\"voices\":2,\"playing\":true}}"
+      "info": "{\"before\":{\"idx\":0,\"chord\":null,\"peak\":0,\"voices\":0},\"afterEasy\":{\"idx\":1,\"chord\":\"Ab9\",\"peak\":0.4985175921958311,\"voices\":2,\"playing\":true}}"
     },
     {
       "name": "Pulpit key change lands on beat",
@@ -180,6 +180,21 @@
       "name": "Pulpit Modern band: 808 + trap groove plays",
       "pass": true,
       "info": "{\"band\":\"modern\",\"feel\":\"modern:120:0.50\",\"playing\":true,\"voices\":2,\"btn\":true}"
+    },
+    {
+      "name": "Menu lists Chords",
+      "pass": true,
+      "info": ""
+    },
+    {
+      "name": "Menu → Chords opens the Chords screen",
+      "pass": true,
+      "info": "{\"ok\":true,\"el\":true,\"title\":\"Chords\"}"
+    },
+    {
+      "name": "Chords screen opens with no console errors",
+      "pass": true,
+      "info": ""
     },
     {
       "name": "a11y: 16 named pads + labelled step checkboxes + live announcements",

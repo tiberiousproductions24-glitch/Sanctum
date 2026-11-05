@@ -1,5 +1,20 @@
 # Sanctum Changelog
 
+## v0.3.2 — 2026-11-05 (America/Los_Angeles)
+
+### Chords menu hookup
+- **Menu → Chords** opens the Sanctum Chords sheet (Live / Import / Theory). The Chords feature shipped in an earlier commit; this release wires the menu button that was left uncommitted.
+- Live: on-device mic/line-in chromagram chord detection (analysis only — never routed to speakers), confidence, key, Roman numerals, history, likely-next chords.
+- Import: analyse a file, direct audio URL, or Sanctum church-bank loop into a timestamped chart (legal sources only).
+- Theory: diatonic chords, relatives, gospel/jazz moves, Markov next-chord hints.
+- Optional **Show chords on screen** pushes the current chord to Lampstand.
+
+### Tests / packaging
+- Smoke adds 3 checks (Menu lists Chords, Menu → Chords opens `#sanctum-chords`, no console errors) → **41/41**.
+- Screenshots: `screenshots/phone-neon-chords.png`, `screenshots/tablet-landscape-neon-chords.png`.
+- versionName 0.3.2 / versionCode 5. APK `release/Sanctum-v0.3.2.apk`. Web at https://tiberious-sanctum.netlify.app.
+
+
 ## v0.3.1 — 2026-11-05 (America/Los_Angeles)
 
 ### Modern banks (new)

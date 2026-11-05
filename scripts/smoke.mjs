@@ -318,6 +318,50 @@ try {
     await page.evaluate(() => { window.__sanctum.app.pulpit.player.setStageLock(false); window.__sanctum.app.pulpit.close(); });
   }
 
+  // ---------- Chords (Menu → Chords) ----------
+  {
+    const errBefore = errors.length;
+    await page.evaluate(() => { window.__sanctum.sheets.close(); window.__sanctum.sheets.menu(); });
+    await sleep(200);
+    const hasBtn = await page.evaluate(() => [...document.querySelectorAll('.menu-grid button')].some((b) => b.textContent === 'Chords'));
+    ok('Menu lists Chords', hasBtn);
+    await page.evaluate(() => [...document.querySelectorAll('.menu-grid button')].find((b) => b.textContent === 'Chords')?.click());
+    await sleep(400);
+    const opened = await page.evaluate(() => {
+      const el = document.getElementById('sanctum-chords');
+      const title = document.querySelector('.sheet h2')?.textContent || '';
+      return { ok: !!el && title === 'Chords', el: !!el, title };
+    });
+    ok('Menu → Chords opens the Chords screen', opened.ok, JSON.stringify(opened));
+    const chordErrs = errors.slice(errBefore).filter((e) => !/favicon|Failed to load resource.*sw\.js/i.test(e));
+    ok('Chords screen opens with no console errors', chordErrs.length === 0, chordErrs.slice(0, 5).join(' | '));
+    // Neon phone screenshot with seeded live state
+    await page.evaluate(() => {
+      const a = window.__sanctum.app; a.p.theme = 'neon'; a.emit('theme');
+      const c = window.__sanctum.sheets.chordsUI;
+      c.state = {
+        current: { label: 'Bbmaj7', root: 10, quality: 'maj7', bass: 10, confidence: 0.91, start: 0, end: 1, roman: 'Imaj7' },
+        history: [
+          { label: 'Cm7', root: 0, quality: 'm7', bass: 0, confidence: 0.8, start: 0, end: 1 },
+          { label: 'F7', root: 5, quality: '7', bass: 5, confidence: 0.85, start: 0, end: 1 },
+          { label: 'Bb', root: 10, quality: 'maj', bass: 10, confidence: 0.88, start: 0, end: 1 },
+        ],
+        key: { tonic: 10, mode: 'major', name: 'Bb', confidence: 0.82 },
+        level: 0.12,
+        nextLikely: [
+          { label: 'Eb', roman: 'IV', p: 0.28 },
+          { label: 'F', roman: 'V', p: 0.22 },
+          { label: 'Gm', roman: 'vi', p: 0.18 },
+        ],
+      };
+      c.tab = 'live';
+      c.render();
+    });
+    await sleep(250);
+    await shoot(page, 'phone-neon-chords');
+    await page.evaluate(() => window.__sanctum.sheets.close());
+  }
+
   // accessibility tree (what TalkBack/VoiceOver get): named pads, step checkboxes, live region, radio theme picker
   {
     const snap = await page.accessibility.snapshot({ interestingOnly: true });
@@ -337,7 +381,16 @@ try {
     await tp.evaluate(() => { const a = window.__sanctum.app; a.play(); });
     await sleep(900);
     for (const t of themes) { await setTheme(tp, t); await shoot(tp, `${name}-${t}`); }
-    if (name === 'tablet-landscape') { await setTheme(tp, 'neon'); await tp.evaluate(() => { window.__sanctum.view.setBank(6); window.__sanctum.sheets.sounds(); }); await sleep(300); await tp.evaluate(() => document.querySelector('.bankitem[data-bank="ext.trap-sanctuary"]')?.scrollIntoView({ block: 'start' })); await shoot(tp, `${name}-neon-bank-picker-modern`); await tp.evaluate(() => { window.__sanctum.sheets.close(); }); await shoot(tp, `${name}-neon-trap-sanctuary`); await tp.evaluate(() => window.__sanctum.view.setBank(0)); }
+    if (name === 'tablet-landscape') { await setTheme(tp, 'neon'); await tp.evaluate(() => { window.__sanctum.view.setBank(6); window.__sanctum.sheets.sounds(); }); await sleep(300); await tp.evaluate(() => document.querySelector('.bankitem[data-bank="ext.trap-sanctuary"]')?.scrollIntoView({ block: 'start' })); await shoot(tp, `${name}-neon-bank-picker-modern`); await tp.evaluate(() => { window.__sanctum.sheets.close(); }); await shoot(tp, `${name}-neon-trap-sanctuary`); await tp.evaluate(() => window.__sanctum.view.setBank(0));
+      await tp.evaluate(() => { window.__sanctum.sheets.close(); window.__sanctum.sheets.chords(); }); await sleep(300);
+      await tp.evaluate(() => {
+        const c = window.__sanctum.sheets.chordsUI;
+        c.state = { current: { label: 'Bbmaj7', root: 10, quality: 'maj7', bass: 10, confidence: 0.91, start: 0, end: 1, roman: 'Imaj7' }, history: [{ label: 'Cm7', root: 0, quality: 'm7', bass: 0, confidence: 0.8, start: 0, end: 1 }, { label: 'F7', root: 5, quality: '7', bass: 5, confidence: 0.85, start: 0, end: 1 }], key: { tonic: 10, mode: 'major', name: 'Bb', confidence: 0.82 }, level: 0.12, nextLikely: [{ label: 'Eb', roman: 'IV', p: 0.28 }, { label: 'F', roman: 'V', p: 0.22 }] };
+        c.tab = 'live'; c.render();
+      });
+      await shoot(tp, `${name}-neon-chords`);
+      await tp.evaluate(() => window.__sanctum.sheets.close());
+    }
     if (name === 'tablet-landscape') { await setTheme(tp, 'warm'); await tp.evaluate(() => window.__sanctum.sheets.timingLab()); await shoot(tp, `${name}-warm-timing-lab`); }
     await tp.evaluate(() => window.__sanctum.app.stop());
     await tp.close();

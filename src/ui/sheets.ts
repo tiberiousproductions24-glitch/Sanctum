@@ -7,6 +7,7 @@ import { CC_TARGETS, type CcTarget } from '../sync/midi';
 import type { View } from './view';
 import { timingLabBody } from './timinglab';
 import { SharePanel } from './sharepanel';
+import { ChordsUI } from '../chords/ui';
 import { LockScreen, type GateScreen } from '../license/gate';
 import { clearLicense } from '../license/license';
 import { storageKind } from '../license/store';
@@ -21,8 +22,10 @@ export class Sheets {
   private updater: (() => void) | null = null;
   private unsub: (() => void) | null = null;
   private sharePanel: SharePanel;
+  private chordsUI: ChordsUI;
   constructor(private app: App, private view: View) {
     this.sharePanel = new SharePanel(app, view, this);
+    this.chordsUI = new ChordsUI(app, (title, body, update) => this.open(title, body, update));
     app.on((w) => { if (this.updater && (w === 'stats' || w === 'link' || w === 'midi' || w === 'latency' || w === 'tempo' || w === 'transport')) this.updater(); });
   }
 
@@ -40,7 +43,7 @@ export class Sheets {
   menu() {
     const items: [string, () => void][] = [
       ['Tempo & Sequencer', () => this.transport()], ['Note Repeat', () => this.noteRepeat()], ['Pad Editor', () => this.padEditor(this.app.p.selectedPad)],
-      ['Pulpit (preacher backup)', () => this.view.openPulpit()], ['Share / Post', () => this.share()], ['Sounds', () => this.sounds()], ['Timing Lab', () => this.timingLab()], ['Link & MIDI', () => this.sync()],
+      ['Pulpit (preacher backup)', () => this.view.openPulpit()], ['Chords', () => this.chords()], ['Share / Post', () => this.share()], ['Sounds', () => this.sounds()], ['Timing Lab', () => this.timingLab()], ['Link & MIDI', () => this.sync()],
       ['Settings & Theme', () => this.settings()], ['Credits', () => this.credits()], ['Help', () => this.help()], ...(this.app.isAdmin ? [['Admin', () => this.admin()] as [string, () => void]] : []),
     ];
     this.open('Sanctum', h('div', { class: 'menu-grid' }, items.map(([l, f]) => h('button', { onclick: f }, l))));
@@ -299,6 +302,9 @@ export class Sheets {
       () => { update(); });
     const prevClose = this.unsub; this.unsub = () => { offs(); offCC(); offBle(); a.midiLearn = null; prevClose?.(); };
   }
+
+  /** Chord detection — live mic, import, theory. */
+  chords() { this.chordsUI.open(); }
 
   /** Share / Post: screenshot, promo card, clip recording → native share sheet / Web Share / X / Facebook / download. */
   share() { this.sharePanel.open(); }
