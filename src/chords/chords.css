@@ -1,0 +1,63 @@
+/* Sanctum Chords sheet — self-contained so concurrent pad-visual work can keep editing styles.css. */
+.chords-ui { display: flex; flex-direction: column; gap: 12px; min-height: 60vh; }
+.chords-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.chords-tabs button {
+  flex: 1; min-width: 72px; padding: 10px 8px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+  font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: 12px;
+}
+.chords-tabs button.on { outline: 2px solid var(--accent, #FF2D95); background: color-mix(in srgb, var(--accent, #FF2D95) 18%, var(--surface)); }
+.chords-live-chord {
+  text-align: center; padding: 18px 8px 8px;
+  background: color-mix(in srgb, var(--surface) 80%, #000); border-radius: 14px;
+  border: 1px solid var(--line);
+}
+.chords-live-chord .big {
+  font-size: clamp(48px, 14vw, 84px); font-weight: 800; letter-spacing: .03em; line-height: 1;
+}
+.chords-live-chord .meta { color: var(--muted); font-size: 14px; margin-top: 6px; min-height: 1.3em; }
+.chords-conf {
+  height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; margin: 8px auto 0; max-width: 220px;
+}
+.chords-conf > i { display: block; height: 100%; background: var(--accent, #FF2D95); width: 0%; transition: width .15s; }
+.chords-history {
+  display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 8px; scroll-snap-type: x proximity;
+}
+.chords-history .hitem {
+  flex: 0 0 auto; scroll-snap-align: start; padding: 8px 12px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--line); font-weight: 700; font-size: 15px;
+}
+.chords-next { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.chords-next .pill {
+  padding: 8px 12px; border-radius: 999px; background: color-mix(in srgb, var(--gold, #D4A84B) 18%, var(--surface));
+  border: 1px solid var(--line); font-weight: 700;
+}
+.chords-chart {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px; line-height: 1.45; white-space: pre-wrap;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+  max-height: 280px; overflow: auto;
+}
+.chords-chart .cursor-line { background: color-mix(in srgb, var(--accent, #FF2D95) 28%, transparent); }
+.chords-import-grid { display: grid; gap: 8px; }
+.chords-import-grid .src {
+  text-align: left; padding: 12px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--text);
+}
+.chords-import-grid .src b { display: block; margin-bottom: 4px; }
+.chords-import-grid .src small { color: var(--muted); }
+.chords-theory { display: grid; gap: 8px; }
+.chords-theory .kv { display: grid; grid-template-columns: 120px 1fr; gap: 4px 10px; font-size: 14px; }
+.chords-theory .dia { display: flex; flex-wrap: wrap; gap: 6px; }
+.chords-theory .dia span {
+  padding: 6px 10px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); font-weight: 600;
+}
+.chords-level {
+  height: 8px; border-radius: 99px; background: var(--line); overflow: hidden;
+}
+.chords-level > i { display: block; height: 100%; background: var(--ok, #3DDC84); width: 0%; }
+.chords-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chords-row input[type="text"], .chords-row input[type="url"], .chords-row input[type="file"] {
+  flex: 1; min-width: 140px; padding: 10px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--text);
+}

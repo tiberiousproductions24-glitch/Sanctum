@@ -70,3 +70,10 @@ All times Pacific (PDT).
 - **Follow Voice**: on-device cadence (onset/phrase) + YIN pitch → hits, chord pick, level hysteresis, tempo hint when not Linked; mic never to speakers; graceful without permission. Tests with synthetic AM voice in `pulpit-test.mjs`.
 - Also: pad decay (worklet envelope), velocity feel presets, song-mode pattern chain, Pulpit follows Link tempo, CREDITS.md, MANUAL Pulpit section, CHANGELOG.md. APK Sanctum-v0.3.0 (versionCode 3).
 - IP: no Whoop Triggerz name/branding/audio in UI; research doc keeps factual attribution. User-facing "Whoop" feel labels renamed to Preaching hold.
+
+## Thu Nov 5 2026 — Chords: live detection, import, theory, Lampstand push
+- Research: `docs/chord-detection-research.md` (chromagram/HPCP + templates + HMM/Viterbi, beat-synchronous chroma, NNLS/Chordino, Essentia.js, Meyda, Basic Pitch, CREPE, madmom, BTC) with on-device vs server recommendation.
+- Import sources: `docs/chord-import-sources.md` ranked quality table + adapter status; Spotify audio-features/analysis confirmed deprecated for new apps (27 Nov 2024).
+- Built `src/chords/`: detect (reuses Pulpit chroma), live mic detector, offline import, pluggable source adapters (file/url/church-banks + SC/Spotify/Apple/Bandcamp stubs), theory-ext (12 keys, diatonic, relatives, gospel/jazz subs, Markov; Beat Theory schema — maps not found on disk), Chords sheet UI + optional Lampstand push via `screen.ts`.
+- Tests: `npm run chords:test`; screenshots `screenshots/chords-*.png`. Menu hookup edits in `src/ui/sheets.ts` left uncommitted (concurrent modern-banks edits in that file).
+- Recommendation: ship on-device chroma+templates+Viterbi for live/import; keep large-vocab BTC/madmom as future server option.

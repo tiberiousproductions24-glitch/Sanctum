@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "Sanctum — MPC-style touch drum machine (PWA prototype)",
+  "description": "Sanctum \u2014 MPC-style touch drum machine (PWA prototype)",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
@@ -25,7 +25,9 @@
     "license:admin": "node scripts/license.mjs admin",
     "license:keygen": "node scripts/license.mjs keygen",
     "license:verify": "node scripts/license.mjs verify",
-    "android:assets": "node scripts/android-assets.mjs && npx capacitor-assets generate --android --iconBackgroundColor \"#07070C\" --iconBackgroundColorDark \"#07070C\" --splashBackgroundColor \"#07070C\" --splashBackgroundColorDark \"#07070C\" && node scripts/compress-splash.mjs"
+    "android:assets": "node scripts/android-assets.mjs && npx capacitor-assets generate --android --iconBackgroundColor \"#07070C\" --iconBackgroundColorDark \"#07070C\" --splashBackgroundColor \"#07070C\" --splashBackgroundColorDark \"#07070C\" && node scripts/compress-splash.mjs",
+    "chords:test": "node --import ./scripts/ts-ext-resolve.mjs scripts/chords-test.mjs",
+    "chords:shots": "node scripts/chords-shots.mjs"
   },
   "devDependencies": {
     "@capacitor/assets": "^4.0.0",

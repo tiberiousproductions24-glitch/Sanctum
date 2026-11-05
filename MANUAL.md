@@ -654,3 +654,28 @@ Pulpit tempo follows the project tempo and Ableton Link when Link is on.
 ### What Follow Voice can and cannot do
 - It estimates speaking rate and pitch from the microphone. It is **not** a cloud transcription service and does not understand words.
 - Accuracy drops with distant mics, heavy reverb, drums in the mic, or several people talking. Use the sensitivity slider; if it misbehaves, turn Follow Voice off and use Easy Play.
+
+
+## Chords — live detection & import
+
+Open **Menu → Chords** (Sanctum Chords sheet).
+
+### Live
+1. Tap **Start mic / line-in** (needs HTTPS / secure context and mic permission).
+2. Sanctum listens with Web Audio analysis only — the mic is **never** routed to the speakers.
+3. The big label shows the current chord (maj, min, 7, maj7, m7, sus2/4, dim, aug; slash bass when clear). Confidence, key, Roman numeral, scrolling history, and the top likely next chords update as you play.
+4. Smoothing (causal HMM + hold frames) reduces flicker on stage.
+
+### Import (legal sources only)
+- **File upload:** MP3, WAV, AAC/M4A, FLAC (FLAC/AAC may fail on some Android WebViews — use WAV/MP3 then).
+- **Direct audio URL:** must allow CORS download; blocked URLs show a clear error.
+- **Church banks:** analyse Sanctum’s own royalty-cleared loops (key/BPM from the manifest).
+- **Metadata adapters:** SoundCloud oEmbed, Spotify (metadata only — audio-features/analysis unavailable to new apps since Nov 2024), Apple Music (metadata), Bandcamp (info: use file upload for purchases you own).
+- **Not available:** YouTube and ripping any streaming service.
+- Offline analysis builds a timestamped chart (grouped by bar when tempo is detected), optional synced playback cursor, export to text/JSON.
+
+### Theory
+Shows key, relative major/minor, diatonic chords, Roman numeral for the current chord, Markov likely-next chords, and gospel/jazz moves (tritone sub, ii–V–I, I–vi–ii–V, passing dim, backdoor). Beat Theory maps can drop in via `content/theory/beat-theory-maps.json` (schema in `src/chords/theory-ext.ts`).
+
+### Show chords on screen
+Toggle **Show chords on screen** to push the current (+ next) chord to Lampstand through the existing screen bridge (`src/integrations/screen.ts`).
