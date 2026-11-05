@@ -1,5 +1,5 @@
 {
-  "at": "Thu Nov 05 2026 08:32:05 GMT-0800 (Pacific Standard Time)",
+  "at": "Thu Nov 05 2026 09:03:26 GMT-0800 (Pacific Standard Time)",
   "results": [
     {
       "name": "locked: only the lock screen mounts (no pads, no app/engine)",
@@ -49,22 +49,52 @@
     {
       "name": "church manifest banks loaded into C–F",
       "pass": true,
-      "info": "{\"sources\":[\"foundation\",\"stagefx\",\"ext.shout-guitar\",\"ext.shout-organ\",\"ext.shout-bass\",\"ext.shout-percussion\",null,null],\"load\":{\"ext.shout-guitar\":\"ready\",\"ext.shout-organ\":\"ready\",\"ext.shout-bass\":\"ready\",\"ext.shout-percussion\":\"ready\"},\"samples\":98}"
+      "info": "{\"sources\":[\"foundation\",\"stagefx\",\"ext.shout-guitar\",\"ext.shout-organ\",\"ext.shout-bass\",\"ext.shout-percussion\",\"ext.trap-sanctuary\",\"ext.drill-pulpit\"],\"load\":{\"ext.shout-guitar\":\"ready\",\"ext.shout-organ\":\"ready\",\"ext.shout-bass\":\"ready\",\"ext.shout-percussion\":\"ready\",\"ext.trap-sanctuary\":\"ready\",\"ext.drill-pulpit\":\"ready\"},\"samples\":130}"
+    },
+    {
+      "name": "modern banks: 5 banks × 16 pads present (group=modern)",
+      "pass": true,
+      "info": "Trap Sanctuary:16, Drill Pulpit:16, Amapiano Praise:16, Neo-Soul Sunday:16, Stage FX Modern:16"
+    },
+    {
+      "name": "modern banks: all 80 sounds decode + register (none silent, none > -0.9 dBFS)",
+      "pass": true,
+      "info": "[[\"Trap Sanctuary\",\"ready\",16,0,0],[\"Drill Pulpit\",\"ready\",16,0,0],[\"Amapiano Praise\",\"ready\",16,0,0],[\"Neo-Soul Sunday\",\"ready\",16,0,0],[\"Stage FX Modern\",\"ready\",16,0,0]]"
+    },
+    {
+      "name": "modern banks: tempo-synced loops carry BPM and decode to exact loop length",
+      "pass": true,
+      "info": "[[\"Trap Sanctuary\",3,0],[\"Drill Pulpit\",4,0],[\"Amapiano Praise\",3,0],[\"Neo-Soul Sunday\",4,0],[\"Stage FX Modern\",0,0]]"
+    },
+    {
+      "name": "first run puts Trap Sanctuary in G and Drill Pulpit in H",
+      "pass": true,
+      "info": "[\"ext.trap-sanctuary\",\"ext.drill-pulpit\"]"
+    },
+    {
+      "name": "modern banks: pad 1 of each bank plays (render-thread voices/peak)",
+      "pass": true,
+      "info": "[[\"Kick Punch\",1,0.329],[\"Drill Kick\",2,0.734],[\"Piano Kick\",3,0.998],[\"Brush Kick\",4,0.594],[\"Impact Boom\",4,0.57]]"
+    },
+    {
+      "name": "touch Trap Sanctuary pad 9 (808 F Dist) plays",
+      "pass": true,
+      "info": "{\"name\":\"808 F Dist\",\"voices\":2,\"peak\":0.4021383884361259}"
     },
     {
       "name": "pad tap produces audio (worklet voices/peak)",
       "pass": true,
-      "info": "{\"voices\":1,\"late\":0,\"peak\":0.30666743544220926,\"frame\":16896,\"queued\":0}"
+      "info": "{\"voices\":3,\"late\":0,\"peak\":0.3762257123064995,\"frame\":107008,\"queued\":0}"
     },
     {
       "name": "multi-touch (2 pads) triggers",
       "pass": true,
-      "info": "voices=2"
+      "info": "voices=4"
     },
     {
       "name": "sequencer plays pattern",
       "pass": true,
-      "info": "{\"playing\":true,\"tick\":2125.5679999999993,\"voices\":5,\"late\":0,\"events\":14}"
+      "info": "{\"playing\":true,\"tick\":2125.5679999999993,\"voices\":6,\"late\":0,\"events\":14}"
     },
     {
       "name": "no late (unscheduled) events",
@@ -84,12 +114,12 @@
     {
       "name": "loop pad launches on next bar, tempo-synced rate",
       "pass": true,
-      "info": "{\"at\":3.3940289855072465,\"now\":3.0613333333333332,\"startRel\":0,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
+      "info": "{\"at\":5.388695652173913,\"now\":5.12,\"startRel\":0,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
     },
     {
       "name": "Timing Lab tap test measures input offset and sets recording correction",
       "pass": true,
-      "info": "{\"off\":24.55466666368622,\"jit\":0.337388203538343,\"comp\":24.6}"
+      "info": "{\"off\":28.189000000004683,\"jit\":3.44098172089955,\"comp\":28.2}"
     },
     {
       "name": "autosave restores project on reload",
@@ -99,17 +129,17 @@
     {
       "name": "Link: bridge connected, peer visible, tempo follows peer (97)",
       "pass": true,
-      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":0.23242859226752838,\"rtt\":365.79999999701977,\"chip\":\"LINK1\"}"
+      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":-1.2797877321910394,\"rtt\":500.09999999403954,\"chip\":\"LINK1\"}"
     },
     {
       "name": "Link: phase error < 5 ms",
       "pass": true,
-      "info": "offset=0.23 ms"
+      "info": "offset=-1.28 ms"
     },
     {
       "name": "Link: app tempo change propagates to the other peer",
       "pass": true,
-      "info": "[peer] t=1793896314214 peers=1 bpm=111.00 beat=49.193 phase=1.193"
+      "info": "[peer] t=1793898183772 peers=1 bpm=111.00 beat=56.503 phase=0.503"
     },
     {
       "name": "Pulpit screen opens",
@@ -119,7 +149,7 @@
     {
       "name": "Easy Play advances chords and produces audio",
       "pass": true,
-      "info": "{\"before\":{\"idx\":0,\"chord\":null,\"peak\":0,\"voices\":0},\"afterEasy\":{\"idx\":1,\"chord\":\"Ab9\",\"peak\":0.623765105009079,\"voices\":2,\"playing\":true}}"
+      "info": "{\"before\":{\"idx\":0,\"chord\":null,\"peak\":0,\"voices\":0},\"afterEasy\":{\"idx\":1,\"chord\":\"Ab9\",\"peak\":0.624386903643608,\"voices\":2,\"playing\":true}}"
     },
     {
       "name": "Pulpit key change lands on beat",
@@ -145,6 +175,11 @@
       "name": "Pulpit autosaves custom progression",
       "pass": true,
       "info": "[{\"c\":\"I\"},{\"c\":\"IV\"},{\"c\":\"V7\"},{\"c\":\"I\"}]"
+    },
+    {
+      "name": "Pulpit Modern band: 808 + trap groove plays",
+      "pass": true,
+      "info": "{\"band\":\"modern\",\"feel\":\"modern:120:0.50\",\"playing\":true,\"voices\":2,\"btn\":true}"
     },
     {
       "name": "a11y: 16 named pads + labelled step checkboxes + live announcements",
