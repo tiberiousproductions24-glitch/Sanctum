@@ -1,0 +1,18 @@
+{
+  "$comment": "Drop-in schema for Beat Theory chord maps. Place a filled maps file as beat-theory-maps.json (same folder) or call loadBeatTheoryMaps() from src/chords/theory-ext.ts. Sanctum ships built-in defaults until Beat Theory publishes maps.",
+  "version": 1,
+  "source": "beat-theory",
+  "diatonic": {
+    "major": ["I", "ii", "iii", "IV", "V", "vi", "vii°"],
+    "minor": ["i", "ii°", "bIII", "iv", "v", "bVI", "bVII"]
+  },
+  "subs": [
+    { "id": "tritone", "from": "V7", "to": ["bII7"], "label": "Tritone substitution" }
+  ],
+  "progressions": [
+    { "id": "2-5-1", "tokens": ["ii7", "V7", "Imaj7"], "mode": "major", "label": "ii–V–I" }
+  ],
+  "markov": {
+    "I": { "IV": 0.28, "V": 0.22, "vi": 0.18, "ii": 0.12, "I": 0.1, "V7": 0.1 }
+  }
+}
