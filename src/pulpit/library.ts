@@ -37,10 +37,10 @@ export const PROGRESSIONS: Progression[] = [
   { id: 'two-five-one', name: '2–5–1 resolve', mode: 'major', feel: 'whoop', key: 'Eb', steps: st('ii9 V13 Imaj9 I7'), desc: 'The jazz-gospel resolve. The I7 leads back to IV.', tags: ['preaching', 'turnaround'] },
   { id: 'one-six-two-five', name: '1–6–2–5 turnaround', mode: 'major', feel: 'whoop', key: 'Bb', steps: st('1(9) 6(7#9) 2m9 5(13)'), desc: 'The classic turnaround. Loops back to 1.', tags: ['preaching', 'turnaround'] },
   { id: 'passing-walk', name: 'Passing walk 1–4–#4°–1/5', mode: 'major', feel: 'whoop', key: 'G', steps: st('I9 IV13 #ivdim7 I/5 VI7#9 ii9 V13'), desc: 'The church walk-up from 1 to 4 and back home through 6–2–5. Same changes as the Shout Guitar/Bass passing loops.', tags: ['preaching', 'walk'] },
-  { id: 'minor-whoop', name: 'Minor preaching i–iv', mode: 'minor', feel: 'whoop', key: 'Fm', steps: st('i9 iv9 i9 V7#9'), desc: 'Dark, heavy whoop for the minor preacher.', tags: ['preaching', 'minor'] },
-  { id: 'minor-walk', name: 'Minor 1–6–5', mode: 'minor', feel: 'whoop', key: 'Cm', steps: st('i9 bVImaj7 V7#9 i9'), desc: 'Minor whoop with a bVI lift.', tags: ['preaching', 'minor'] },
+  { id: 'minor-whoop', name: 'Minor preaching i–iv', mode: 'minor', feel: 'whoop', key: 'Fm', steps: st('i9 iv9 i9 V7#9'), desc: 'Dark, heavy preaching hold for the minor preacher.', tags: ['preaching', 'minor'] },
+  { id: 'minor-walk', name: 'Minor 1–6–5', mode: 'minor', feel: 'whoop', key: 'Cm', steps: st('i9 bVImaj7 V7#9 i9'), desc: 'Minor preaching hold with a bVI lift.', tags: ['preaching', 'minor'] },
   { id: 'band-hits', name: 'Band hits (stabs)', mode: 'major', feel: 'praise', key: 'Ab', steps: st('I! IV! I! V7!'), desc: 'Short, punched band hits that answer the preacher.', tags: ['hits'] },
-  { id: 'tune-up', name: 'Tuning up', mode: 'major', feel: 'tuneup', key: 'Eb', steps: st('I IV/1 I V7sus ~V7'), desc: 'Pre-whoop organ "tune up" with a run into the 5.', tags: ['preaching', 'intro'] },
+  { id: 'tune-up', name: 'Tuning up', mode: 'major', feel: 'tuneup', key: 'Eb', steps: st('I IV/1 I V7sus ~V7'), desc: 'Pre-sermon organ "tune up" with a run into the 5.', tags: ['preaching', 'intro'] },
   { id: 'altar-call', name: 'Altar call', mode: 'major', feel: 'worship', key: 'Db', steps: st('Imaj9 iii7 vi9 ii9 IVmaj7/5 V7sus'), desc: 'Soft worship changes for prayer and altar call.', tags: ['worship'] },
 ];
 
@@ -112,7 +112,7 @@ export const PLAYLISTS: Playlist[] = [
     { kind: 'song', id: 'blessed-assurance', key: 'D' },
     { kind: 'song', id: 'amazing-grace', key: 'G' },
     { kind: 'progression', id: 'tune-up', key: 'Eb', label: 'Sermon: tune up' },
-    { kind: 'progression', id: 'whoop-145', key: 'Eb', label: 'Sermon: whoop' },
+    { kind: 'progression', id: 'whoop-145', key: 'Eb', label: 'Sermon: preaching hold' },
     { kind: 'shout', id: 'shout-14', key: 'Eb', label: 'Praise break' },
     { kind: 'progression', id: 'altar-call', key: 'Db', label: 'Altar call' },
   ] },
