@@ -2,6 +2,14 @@
 
 All times Pacific (PDT).
 
+## Thu Nov 5 2026 — Acrylic Kit pad skin (Stage Glass)
+- Research: `design/pad-skin/research.md` (Remo/Evans clear heads, Ludwig Vistalite acrylic shells, overhead kit POV, MPC Live III / Maschine / Push 3 / TR-8S / TE design language). Concept art + HTML/SVG frames in `design/pad-skin/frames/` (Stage Glass / Smoked Acrylic / Studio Daylight × phone/tablet × idle/hit). Spec: `design/pad-skin/SPEC.md`.
+- **Recommended direction: Stage Glass** (dark clear acrylic, rim-lit); smoked + daylight become theme token accents of one skin.
+- Implemented selectable **Pad skin** setting (`acrylic` | `hardware`), default `acrylic` for new projects; Hardware skin preserved. Persistence via project settings + `localStorage['sanctum.padSkin']` + `data-pad-skin`.
+- New files: `src/skins/acrylic.css`, `src/ui/skins/kit/{instruments,mapping,index}.ts` — original SVG instrument art (kick/snare/toms/hats/crash/ride/cowbell/clap/rim/tamb/shaker/808/fx/loop/organ/choir), sound→instrument mapping, head-flex / cymbal-shimmer / shake hit motion (transform/opacity only).
+- Settings UI: Menu → Settings → Pad skin. Screenshots: `screenshots/skin-acrylic-*.png` (+ hardware control). `npm run build` green; smoke **38/38**.
+- Engine/haptics/a11y untouched. Open brand call for Lawrence: keep Acrylic as default vs Hardware; church-bank motif strength; label visibility.
+
 ## Sat Oct 31 2026 00:22 PDT — Kickoff
 - Read all spec docs in /workspace/projects/mpc-research/ (README, design-goals, design-phone, design-tablet, phase1-3, daw-sync, midi-integration, branding-logo, branding/*.svg, access-control).
 - Stack decision: Vite + TypeScript PWA, Web Audio API with AudioWorklet engine (box has Node 24, no Flutter/Android SDK). Node WebSocket bridge for Ableton Link.

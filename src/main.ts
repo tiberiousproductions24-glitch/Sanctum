@@ -2,6 +2,7 @@
 import './styles.css';
 import './hardware.css';
 import './themes.css';
+import './skins/acrylic.css';
 import { Capacitor } from '@capacitor/core';
 import { checkLicense, activate } from './license/license';
 import { LockScreen } from './license/gate';
@@ -13,6 +14,8 @@ try {
   const t = localStorage.getItem('sanctum.theme') || JSON.parse(localStorage.getItem('sanctum.project.v1') || '{}').theme;
   if (['dark', 'light', 'warm', 'contrast', 'neon', 'minimal'].includes(t)) document.documentElement.dataset.theme = t;
   const l = localStorage.getItem('sanctum.layout'); if (l === 'auto' || l === 'phone' || l === 'tablet') document.documentElement.dataset.layoutMode = l;
+  const raw = localStorage.getItem('sanctum.padSkin') || JSON.parse(localStorage.getItem('sanctum.project.v1') || '{}')?.settings?.padSkin;
+  document.documentElement.dataset.padSkin = (raw === 'hardware' || raw === 'acrylic') ? raw : 'acrylic';
 } catch {}
 
 let mounted = false;

@@ -250,11 +250,19 @@ Open **Menu → Settings & Theme → Theme** and tap a swatch:
 
 The theme is saved with your project. You can also add `?theme=warm` (or `dark` or `light`) to the address.
 
+### 5b. Pad skin (Acrylic Kit / Hardware)
+
+Open **Menu → Settings & Theme → Pad skin**:
+- **Acrylic Kit** (default on new projects): each pad shows a **clear stage-head instrument** from above — snare with wires, kick with port, toms, hats, crash/ride, cowbell, clap, tambourine, shaker, 808 cone, plus motifs for FX, loops, organ and choir. Glass reflections and rim light follow the colour theme (Stage Glass on dark/neon, Studio Daylight on light/minimal, high-contrast outlines on Contrast).
+- **Hardware**: the original raised neon rubber caps with LED strips.
+
+The pad skin is saved with your project (separate from the colour theme). Hit feedback still scales with velocity: head flex, cymbal shimmer, rim light, flash and touch-point ripple — graphics-chip only, so sound timing stays unchanged.
+
 ---
 
 ## 6. Pad lights: flash and ripple
 
-- Pads are raised keys: when you hit one it **presses down**, **flashes** and **glows** in its row colour, and **harder hits flash brighter, glow wider and ripple further**.
+- Pads are raised keys: when you hit one it **presses down**, **flashes** and **glows** in its row colour, and **harder hits flash brighter, glow wider and ripple further**. With Acrylic Kit the instrument art also flexes or shimmers.
 - On the Android app each hit also gives a small **vibration** (stronger for harder hits). Turn it off in Settings → Haptics.
 - All of these effects use only the phone's graphics chip (no page re-layout), so they never delay the sound.
 - The pad also shows a **ring** that grows outward and a **ripple** that spreads from where your finger touched.

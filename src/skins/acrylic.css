@@ -1,0 +1,390 @@
+/* ===== Sanctum Acrylic Kit pad skin =====
+   Activated by <html data-pad-skin="acrylic">. Hardware skin remains default CSS underneath;
+   this file restyles .pad anatomy into clear stage-head instruments.
+   Hit animations stay transform/opacity only (compositor-friendly). */
+
+/* ---------- tokens (Stage Glass base; theme overrides below) ---------- */
+[data-pad-skin="acrylic"] {
+  --ak-well: #050508;
+  --ak-glass: rgba(210, 230, 255, 0.10);
+  --ak-glass-edge: rgba(255, 255, 255, 0.38);
+  --ak-film: rgba(190, 215, 240, 0.14);
+  --ak-film-stroke: rgba(255, 255, 255, 0.22);
+  --ak-shell: rgba(40, 55, 75, 0.45);
+  --ak-chrome: #D8DEE8;
+  --ak-chrome-dark: #6A7384;
+  --ak-brass: #C4A35A;
+  --ak-brass-hi: #E8D090;
+  --ak-brass-lo: #7A5A28;
+  --ak-wire: rgba(200, 210, 230, 0.35);
+  --ak-port: rgba(0, 0, 0, 0.55);
+  --ak-label: rgba(244, 241, 234, 0.78);
+  --ak-specular: rgba(255, 255, 255, 0.28);
+  --ak-rim: var(--zc, #FF6A13);
+  --travel: 3px;
+}
+
+/* Smoked Acrylic accent (neon / dark flagship) */
+[data-pad-skin="acrylic"][data-theme="neon"],
+[data-pad-skin="acrylic"][data-theme="dark"],
+[data-pad-skin="acrylic"]:not([data-theme]) {
+  --ak-well: #030306;
+  --ak-glass: rgba(120, 180, 255, 0.07);
+  --ak-film: rgba(140, 190, 255, 0.10);
+  --ak-shell: rgba(20, 30, 50, 0.55);
+}
+
+/* Studio Daylight accent */
+[data-pad-skin="acrylic"][data-theme="light"],
+[data-pad-skin="acrylic"][data-theme="minimal"] {
+  --ak-well: #C4C2BA;
+  --ak-glass: rgba(255, 255, 255, 0.55);
+  --ak-glass-edge: rgba(255, 255, 255, 0.85);
+  --ak-film: rgba(255, 255, 255, 0.42);
+  --ak-film-stroke: rgba(80, 90, 110, 0.28);
+  --ak-shell: rgba(90, 110, 130, 0.22);
+  --ak-chrome: #8A919C;
+  --ak-chrome-dark: #4A5160;
+  --ak-label: rgba(26, 26, 34, 0.82);
+  --ak-specular: rgba(255, 255, 255, 0.55);
+  --ak-wire: rgba(40, 50, 70, 0.28);
+  --ak-port: rgba(0, 0, 0, 0.35);
+}
+
+[data-pad-skin="acrylic"][data-theme="warm"] {
+  --ak-well: #5A554C;
+  --ak-glass: rgba(255, 230, 190, 0.12);
+  --ak-film: rgba(255, 220, 170, 0.16);
+  --ak-shell: rgba(60, 45, 30, 0.4);
+  --ak-chrome: #C9B89A;
+  --ak-chrome-dark: #6A5E4E;
+  --ak-brass: #D4893A;
+  --ak-label: rgba(36, 33, 29, 0.85);
+}
+
+/* High contrast: thick outlines, max legibility, still instrument-shaped */
+[data-pad-skin="acrylic"][data-theme="contrast"] {
+  --ak-well: #000;
+  --ak-glass: #000;
+  --ak-glass-edge: #FFF;
+  --ak-film: #111;
+  --ak-film-stroke: #FFF;
+  --ak-shell: #000;
+  --ak-chrome: #FFF;
+  --ak-chrome-dark: #FFF;
+  --ak-brass: #FFD400;
+  --ak-brass-hi: #FFE66A;
+  --ak-brass-lo: #FFD400;
+  --ak-wire: #FFF;
+  --ak-port: #000;
+  --ak-label: #FFF;
+  --ak-specular: transparent;
+}
+
+/* ---------- pad well + glass cap ---------- */
+[data-pad-skin="acrylic"] .pads { gap: clamp(6px, calc(var(--grid, 360px) / 40), 12px); }
+
+[data-pad-skin="acrylic"] .pad {
+  background: var(--ak-well);
+  border-radius: 16px;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.75),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 0 1px color-mix(in srgb, var(--ak-rim) 25%, transparent);
+  contain: layout style;
+}
+
+[data-pad-skin="acrylic"] .pad .cap {
+  inset: 2px 2px calc(var(--travel) + 2px) 2px;
+  border-radius: 13px;
+  padding: 6px 8px;
+  color: var(--ak-label);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.16) 0%, transparent 42%),
+    radial-gradient(120% 90% at 50% 0%, var(--ak-glass) 0%, transparent 55%),
+    linear-gradient(180deg, color-mix(in srgb, var(--ak-glass) 80%, transparent), transparent 70%);
+  border: 1px solid var(--ak-glass-edge);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.25),
+    0 var(--travel) 0 color-mix(in srgb, var(--ak-well) 70%, #000),
+    0 0 18px color-mix(in srgb, var(--ak-rim) 22%, transparent);
+  overflow: hidden;
+}
+
+[data-pad-skin="acrylic"] .pad.down .cap {
+  transform: translateY(calc(var(--travel) - 1px)) scale(0.985);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 1px 0 color-mix(in srgb, var(--ak-well) 70%, #000),
+    0 0 22px color-mix(in srgb, var(--ak-rim) 45%, transparent);
+}
+
+[data-pad-skin="acrylic"] .pad .glow {
+  inset: -4px -4px calc(var(--travel) - 4px) -4px;
+  border-radius: 18px;
+  box-shadow: 0 0 20px 3px var(--ak-rim), inset 0 0 0 1.5px color-mix(in srgb, var(--ak-rim) 70%, #fff);
+}
+
+[data-pad-skin="acrylic"] .pad .led { display: none; } /* instrument art replaces LED strip */
+
+[data-pad-skin="acrylic"] .pad .flash {
+  background: radial-gradient(120% 120% at 50% 40%,
+    color-mix(in srgb, var(--ak-rim) 55%, #fff) 0%,
+    color-mix(in srgb, var(--ak-rim) 40%, transparent) 45%,
+    transparent 72%);
+  mix-blend-mode: screen;
+}
+
+[data-pad-skin="acrylic"][data-theme="light"] .pad .flash,
+[data-pad-skin="acrylic"][data-theme="minimal"] .pad .flash {
+  mix-blend-mode: multiply;
+  background: radial-gradient(120% 120% at 50% 40%,
+    color-mix(in srgb, var(--ak-rim) 50%, #fff) 0%,
+    color-mix(in srgb, var(--ak-rim) 35%, transparent) 50%,
+    transparent 75%);
+}
+
+[data-pad-skin="acrylic"] .pad .ring {
+  border: 2px solid color-mix(in srgb, var(--ak-rim) 80%, #fff);
+  border-radius: inherit;
+}
+
+[data-pad-skin="acrylic"] .pad .ripple {
+  border: 2px solid color-mix(in srgb, var(--ak-rim) 65%, #fff);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ak-rim) 40%, transparent);
+}
+
+[data-pad-skin="acrylic"] .pad.sel .cap {
+  border-color: color-mix(in srgb, var(--ak-rim) 70%, #fff);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 0 0 1.5px color-mix(in srgb, var(--ak-rim) 55%, transparent),
+    0 var(--travel) 0 color-mix(in srgb, var(--ak-well) 70%, #000),
+    0 0 22px color-mix(in srgb, var(--ak-rim) 40%, transparent);
+}
+
+[data-pad-skin="acrylic"] .pad.looping .cap {
+  box-shadow:
+    inset 0 0 0 2px var(--ak-rim),
+    0 var(--travel) 0 color-mix(in srgb, var(--ak-well) 70%, #000),
+    0 0 24px color-mix(in srgb, var(--ak-rim) 50%, transparent);
+}
+[data-pad-skin="acrylic"] .pad.looping .glow { opacity: 0.5; }
+
+[data-pad-skin="acrylic"] .pad.muted .cap { opacity: 0.38; filter: none; }
+[data-pad-skin="acrylic"] .pad.empty .kit { opacity: 0.35; }
+
+/* Labels: small, optional; silhouette is primary */
+[data-pad-skin="acrylic"] .pad .num {
+  font-size: 10px; font-weight: 800; opacity: 0.55; letter-spacing: 0.04em; z-index: 4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+[data-pad-skin="acrylic"] .pad .name {
+  font-size: clamp(9px, calc(var(--grid, 360px) / 34), 13px);
+  font-weight: 800; letter-spacing: 0.03em; z-index: 4; opacity: 0.88;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+  max-width: 92%;
+}
+[data-pad-skin="acrylic"] .pad .tag {
+  font-size: 8px; font-weight: 800; z-index: 4; opacity: 0.75;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+[data-pad-skin="acrylic"][data-theme="contrast"] .pad .num,
+[data-pad-skin="acrylic"][data-theme="contrast"] .pad .name,
+[data-pad-skin="acrylic"][data-theme="contrast"] .pad .tag {
+  opacity: 1; text-shadow: none;
+  font-size: clamp(12px, calc(var(--grid, 360px) / 28), 18px);
+}
+[data-pad-skin="acrylic"][data-theme="contrast"] .pad .cap {
+  border: 3px solid var(--ak-rim);
+  box-shadow: 0 var(--travel) 0 #FFF;
+}
+[data-pad-skin="acrylic"][data-theme="contrast"] .pad.sel .cap { border: 4px solid #FFF; }
+[data-pad-skin="acrylic"][data-theme="contrast"] .pad .kit { opacity: 1; }
+
+[data-pad-skin="acrylic"] .pad:focus-visible {
+  outline: 3px solid var(--gold, #E8B931);
+  outline-offset: 3px;
+}
+
+/* ---------- instrument art layer ---------- */
+[data-pad-skin="acrylic"] .pad .kit {
+  position: absolute; inset: 10% 8% 18% 8%;
+  z-index: 1; pointer-events: none;
+  display: grid; place-items: center;
+  will-change: transform, opacity;
+}
+[data-pad-skin="acrylic"] .pad .kit .kit-art {
+  width: 100%; height: 100%;
+  overflow: visible;
+}
+
+/* Hide kit art when hardware skin is active (slot may still exist in DOM). */
+html:not([data-pad-skin="acrylic"]) .pad .kit { display: none; }
+
+/* SVG paint */
+[data-pad-skin="acrylic"] .kit-art .shell-depth { fill: var(--ak-shell); }
+[data-pad-skin="acrylic"] .kit-art .head-film {
+  fill: var(--ak-film);
+  stroke: var(--ak-film-stroke);
+  stroke-width: 0.8;
+}
+[data-pad-skin="acrylic"] .kit-art .head-ring {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 0.6;
+}
+[data-pad-skin="acrylic"] .kit-art .head-ring.soft { stroke: rgba(255, 255, 255, 0.06); }
+[data-pad-skin="acrylic"] .kit-art .hoop-outer {
+  stroke: var(--ak-chrome); stroke-width: 3.2; fill: none;
+}
+[data-pad-skin="acrylic"] .kit-art .hoop-inner {
+  stroke: var(--ak-chrome-dark); stroke-width: 1.2; fill: none; opacity: 0.7;
+}
+[data-pad-skin="acrylic"] .kit-art .lug {
+  fill: var(--ak-chrome);
+  stroke: var(--ak-chrome-dark);
+  stroke-width: 0.4;
+}
+[data-pad-skin="acrylic"] .kit-art .specular {
+  fill: var(--ak-specular);
+  pointer-events: none;
+}
+[data-pad-skin="acrylic"] .kit-art .port { fill: var(--ak-port); }
+[data-pad-skin="acrylic"] .kit-art .port-inner { stroke: rgba(255, 255, 255, 0.15); stroke-width: 1; }
+[data-pad-skin="acrylic"] .kit-art .badge {
+  fill: color-mix(in srgb, var(--ak-rim) 55%, var(--ak-chrome));
+  opacity: 0.85;
+}
+[data-pad-skin="acrylic"] .kit-art .snare-wires line {
+  stroke: var(--ak-wire); stroke-width: 0.7;
+}
+[data-pad-skin="acrylic"] .kit-art .strainer {
+  fill: var(--ak-chrome); stroke: var(--ak-chrome-dark); stroke-width: 0.4;
+}
+[data-pad-skin="acrylic"] .kit-art .rim-stick {
+  fill: #E8DCC8; stroke: #6A5E4E; stroke-width: 0.5;
+}
+[data-pad-skin="acrylic"] .kit-art .rim-stick-shaft { fill: #C4B49A; }
+
+/* Cymbals */
+[data-pad-skin="acrylic"] .kit-art .cym-bow {
+  fill: url(#none);
+  fill: var(--ak-brass);
+  opacity: 0.92;
+}
+[data-pad-skin="acrylic"] .kit-art .cym-bow.top { opacity: 0.88; }
+[data-pad-skin="acrylic"] .kit-art .cym-lathe {
+  stroke: var(--ak-brass-lo); stroke-width: 0.7; opacity: 0.55;
+}
+[data-pad-skin="acrylic"] .kit-art .cym-bell {
+  fill: var(--ak-brass-hi);
+  stroke: var(--ak-brass-lo); stroke-width: 0.6;
+}
+[data-pad-skin="acrylic"] .kit-art .cym-bell.big { fill: var(--ak-brass-hi); }
+[data-pad-skin="acrylic"] .kit-art .cym-nut { fill: var(--ak-chrome); }
+
+/* Cowbell / metal */
+[data-pad-skin="acrylic"] .kit-art .bell-body {
+  fill: #A8B0BC; stroke: var(--ak-chrome-dark); stroke-width: 1;
+}
+[data-pad-skin="acrylic"] .kit-art .bell-mouth { fill: #7A8494; }
+[data-pad-skin="acrylic"] .kit-art .bell-edge { stroke: rgba(0, 0, 0, 0.25); stroke-width: 1; }
+[data-pad-skin="acrylic"] .kit-art .bell-mount { fill: var(--ak-chrome); }
+
+/* Clap */
+[data-pad-skin="acrylic"] .kit-art .palm {
+  fill: color-mix(in srgb, var(--ak-rim) 35%, #E8C4A8);
+  stroke: rgba(0, 0, 0, 0.25); stroke-width: 0.8; opacity: 0.9;
+}
+[data-pad-skin="acrylic"] .kit-art .palm.right { opacity: 0.75; }
+
+/* Tamb / shaker */
+[data-pad-skin="acrylic"] .kit-art .tamb-ring {
+  stroke: var(--ak-chrome); stroke-width: 5; fill: none;
+}
+[data-pad-skin="acrylic"] .kit-art .tamb-ring.inner { stroke-width: 2; stroke: var(--ak-chrome-dark); }
+[data-pad-skin="acrylic"] .kit-art .jingle {
+  fill: var(--ak-brass-hi); stroke: var(--ak-brass-lo); stroke-width: 0.5;
+}
+[data-pad-skin="acrylic"] .kit-art .tamb-head { fill: var(--ak-film); stroke: var(--ak-film-stroke); stroke-width: 0.6; }
+[data-pad-skin="acrylic"] .kit-art .shaker-body {
+  fill: var(--ak-film); stroke: var(--ak-glass-edge); stroke-width: 1.2;
+}
+[data-pad-skin="acrylic"] .kit-art .shaker-band { fill: var(--ak-chrome); opacity: 0.7; }
+[data-pad-skin="acrylic"] .kit-art .bead { fill: var(--ak-brass-lo); opacity: 0.7; }
+
+/* 808 / FX / loop / organ / choir */
+[data-pad-skin="acrylic"] .kit-art .cone {
+  fill: #1A1A22; stroke: var(--ak-chrome); stroke-width: 2;
+}
+[data-pad-skin="acrylic"] .kit-art .cone-ring { stroke: rgba(255, 255, 255, 0.18); stroke-width: 1.2; }
+[data-pad-skin="acrylic"] .kit-art .dustcap { fill: #2A2A35; stroke: var(--ak-rim); stroke-width: 1.2; }
+[data-pad-skin="acrylic"] .kit-art .eight-label {
+  fill: var(--ak-rim); font-size: 9px; font-weight: 900;
+  font-family: system-ui, sans-serif;
+}
+[data-pad-skin="acrylic"] .kit-art .fx-orb {
+  fill: color-mix(in srgb, var(--ak-rim) 30%, transparent);
+  stroke: var(--ak-rim); stroke-width: 1.5;
+}
+[data-pad-skin="acrylic"] .kit-art .fx-bolt { fill: var(--ak-rim); }
+[data-pad-skin="acrylic"] .kit-art .loop-ring {
+  stroke: var(--ak-rim); stroke-width: 3;
+}
+[data-pad-skin="acrylic"] .kit-art .loop-arrow { stroke: var(--ak-chrome); stroke-width: 2.5; }
+[data-pad-skin="acrylic"] .kit-art .loop-head { fill: var(--ak-chrome); }
+[data-pad-skin="acrylic"] .kit-art .fret { fill: var(--ak-brass); opacity: 0.85; }
+[data-pad-skin="acrylic"] .kit-art .keys-base { fill: #1A1A22; }
+[data-pad-skin="acrylic"] .kit-art .key.white { fill: #F4F1EA; stroke: #2A2A32; stroke-width: 0.4; }
+[data-pad-skin="acrylic"] .kit-art .key.black { fill: #141418; }
+[data-pad-skin="acrylic"] .kit-art .pipe {
+  fill: var(--ak-chrome); stroke: var(--ak-chrome-dark); stroke-width: 0.4;
+}
+[data-pad-skin="acrylic"] .kit-art .voice {
+  fill: color-mix(in srgb, var(--ak-rim) 25%, #E8DCC8);
+  stroke: rgba(0, 0, 0, 0.2); stroke-width: 0.6; opacity: 0.9;
+}
+[data-pad-skin="acrylic"] .kit-art .wave {
+  stroke: var(--ak-rim); stroke-width: 2; fill: none; opacity: 0.85;
+}
+[data-pad-skin="acrylic"] .kit-art .wave.soft { opacity: 0.45; stroke-width: 1.4; }
+[data-pad-skin="acrylic"] .kit-art .empty-ring {
+  stroke: rgba(255, 255, 255, 0.18); stroke-width: 2; stroke-dasharray: 4 3;
+}
+[data-pad-skin="acrylic"] .kit-art .empty-ring.soft { stroke-width: 1; opacity: 0.5; stroke-dasharray: none; }
+
+/* Light theme cone / keys adjustments */
+[data-pad-skin="acrylic"][data-theme="light"] .kit-art .cone,
+[data-pad-skin="acrylic"][data-theme="minimal"] .kit-art .cone { fill: #2A2A32; }
+[data-pad-skin="acrylic"][data-theme="warm"] .kit-art .cym-bow { fill: #C8883A; }
+[data-pad-skin="acrylic"][data-theme="contrast"] .kit-art .cym-bow { fill: #FFD400; }
+[data-pad-skin="acrylic"][data-theme="contrast"] .kit-art .cym-lathe { stroke: #000; opacity: 0.85; }
+[data-pad-skin="acrylic"][data-theme="contrast"] .kit-art .head-film { fill: #000; stroke: #FFF; stroke-width: 2; }
+[data-pad-skin="acrylic"][data-theme="contrast"] .kit-art .hoop-outer { stroke: #FFF; stroke-width: 4; }
+[data-pad-skin="acrylic"][data-theme="contrast"] .kit-art .lug { fill: #FFD400; stroke: #000; }
+
+/* Neon edge boost */
+[data-pad-skin="acrylic"][data-theme="neon"] .pad .cap {
+  box-shadow:
+    inset 0 0 16px color-mix(in srgb, var(--ak-rim) 28%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 var(--travel) 0 #000,
+    0 0 20px color-mix(in srgb, var(--ak-rim) 45%, transparent);
+}
+[data-pad-skin="acrylic"][data-theme="neon"] .pad .name { color: var(--ak-rim); }
+
+/* Reduced motion */
+.reduce-motion[data-pad-skin="acrylic"] .pad .cap,
+[data-pad-skin="acrylic"] .reduce-motion .pad .cap { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  [data-pad-skin="acrylic"] .pad .cap { transition: none !important; }
+}
+
+/* Phone vs tablet: kit art scales with pad; slightly more inset on tiny grids */
+@media (max-width: 420px) {
+  [data-pad-skin="acrylic"] .pad .kit { inset: 12% 10% 22% 10%; }
+  [data-pad-skin="acrylic"] .pad .name { font-size: 9px; }
+}

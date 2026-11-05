@@ -5,6 +5,7 @@ import { h, $, toast, slider } from './dom';
 import { archPadSvg } from './logo';
 import type { Sheets } from './sheets';
 import { PulpitUI } from '../pulpit/ui';
+import { applyPadSkin, paintPadInstrument, acrylicHit, type PadSkin } from './skins/kit';
 
 const PAD_ORDER = [12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3]; // DOM order -> pad index (pad 1 bottom-left)
 const KEYMAP: Record<string, number> = { Digit1: 12, Digit2: 13, Digit3: 14, Digit4: 15, KeyQ: 8, KeyW: 9, KeyE: 10, KeyR: 11, KeyA: 4, KeyS: 5, KeyD: 6, KeyF: 7, KeyZ: 0, KeyX: 1, KeyC: 2, KeyV: 3 };
@@ -52,6 +53,8 @@ export class View {
   applyTheme() {
     document.documentElement.dataset.theme = this.app.p.theme;
     try { localStorage.setItem('sanctum.theme', this.app.p.theme); } catch {}
+    const skin = (this.app.p.settings.padSkin === 'hardware' ? 'hardware' : 'acrylic') as PadSkin;
+    applyPadSkin(skin);
     const meta = document.querySelector('meta[name=theme-color]'); const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
     meta?.setAttribute('content', bg || '#0B0B0F');
     document.body.classList.toggle('reduce-motion', this.app.p.settings.reduceMotion || matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -272,11 +275,14 @@ export class View {
     const pad = this.pads[pad16]; if (!pad) return;
     const k = vel / 127; const a = 0.25 + 0.75 * k;
     const reduce = document.body.classList.contains('reduce-motion');
-    const cap = pad.firstElementChild as HTMLElement;
-    const fl = cap.children[3] as HTMLElement, ring = cap.children[4] as HTMLElement, glow = pad.children[1] as HTMLElement;
+    const cap = pad.querySelector('.cap') as HTMLElement;
+    const fl = cap.querySelector('.flash') as HTMLElement;
+    const ring = cap.querySelector('.ring') as HTMLElement;
+    const glow = pad.querySelector('.glow') as HTMLElement;
     // GPU-cheap: opacity + transform only (no layout, no box-shadow animation)
     fl.animate([{ opacity: a }, { opacity: 0 }], { duration: reduce ? 90 : 120 + 120 * k, easing: 'cubic-bezier(.2,.7,.3,1)' });
     glow.animate([{ opacity: 0.35 + 0.65 * k, transform: `scale(${1 + 0.06 * k})` }, { opacity: 0, transform: 'scale(1)' }], { duration: reduce ? 120 : 220 + 260 * k, easing: 'cubic-bezier(.15,.7,.3,1)' });
+    acrylicHit(pad, vel, reduce);
     if (reduce) return;
     ring.animate([{ opacity: a, transform: 'scale(1)' }, { opacity: 0, transform: `scale(${1.04 + 0.12 * k})` }], { duration: 200, easing: 'ease-out' });
     const w = cap.clientWidth, hgt = cap.clientHeight;
@@ -405,9 +411,10 @@ export class View {
       const g = a.p.currentBank * 16 + i; const pad = this.pads[i];
       const showG = a.sixteenLevels ? a.p.selectedPad : g;
       const s = a.soundOf(showG); const slot = a.p.pads[showG];
-      const cap = pad.firstElementChild as HTMLElement;
-      (cap.children[2] as HTMLElement).textContent = a.sixteenLevels ? `${s?.short || '—'} ${Math.round((i + 1) * 127 / 16)}` : (s?.short || '—');
-      (cap.children[1] as HTMLElement).textContent = s?.kind === 'loop' ? `LOOP${s.bars ? ' ' + s.bars + 'B' : ''}` : (s?.choke ? 'CHK' : '');
+      const cap = pad.querySelector('.cap') as HTMLElement;
+      (cap.querySelector('.name') as HTMLElement).textContent = a.sixteenLevels ? `${s?.short || '—'} ${Math.round((i + 1) * 127 / 16)}` : (s?.short || '—');
+      (cap.querySelector('.tag') as HTMLElement).textContent = s?.kind === 'loop' ? `LOOP${s.bars ? ' ' + s.bars + 'B' : ''}` : (s?.choke ? 'CHK' : '');
+      paintPadInstrument(pad, s);
       pad.classList.toggle('empty', !s);
       pad.classList.toggle('sel', !a.sixteenLevels && g === a.p.selectedPad);
       pad.classList.toggle('muted', !!slot?.mute);

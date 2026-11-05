@@ -25,6 +25,7 @@ export interface Settings {
   midiClockOut: boolean; midiClockIn: boolean; midiNotesIn: boolean; midiNotesOut: boolean; midiChannel: number; ccMap: Record<string, string>; ccOut: boolean; midiOutId: string; midiInId: string; midiClockOffsetMs: number;
   loopLaunch: 'bar' | 'beat';
   deviceClass: LayoutMode;       // layout mode (separate from the colour theme)
+  padSkin: 'acrylic' | 'hardware'; // pad face: clear acrylic kit vs raised hardware caps
   master: number;
 }
 
@@ -56,7 +57,7 @@ export function defaultProject(): Project {
       metronome: false, countIn: false, haptics: true, reduceMotion: false, handedness: 'right',
       linkEnabled: false, linkUrl: '', linkQuantum: 4,
       midiClockOut: false, midiClockIn: false, midiNotesIn: true, midiNotesOut: false, midiChannel: 10, ccMap: { '7': 'master', '9': 'swing', '71': 'padLevel', '74': 'padTune' }, ccOut: true, midiOutId: '', midiInId: '', midiClockOffsetMs: 0,
-      loopLaunch: 'bar', deviceClass: 'auto', master: 0.85,
+      loopLaunch: 'bar', deviceClass: 'auto', padSkin: 'acrylic', master: 0.85,
     },
     lab: { roundTripMs: null, roundTripJitterMs: null, tapOffsetMs: null, tapJitterMs: null, measuredAt: null, route: 'default output' },
     access: 'owner',
@@ -78,6 +79,7 @@ export function loadProject(): { project: Project; restored: boolean } {
       if (!Array.isArray(project.songChain)) project.songChain = [];
       if (typeof project.songMode !== 'boolean') project.songMode = false;
       if (!project.settings.velocityPreset) project.settings.velocityPreset = 'hard';
+      if (project.settings.padSkin !== 'acrylic' && project.settings.padSkin !== 'hardware') project.settings.padSkin = 'acrylic';
       if (!Array.isArray(project.patterns) || project.patterns.length === 0) project.patterns = d.patterns;
       return { project, restored: true };
     }

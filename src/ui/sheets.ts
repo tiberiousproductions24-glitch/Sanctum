@@ -11,6 +11,7 @@ import { LockScreen, type GateScreen } from '../license/gate';
 import { clearLicense } from '../license/license';
 import { storageKind } from '../license/store';
 import { REVOKED_IDS } from '../license/revocation';
+import { PAD_SKINS, applyPadSkin, type PadSkin } from './skins/kit';
 
 const QOPTS: { v: QuantizeKey; label: string }[] = (['off', '1/8', '1/8T', '1/16', '1/16T', '1/32', '1/32T'] as QuantizeKey[]).map((v) => ({ v, label: v.toUpperCase() }));
 const ROPTS: { v: QuantizeKey; label: string }[] = (['1/4', '1/8', '1/8T', '1/16', '1/16T', '1/32', '1/32T'] as QuantizeKey[]).map((v) => ({ v, label: v.toUpperCase() }));
@@ -155,6 +156,9 @@ export class Sheets {
     const snaps = listSnapshots();
     this.open('Settings', h('div', {},
       h('h3', {}, 'Theme'), sw,
+      h('h3', {}, 'Pad skin'),
+      h('div', { class: 'row' }, h('label', {}, 'Pads'), seg(PAD_SKINS.map((x) => ({ v: x.v, label: x.label })) as any, (s.padSkin === 'hardware' ? 'hardware' : 'acrylic') as PadSkin, (v: any) => { s.padSkin = v as PadSkin; applyPadSkin(v); a.save(); a.emit('theme'); a.emit('select'); }, 'Pad skin')),
+      h('p', { class: 'note' }, 'Acrylic Kit draws each pad as a clear stage-head instrument (snare, kick, hats…). Hardware keeps the raised neon rubber caps. Saved with the project.'),
       h('h3', {}, 'Velocity'),
       h('div', { class: 'row' }, seg([{ v: 'auto', label: 'Auto' }, { v: 'position', label: 'Position' }, { v: 'pressure', label: 'Pressure' }, { v: 'fixed', label: 'Fixed' }] as const as any, s.velocityMode, (v: any) => { s.velocityMode = v; a.save(); }, 'Velocity mode')),
       h('p', { class: 'note' }, 'Auto: uses stylus/3D-touch force when the device reports it, else finger contact size + vertical position (top of pad = loudest). Mouse/keyboard: position / Shift = 127.'),
