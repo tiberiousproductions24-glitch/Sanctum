@@ -77,6 +77,15 @@ export class Engine {
     this.ctx = null; this.node = null; this.active = []; this.micSource = null;
   }
 
+  /** Recording tap for the Share panel: a MediaStream of the master output (post master gain). Null before audio starts. */
+  tapOutput(): { stream: MediaStream; analyser: AnalyserNode; release: () => void } | null {
+    const ctx = this.ctx, master = this.master; if (!ctx || !master || !ctx.createMediaStreamDestination) return null;
+    const dest = ctx.createMediaStreamDestination();
+    const analyser = ctx.createAnalyser(); analyser.fftSize = 1024; analyser.smoothingTimeConstant = 0.6;
+    master.connect(dest); master.connect(analyser);
+    return { stream: dest.stream, analyser, release: () => { try { master.disconnect(dest); master.disconnect(analyser); } catch {} } };
+  }
+
   async resume() { if (this.ctx && this.ctx.state !== 'running') { try { await this.ctx.resume(); } catch {} } }
 
   latency(): LatencyInfo {

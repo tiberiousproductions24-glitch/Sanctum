@@ -6,6 +6,7 @@ import { LinkClient, normalizeBridgeUrl } from '../sync/link';
 import { CC_TARGETS, type CcTarget } from '../sync/midi';
 import type { View } from './view';
 import { timingLabBody } from './timinglab';
+import { SharePanel } from './sharepanel';
 import { LockScreen, type GateScreen } from '../license/gate';
 import { clearLicense } from '../license/license';
 import { storageKind } from '../license/store';
@@ -18,7 +19,9 @@ export class Sheets {
   private back: HTMLElement | null = null;
   private updater: (() => void) | null = null;
   private unsub: (() => void) | null = null;
+  private sharePanel: SharePanel;
   constructor(private app: App, private view: View) {
+    this.sharePanel = new SharePanel(app, view, this);
     app.on((w) => { if (this.updater && (w === 'stats' || w === 'link' || w === 'midi' || w === 'latency' || w === 'tempo' || w === 'transport')) this.updater(); });
   }
 
@@ -36,7 +39,7 @@ export class Sheets {
   menu() {
     const items: [string, () => void][] = [
       ['Tempo & Sequencer', () => this.transport()], ['Note Repeat', () => this.noteRepeat()], ['Pad Editor', () => this.padEditor(this.app.p.selectedPad)],
-      ['Sounds', () => this.sounds()], ['Timing Lab', () => this.timingLab()], ['Link & MIDI', () => this.sync()],
+      ['Share / Post', () => this.share()], ['Sounds', () => this.sounds()], ['Timing Lab', () => this.timingLab()], ['Link & MIDI', () => this.sync()],
       ['Settings & Theme', () => this.settings()], ['Credits', () => this.credits()], ['Help', () => this.help()], ...(this.app.isAdmin ? [['Admin', () => this.admin()] as [string, () => void]] : []),
     ];
     this.open('Sanctum', h('div', { class: 'menu-grid' }, items.map(([l, f]) => h('button', { onclick: f }, l))));
@@ -137,7 +140,8 @@ export class Sheets {
   settings() {
     const a = this.app; const s = a.p.settings;
     const themes: { v: Theme; label: string; bg: string; fg: string; acc: string }[] = [
-      { v: 'dark', label: 'Neon (dark)', bg: '#07070C', fg: '#F2EEE6', acc: '#FF2D95' }, { v: 'light', label: 'Light', bg: '#F5F5F2', fg: '#14141A', acc: '#D9530A' }, { v: 'warm', label: 'Warm · MPC60', bg: '#D9D3C7', fg: '#2B2724', acc: '#FF6A13' }];
+      { v: 'dark', label: 'Dark (stage)', bg: '#07070C', fg: '#F2EEE6', acc: '#FF2D95' }, { v: 'light', label: 'Light', bg: '#F5F5F2', fg: '#14141A', acc: '#D9530A' }, { v: 'warm', label: 'Warm · MPC60', bg: '#D9D3C7', fg: '#2B2724', acc: '#FF6A13' },
+      { v: 'contrast', label: 'High contrast', bg: '#000000', fg: '#FFFFFF', acc: '#FFD400' }, { v: 'neon', label: 'Neon', bg: '#05030C', fg: '#E9FDFF', acc: 'linear-gradient(90deg,#00F0FF,#FF2BD6,#A6FF00)' }, { v: 'minimal', label: 'Minimal', bg: '#FAFAFA', fg: '#111111', acc: '#111111' }];
     const sw = h('div', { class: 'themes', role: 'radiogroup', 'aria-label': 'Theme' });
     const renderSw = () => { sw.innerHTML = ''; for (const t of themes) sw.append(h('button', { class: 'swatch' + (a.p.theme === t.v ? ' on' : ''), role: 'radio', 'aria-checked': a.p.theme === t.v ? 'true' : 'false', 'aria-label': `${t.label} theme`, style: { background: t.bg, color: t.fg }, onclick: () => { a.p.theme = t.v; a.save(); a.emit('theme'); renderSw(); } }, t.label, h('span', { style: { height: '8px', borderRadius: '4px', background: t.acc, display: 'block' } }))); };
     renderSw();
@@ -150,7 +154,8 @@ export class Sheets {
       slider('Fixed vel', 1, 127, 1, s.fixedVelocity, (v) => String(v), (v) => { s.fixedVelocity = v; a.save(); }),
       slider('Curve', 0.6, 3, 0.1, s.velocityCurve, (v) => v.toFixed(1), (v) => { s.velocityCurve = v; a.save(); }),
       h('h3', {}, 'Layout & feel'),
-      h('div', { class: 'row' }, h('label', {}, 'Layout'), seg([{ v: 'auto', label: 'Auto' }, { v: 'phone', label: 'Phone' }, { v: 'tablet', label: 'Tablet' }] as any, s.deviceClass, (v: any) => { s.deviceClass = v; a.save(); a.emit('layout'); })),
+      h('div', { class: 'row' }, h('label', {}, 'Layout'), seg([{ v: 'auto', label: 'Auto' }, { v: 'phone', label: 'Phone' }, { v: 'tablet', label: 'Tablet' }] as any, s.deviceClass, (v: any) => { s.deviceClass = v; a.save(); a.emit('layout'); }, 'Layout mode')),
+      h('p', { class: 'note' }, 'Auto picks from screen size and orientation. Phone: compact 4×4 pads with mixer and quick buttons in a pull-up CONTROLS drawer. Tablet: pads with sequencer and mixer panels side by side. Layout is separate from the colour theme.'),
       h('div', { class: 'row' }, h('label', {}, 'Dominant hand'), seg([{ v: 'right', label: 'Right' }, { v: 'left', label: 'Left' }] as any, s.handedness, (v: any) => { s.handedness = v; a.save(); a.emit('layout'); })),
       h('div', { class: 'row' }, toggle('Haptics (Android vibrate)', s.haptics, (v) => { s.haptics = v; a.save(); }), toggle('Reduce motion', s.reduceMotion, (v) => { s.reduceMotion = v; a.save(); a.emit('theme'); })),
       slider('Master', 0, 1, 0.01, s.master, (v) => Math.round(v * 100) + '%', (v) => { s.master = v; a.engine.setMaster(v); a.save(); a.ccOut('master'); }),
@@ -275,6 +280,9 @@ export class Sheets {
       () => { update(); });
     const prevClose = this.unsub; this.unsub = () => { offs(); offCC(); offBle(); a.midiLearn = null; prevClose?.(); };
   }
+
+  /** Share / Post: screenshot, promo card, clip recording → native share sheet / Web Share / X / Facebook / download. */
+  share() { this.sharePanel.open(); }
 
   timingLab() { const { el, update } = timingLabBody(this.app); this.open('Timing Lab', el, update); }
 

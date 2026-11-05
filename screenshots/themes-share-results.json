@@ -1,0 +1,30 @@
+{
+  "at": "2026-11-03T02:34:27.464Z",
+  "results": {
+    "promo": {
+      "kind": "image",
+      "size": 846650,
+      "name": "sanctum-promo-2026-11-02-183407.png"
+    },
+    "screenshot": {
+      "kind": "image",
+      "size": 693794,
+      "name": "sanctum-screenshot-2026-11-02-183409.png"
+    },
+    "audio": {
+      "kind": "audio",
+      "size": 58837,
+      "mime": "audio/mp4;codecs=opus",
+      "name": "sanctum-clip-audio-2026-11-02-183413.m4a"
+    },
+    "audio-pill": "REC 0:02 · 13s lefttap to stop",
+    "video-vertical": {
+      "kind": "video",
+      "size": 867378,
+      "mime": "video/mp4;codecs=avc1.42002a,opus",
+      "name": "sanctum-clip-2026-11-02-183416.mp4"
+    },
+    "video-vertical-pill": "REC 0:02 · 13s lefttap to stop"
+  },
+  "errors": []
+}

@@ -1,13 +1,19 @@
 // Entry: license gate first. The app/engine/pads module is only imported after a valid license.
 import './styles.css';
 import './hardware.css';
+import './themes.css';
 import { Capacitor } from '@capacitor/core';
 import { checkLicense, activate } from './license/license';
 import { LockScreen } from './license/gate';
 import { extractCode } from './license/token';
 import type { LicensePayload } from './license/token';
 
-try { const t = JSON.parse(localStorage.getItem('sanctum.project.v1') || '{}').theme; if (['dark', 'light', 'warm'].includes(t)) document.documentElement.dataset.theme = t; } catch {}
+// Apply the saved colour theme + layout mode before anything renders (lock screen included).
+try {
+  const t = localStorage.getItem('sanctum.theme') || JSON.parse(localStorage.getItem('sanctum.project.v1') || '{}').theme;
+  if (['dark', 'light', 'warm', 'contrast', 'neon', 'minimal'].includes(t)) document.documentElement.dataset.theme = t;
+  const l = localStorage.getItem('sanctum.layout'); if (l === 'auto' || l === 'phone' || l === 'tablet') document.documentElement.dataset.layoutMode = l;
+} catch {}
 
 let mounted = false;
 let lock: LockScreen | null = null;

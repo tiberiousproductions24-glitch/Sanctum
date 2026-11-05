@@ -42,6 +42,7 @@ export class View {
 
   applyTheme() {
     document.documentElement.dataset.theme = this.app.p.theme;
+    try { localStorage.setItem('sanctum.theme', this.app.p.theme); } catch {}
     const meta = document.querySelector('meta[name=theme-color]'); const bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
     meta?.setAttribute('content', bg || '#0B0B0F');
     document.body.classList.toggle('reduce-motion', this.app.p.settings.reduceMotion || matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -66,7 +67,8 @@ export class View {
     const link = h('button', { class: 'chip link', 'aria-label': 'Ableton Link', onclick: () => this.sheets.sync() }, h('span', { class: 'led' }), 'LINK', h('span', { class: 'v' }, ''));
     const midi = h('button', { class: 'chip midi hide-phone', 'aria-label': 'MIDI', onclick: () => this.sheets.sync() }, h('span', { class: 'led' }), 'MIDI');
     const menu = h('button', { class: 'tbtn hide-phone', 'aria-label': 'Menu', onclick: () => this.sheets.menu() }, '⚙');
-    const status = h('header', { class: 'status' }, h('div', { class: 'mark', html: archPadSvg(false) + '<span class="word">SANCTUM</span>' }), rec, play, stop, lcd, lat, link, midi, menu);
+    const share = h('button', { class: 'tbtn share hide-phone', 'aria-label': 'Share or post a clip, screenshot or promo', title: 'Share / Post', onclick: () => this.sheets.share() }, '⤴', h('span', { class: 'hide-phone' }, 'SHARE'));
+    const status = h('header', { class: 'status' }, h('div', { class: 'mark', html: archPadSvg(false) + '<span class="word">SANCTUM</span>' }), rec, play, stop, lcd, lat, link, midi, share, menu);
     Object.assign(this.els, { rec, play, lcd, lat, link, midi });
 
     // track row
@@ -99,10 +101,14 @@ export class View {
     const padzone = h('section', { class: 'padzone' }, padsEl, sideacts);
     this.els.padsEl = padsEl; this.els.padzone = padzone; this.els.sideacts = sideacts;
 
-    // action bar
+    // action bar, wrapped in the phone "drawer": a handle that slides a controls panel up over the pads
     const actions = h('nav', { class: 'actions', 'aria-label': 'Pad actions' });
     this.els.actions = actions;
     this.buildActions(actions); this.buildActions(sideacts);
+    const drawerBody = h('div', { class: 'drawer-body', id: 'sanctum-drawer', role: 'region', 'aria-label': 'Controls drawer' });
+    const handle = h('button', { class: 'drawer-handle', 'aria-expanded': 'false', 'aria-controls': 'sanctum-drawer', onclick: () => this.toggleDrawer() }, h('i', { 'aria-hidden': 'true' }), h('span', { class: 'lbl' }, 'CONTROLS'));
+    const drawer = h('section', { class: 'drawer' }, drawerBody, handle, actions);
+    Object.assign(this.els, { drawer, drawerBody, handle });
 
     // tablet panels
     const browser = h('aside', { class: 'browser panel', 'aria-label': 'Sound browser' });
@@ -111,7 +117,7 @@ export class View {
     Object.assign(this.els, { browser, inspector, macro });
     browser.style.gridArea = 'browser'; inspector.style.gridArea = 'inspector';
 
-    r.append(status, track, browser, editor, inspector, padzone, macro, actions);
+    r.append(status, track, browser, editor, inspector, padzone, macro, drawer);
     this.relayout();
     this.renderAll();
   }
@@ -129,6 +135,29 @@ export class View {
     const edit = h('button', { class: 'act edit', 'aria-label': 'Edit the selected pad', onclick: () => this.sheets.padEditor(a.p.selectedPad) }, 'EDIT', h('small', {}, 'pad'));
     const more = h('button', { class: 'act', 'aria-label': 'Menu', onclick: () => this.sheets.menu() }, '☰', h('small', {}, 'menu'));
     host.append(nr, rate, full, six, edit, more);
+  }
+
+  toggleDrawer(open = !this.els.drawer.classList.contains('open')) {
+    this.els.drawer.classList.toggle('open', open);
+    this.els.handle.setAttribute('aria-expanded', String(open));
+    this.els.handle.querySelector('.lbl')!.textContent = open ? 'CLOSE' : 'CONTROLS';
+    if (open) this.renderDrawer();
+  }
+
+  /** Phone-layout controls drawer: mixer sliders + quick buttons (Share, Theme, Timing Lab, Link). */
+  renderDrawer() {
+    const a = this.app; const d = this.els.drawerBody; if (!d) return; d.innerHTML = '';
+    const sel = a.p.pads[a.p.selectedPad];
+    d.append(
+      slider('Tempo', 30, 300, 0.5, a.p.bpm, (v) => v.toFixed(1), (v) => a.setTempo(v)),
+      slider('Swing', 50, 75, 1, a.p.swing, (v) => v + '%', (v) => { a.p.swing = v; a.save(); a.ccOut('swing'); this.renderHeader(); }),
+      slider('Master', 0, 1, 0.01, a.p.settings.master, (v) => Math.round(v * 100) + '%', (v) => { a.p.settings.master = v; a.engine.setMaster(v); a.save(); a.ccOut('master'); }),
+      slider('Pad level', 0, 1.5, 0.01, sel.gain, (v) => Math.round(v * 100) + '%', (v) => { a.p.pads[a.p.selectedPad].gain = v; a.save(); a.ccOut('padLevel'); }),
+      h('div', { class: 'drawer-btns' },
+        h('button', { class: 'btn primary', onclick: () => { this.toggleDrawer(false); this.sheets.share(); } }, '⤴ Share / Post'),
+        h('button', { class: 'btn', onclick: () => { this.toggleDrawer(false); this.sheets.settings(); } }, 'Theme & layout'),
+        h('button', { class: 'btn', onclick: () => { this.toggleDrawer(false); this.sheets.timingLab(); } }, 'Timing Lab'),
+        h('button', { class: 'btn', onclick: () => { this.toggleDrawer(false); this.sheets.sync(); } }, 'Link / MIDI')));
   }
 
   private cycleRate() {
@@ -285,19 +314,25 @@ export class View {
   relayout() {
     const W = window.innerWidth, H = window.innerHeight;
     const forced = this.app.p.settings.deviceClass;
-    const tablet = forced === 'tablet' || (forced === 'auto' && Math.min(W, H) >= 600);
+    // Auto: tablet when the short side is ≥ 600 px, or a wide landscape window (≥ 1024 × 600, e.g. desktop / iPad split view)
+    const tablet = forced === 'tablet' || (forced === 'auto' && (Math.min(W, H) >= 600 || (W >= 1024 && H >= 560)));
     this.layout = tablet ? 'tablet' : 'phone';
     this.orient = W > H ? 'landscape' : 'portrait';
     const r = this.root;
     r.className = `layout-${this.layout} orient-${this.orient} hand-${this.app.p.settings.handedness}`;
+    // data-layout = resolved layout on #app; data-layout-mode = the user's choice (auto | phone | tablet) on <html>
+    r.dataset.layout = this.layout; r.dataset.orient = this.orient;
+    document.documentElement.dataset.layoutMode = forced;
+    try { localStorage.setItem('sanctum.layout', forced); } catch {}
+    if (this.layout !== 'phone' && this.els.drawer) this.toggleDrawer(false);
     // pad grid size: as big as possible (pads are the hero), keep the editor usable
-    const header = 52 + 47; const actions = 58;
+    const header = 52 + 47; const actions = this.layout === 'phone' ? 58 + 22 : 58;  // phone: + drawer handle
     let size: number;
     if (this.layout === 'phone') {
       if (this.orient === 'landscape') size = Math.min(H - header - actions - 12, W * 0.5);
       else size = Math.min(W - 16, H - header - actions - (H > 760 ? 230 : 120));
     } else if (this.orient === 'landscape') size = Math.min(H * 0.58, (W - 290) * 0.75, H - header - 290);
-    else size = Math.min(W - 24, H * 0.55);
+    else size = Math.min(W - 300, H * 0.5);   // tablet portrait: pads + mixer side by side
     size = Math.max(220, Math.floor(size));
     r.style.setProperty('--grid', size + 'px');
     this.renderSteps();
@@ -453,7 +488,7 @@ export class View {
 
   renderMacro() {
     const a = this.app; const m = this.els.macro; m.innerHTML = '';
-    m.append(h('div', { class: 'panel-title' }, 'Macro strip'));
+    m.append(h('div', { class: 'panel-title' }, 'Mixer & macros'));
     this.macro.tempo = slider('Tempo', 30, 300, 0.5, a.p.bpm, (v) => v.toFixed(1), (v) => a.setTempo(v));
     this.macro.swing = slider('Swing', 50, 75, 1, a.p.swing, (v) => v + '%', (v) => { a.p.swing = v; a.save(); a.ccOut('swing'); this.renderHeader(); });
     this.macro.master = slider('Master', 0, 1, 0.01, a.p.settings.master, (v) => Math.round(v * 100) + '%', (v) => { a.p.settings.master = v; a.engine.setMaster(v); a.save(); a.ccOut('master'); });
@@ -461,7 +496,7 @@ export class View {
     this.macro.gain = slider('Pad level', 0, 1.5, 0.01, sel.gain, (v) => Math.round(v * 100) + '%', (v) => { a.p.pads[a.p.selectedPad].gain = v; a.save(); a.ccOut('padLevel'); });
     this.macro.tune = slider('Pad tune', -12, 12, 1, sel.tune, (v) => (v > 0 ? '+' : '') + v + ' st', (v) => { a.p.pads[a.p.selectedPad].tune = v; a.save(); a.ccOut('padTune'); });
     m.append(this.macro.tempo, this.macro.swing, this.macro.master, this.macro.gain, this.macro.tune,
-      h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => this.sheets.timingLab() }, 'Timing Lab'), h('button', { class: 'btn', onclick: () => this.sheets.sync() }, 'Link / MIDI'), h('button', { class: 'btn', onclick: () => this.sheets.settings() }, 'Settings')));
+      h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => this.sheets.timingLab() }, 'Timing Lab'), h('button', { class: 'btn', onclick: () => this.sheets.sync() }, 'Link / MIDI'), h('button', { class: 'btn', onclick: () => this.sheets.settings() }, 'Settings'), h('button', { class: 'btn primary', onclick: () => this.sheets.share() }, '⤴ Share')));
   }
 
   private onEvent(w: string) {

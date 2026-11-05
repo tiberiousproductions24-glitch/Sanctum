@@ -1,7 +1,9 @@
 // Project state + crash-safe autosave (localStorage, debounced, plus rolling snapshots).
 export const PPQ = 960;
 export const BANKS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as const;
-export type Theme = 'dark' | 'light' | 'warm';
+export type Theme = 'dark' | 'light' | 'warm' | 'contrast' | 'neon' | 'minimal';
+export const THEMES: Theme[] = ['dark', 'light', 'warm', 'contrast', 'neon', 'minimal'];
+export type LayoutMode = 'auto' | 'phone' | 'tablet';
 export type QuantizeKey = 'off' | '1/4' | '1/8' | '1/8T' | '1/16' | '1/16T' | '1/32' | '1/32T';
 export const QUANT_TICKS: Record<QuantizeKey, number> = { off: 0, '1/4': 960, '1/8': 480, '1/8T': 320, '1/16': 240, '1/16T': 160, '1/32': 120, '1/32T': 80 };
 export type VelocityMode = 'auto' | 'position' | 'pressure' | 'fixed';
@@ -21,7 +23,7 @@ export interface Settings {
   linkEnabled: boolean; linkUrl: string; linkQuantum: number;
   midiClockOut: boolean; midiClockIn: boolean; midiNotesIn: boolean; midiNotesOut: boolean; midiChannel: number; ccMap: Record<string, string>; ccOut: boolean; midiOutId: string; midiInId: string; midiClockOffsetMs: number;
   loopLaunch: 'bar' | 'beat';
-  deviceClass: 'auto' | 'phone' | 'tablet';
+  deviceClass: LayoutMode;       // layout mode (separate from the colour theme)
   master: number;
 }
 

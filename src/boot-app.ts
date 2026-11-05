@@ -7,6 +7,7 @@ import { archPadSvg } from './ui/logo';
 import type { LicenseState } from './license/license';
 import type { LicensePayload } from './license/token';
 import { initNative } from './native';
+import { THEMES } from './state';
 
 export function mountApp(license: LicensePayload, st: LicenseState) {
   const app = new App();
@@ -18,7 +19,7 @@ export function mountApp(license: LicensePayload, st: LicenseState) {
 
   if (import.meta.env.DEV) {
     const q = new URLSearchParams(location.search);
-    if (q.get('theme') && ['dark', 'light', 'warm'].includes(q.get('theme')!)) { app.p.theme = q.get('theme') as any; app.emit('theme'); }
+    if (q.get('theme') && THEMES.includes(q.get('theme') as any)) { app.p.theme = q.get('theme') as any; app.emit('theme'); }
     if (q.get('layout') && ['phone', 'tablet', 'auto'].includes(q.get('layout')!)) { app.p.settings.deviceClass = q.get('layout') as any; app.emit('layout'); }
   }
   initNative(app);
