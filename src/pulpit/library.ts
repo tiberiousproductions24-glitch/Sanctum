@@ -17,7 +17,7 @@ export interface Playlist { id: string; name: string; items: PlaylistItem[] }
 export interface Collection { id: string; name: string; kind: ItemKind; ids: string[] }
 
 export const FEELS: Record<FeelId, Feel> = {
-  whoop:     { id: 'whoop',     name: 'Whoop (12/8 hold)',  bpm: 66,  beatsPerBar: 4, swing: 0.66, hint: 'Each tap holds a chord under the preacher. Tap again on the next phrase.' },
+  whoop:     { id: 'whoop',     name: 'Preaching hold (12/8)',  bpm: 66,  beatsPerBar: 4, swing: 0.66, hint: 'Each tap holds a chord under the preacher. Tap again on the next phrase.' },
   tuneup:    { id: 'tuneup',    name: 'Tuning up',          bpm: 60,  beatsPerBar: 4, swing: 0.5,  hint: 'Soft organ and cymbal swells while the preacher builds.' },
   ballad:    { id: 'ballad',    name: 'Ballad / hymn',      bpm: 64,  beatsPerBar: 3, swing: 0.5,  hint: 'Slow 3/4 hymn feel for singer backup.' },
   worship:   { id: 'worship',   name: 'Worship / altar',    bpm: 72,  beatsPerBar: 4, swing: 0.5,  hint: 'Pads and keys, light kit.' },
@@ -32,12 +32,12 @@ const st = (s: string): Step[] => s.trim().split(/\s+/).map((tok) => {
 });
 
 export const PROGRESSIONS: Progression[] = [
-  { id: 'whoop-14', name: 'Whoop 1–4', mode: 'major', feel: 'whoop', key: 'Ab', steps: st('I9 IV9 I9 IV9'), desc: 'The basic preacher back-and-forth. Tap on every phrase.', tags: ['preaching'] },
-  { id: 'whoop-145', name: 'Whoop 1–4–1–5', mode: 'major', feel: 'whoop', key: 'Ab', steps: st('I IV9 I V7sus V7'), desc: 'Home, lift, home, and set up the turnaround.', tags: ['preaching'] },
+  { id: 'whoop-14', name: 'Preaching 1–4', mode: 'major', feel: 'whoop', key: 'Ab', steps: st('I9 IV9 I9 IV9'), desc: 'The basic preacher back-and-forth. Tap on every phrase.', tags: ['preaching'] },
+  { id: 'whoop-145', name: 'Preaching 1–4–1–5', mode: 'major', feel: 'whoop', key: 'Ab', steps: st('I IV9 I V7sus V7'), desc: 'Home, lift, home, and set up the turnaround.', tags: ['preaching'] },
   { id: 'two-five-one', name: '2–5–1 resolve', mode: 'major', feel: 'whoop', key: 'Eb', steps: st('ii9 V13 Imaj9 I7'), desc: 'The jazz-gospel resolve. The I7 leads back to IV.', tags: ['preaching', 'turnaround'] },
   { id: 'one-six-two-five', name: '1–6–2–5 turnaround', mode: 'major', feel: 'whoop', key: 'Bb', steps: st('1(9) 6(7#9) 2m9 5(13)'), desc: 'The classic turnaround. Loops back to 1.', tags: ['preaching', 'turnaround'] },
   { id: 'passing-walk', name: 'Passing walk 1–4–#4°–1/5', mode: 'major', feel: 'whoop', key: 'G', steps: st('I9 IV13 #ivdim7 I/5 VI7#9 ii9 V13'), desc: 'The church walk-up from 1 to 4 and back home through 6–2–5. Same changes as the Shout Guitar/Bass passing loops.', tags: ['preaching', 'walk'] },
-  { id: 'minor-whoop', name: 'Minor whoop i–iv', mode: 'minor', feel: 'whoop', key: 'Fm', steps: st('i9 iv9 i9 V7#9'), desc: 'Dark, heavy whoop for the minor preacher.', tags: ['preaching', 'minor'] },
+  { id: 'minor-whoop', name: 'Minor preaching i–iv', mode: 'minor', feel: 'whoop', key: 'Fm', steps: st('i9 iv9 i9 V7#9'), desc: 'Dark, heavy whoop for the minor preacher.', tags: ['preaching', 'minor'] },
   { id: 'minor-walk', name: 'Minor 1–6–5', mode: 'minor', feel: 'whoop', key: 'Cm', steps: st('i9 bVImaj7 V7#9 i9'), desc: 'Minor whoop with a bVI lift.', tags: ['preaching', 'minor'] },
   { id: 'band-hits', name: 'Band hits (stabs)', mode: 'major', feel: 'praise', key: 'Ab', steps: st('I! IV! I! V7!'), desc: 'Short, punched band hits that answer the preacher.', tags: ['hits'] },
   { id: 'tune-up', name: 'Tuning up', mode: 'major', feel: 'tuneup', key: 'Eb', steps: st('I IV/1 I V7sus ~V7'), desc: 'Pre-whoop organ "tune up" with a run into the 5.', tags: ['preaching', 'intro'] },
@@ -100,7 +100,7 @@ export const SHOUT_SETS: ShoutSet[] = [
 ];
 
 export const COLLECTIONS: Collection[] = [
-  { id: 'preaching', name: 'Preaching (whoop)', kind: 'progression', ids: ['tune-up', 'whoop-14', 'whoop-145', 'two-five-one', 'one-six-two-five', 'passing-walk', 'minor-whoop', 'minor-walk', 'band-hits'] },
+  { id: 'preaching', name: 'Preaching hold', kind: 'progression', ids: ['tune-up', 'whoop-14', 'whoop-145', 'two-five-one', 'one-six-two-five', 'passing-walk', 'minor-whoop', 'minor-walk', 'band-hits'] },
   { id: 'singer', name: 'Singer backup (hymns)', kind: 'song', ids: ['amazing-grace', 'blessed-assurance', 'little-light', 'call-response'] },
   { id: 'shout', name: 'Shout', kind: 'shout', ids: ['shout-14', 'shout-1415', 'shout-minor', 'shout-fast-1625'] },
   { id: 'worship', name: 'Worship & altar', kind: 'progression', ids: ['altar-call', 'two-five-one'] },

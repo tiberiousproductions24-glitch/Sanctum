@@ -8,6 +8,7 @@ export interface Trig {
   vel: number;         // 0..1 linear gain from velocity curve
   gain?: number; pan?: number; rate?: number; loop?: boolean;
   choke?: string; key?: string; mono?: boolean;
+  decay?: number;       // seconds; 0 = full sample (worklet envelope)
 }
 export interface EngineStats { voices: number; late: number; peak: number; frame: number; queued: number }
 export interface LatencyInfo { base: number; output: number; sampleRate: number; hint: number | string; mode: string; state: string }
@@ -110,8 +111,8 @@ export class Engine {
     return performance.now() + (t - c.currentTime + l.base + l.output) * 1000;
   }
 
-  register(id: string, ch: Float32Array[], sr: number) {
-    const s = { ch, sr }; this.samples.set(id, s); if (this.ctx) this.upload(id, s);
+  register(id: string, ch: Float32Array[], sr?: number) {
+    const s = { ch, sr: sr || this.sampleRate }; this.samples.set(id, s); if (this.ctx) this.upload(id, s);
   }
   has(id: string) { return this.samples.has(id); }
 
@@ -132,7 +133,7 @@ export class Engine {
     const ctx = this.ctx; if (!ctx) return;
     if (this.mode === 'worklet' && this.node) {
       const at = o.at <= ctx.currentTime ? 0 : this.frame(o.at);
-      this.node.port.postMessage({ t: 'trig', at, id: o.id, vel: o.vel, gain: o.gain ?? 1, pan: o.pan ?? 0, rate: o.rate ?? 1, loop: !!o.loop, choke: o.choke, key: o.key, mono: !!o.mono });
+      this.node.port.postMessage({ t: 'trig', at, id: o.id, vel: o.vel, gain: o.gain ?? 1, pan: o.pan ?? 0, rate: o.rate ?? 1, loop: !!o.loop, choke: o.choke, key: o.key, mono: !!o.mono, decay: o.decay ?? 0 });
       return;
     }
     const b = this.buffers.get(o.id); if (!b || !this.master) return;

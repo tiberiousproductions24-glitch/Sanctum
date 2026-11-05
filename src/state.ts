@@ -11,10 +11,11 @@ export type AccessState = 'owner' | 'locked' | 'invite' | 'expired' | 'revoked' 
 
 export interface NoteEvent { p: number; t: number; v: number }   // pad (0..127 = bank*16+pad), tick, velocity 1..127
 export interface Pattern { name: string; bars: number; events: NoteEvent[] }
-export interface PadSlot { sound: string | null; gain: number; pan: number; tune: number; mute: boolean }
+export interface PadSlot { sound: string | null; gain: number; pan: number; tune: number; decay: number; mute: boolean }
+export type VelocityCurvePreset = 'soft' | 'linear' | 'hard' | 'fixed-curve';
 
 export interface Settings {
-  velocityMode: VelocityMode; fixedVelocity: number; velocityCurve: number;
+  velocityMode: VelocityMode; fixedVelocity: number; velocityCurve: number; velocityPreset: VelocityCurvePreset;
   latencyHint: number;          // seconds; 0 = 'interactive'
   touchCompMs: number;          // input-path (touch) latency compensation for recording
   preLightMs: number;           // visual pre-light ahead of audible sound for sequenced notes
@@ -33,6 +34,7 @@ export interface Project {
   version: 1;
   bpm: number; swing: number; swingRes: 8 | 16; quantize: QuantizeKey; noteRepeatRate: QuantizeKey;
   patterns: Pattern[]; currentPattern: number;
+  songChain: number[]; songMode: boolean;  // pattern indices to play in order; empty = off
   pads: PadSlot[]; bankSources: (string | null)[]; currentBank: number; selectedPad: number;
   theme: Theme; settings: Settings; lab: Lab; access: AccessState;
   savedAt?: string;
@@ -44,11 +46,12 @@ export function defaultProject(): Project {
   return {
     version: 1, bpm: 92, swing: 56, swingRes: 16, quantize: '1/16', noteRepeatRate: '1/16',
     patterns: Array.from({ length: 8 }, (_, i) => emptyPattern(i)), currentPattern: 0,
-    pads: Array.from({ length: 128 }, () => ({ sound: null, gain: 1, pan: 0, tune: 0, mute: false })),
+    pads: Array.from({ length: 128 }, () => ({ sound: null, gain: 1, pan: 0, tune: 0, decay: 0, mute: false })),
+    songChain: [], songMode: false,
     bankSources: Array(8).fill(null), currentBank: 0, selectedPad: 0,
     theme: 'dark',
     settings: {
-      velocityMode: 'auto', fixedVelocity: 110, velocityCurve: 1.6,
+      velocityMode: 'auto', fixedVelocity: 110, velocityCurve: 1.6, velocityPreset: 'hard',
       latencyHint: 0, touchCompMs: 0, preLightMs: 8,
       metronome: false, countIn: false, haptics: true, reduceMotion: false, handedness: 'right',
       linkEnabled: false, linkUrl: '', linkQuantum: 4,
@@ -71,6 +74,10 @@ export function loadProject(): { project: Project; restored: boolean } {
       const d = defaultProject();
       const project: Project = { ...d, ...p, settings: { ...d.settings, ...(p.settings || {}) }, lab: { ...d.lab, ...(p.lab || {}) } };
       if (!Array.isArray(project.pads) || project.pads.length !== 128) project.pads = d.pads;
+      else project.pads = project.pads.map((pad: any, i: number) => ({ ...d.pads[i], ...pad, decay: pad.decay ?? 0 }));
+      if (!Array.isArray(project.songChain)) project.songChain = [];
+      if (typeof project.songMode !== 'boolean') project.songMode = false;
+      if (!project.settings.velocityPreset) project.settings.velocityPreset = 'hard';
       if (!Array.isArray(project.patterns) || project.patterns.length === 0) project.patterns = d.patterns;
       return { project, restored: true };
     }

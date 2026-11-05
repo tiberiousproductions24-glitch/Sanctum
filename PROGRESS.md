@@ -55,3 +55,10 @@ All times Pacific (PDT).
 - E. Release keystore in android-signing/ (gitignored); signed release APK release/Sanctum-v0.2.0.apk (~8.1 MB, apksigner v2 OK) + debug release/Sanctum-v0.2.0-debug.apk. Custom Keystone S adaptive icon + Arch Pad splash (npm run android:assets).
 - Smoke 24/24 (browser): lock blocks pads, garbage/tampered/expired rejected, invite unlocks, admin unlocks + Admin panel, a11y tree, plus all previous audio/sequencer/Link checks; also passed against the OGG-only Android dist.
 - Not verified on a device: emulator not run (/dev/kvm not accessible to this user), no USB/BLE MIDI hardware or DAW here.
+
+## Thu Nov 5 2026 — v0.3.0 Sanctum Pulpit + Voice Follow + signed APK
+- Step 0: `npm run build` green; smoke 24/24 after Link phase sampling harden; committed Nov 2 work (themes, share, integrations, Pulpit libs, promo) as 5a97866. Fixed Roman `bVI` (major-relative accidentals) and key-detect phrase-end weighting so `pulpit-test` PASS.
+- **Sanctum Pulpit** screen: Easy Play, 12 keys (hold-to-detect), quantized key change, tempo, Shout/Worship 1–4, mutes, stop/fade, HIT, Full Band / Organ + Drums, organ runs, Stage Mode lock, progression picker + editable autosaved sequence. Original synthesized chords/grooves via `src/pulpit/tones.ts` + player; theory/library/keydetect wired.
+- **Follow Voice**: on-device cadence (onset/phrase) + YIN pitch → hits, chord pick, level hysteresis, tempo hint when not Linked; mic never to speakers; graceful without permission. Tests with synthetic AM voice in `pulpit-test.mjs`.
+- Also: pad decay (worklet envelope), velocity feel presets, song-mode pattern chain, Pulpit follows Link tempo, CREDITS.md, MANUAL Pulpit section, CHANGELOG.md. APK Sanctum-v0.3.0 (versionCode 3).
+- IP: no Whoop Triggerz name/branding/audio in UI; research doc keeps factual attribution. User-facing "Whoop" feel labels renamed to Preaching hold.

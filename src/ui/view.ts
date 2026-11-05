@@ -4,6 +4,7 @@ import { BANKS, PPQ, QUANT_TICKS, type QuantizeKey } from '../state';
 import { h, $, toast, slider } from './dom';
 import { archPadSvg } from './logo';
 import type { Sheets } from './sheets';
+import { PulpitUI } from '../pulpit/ui';
 
 const PAD_ORDER = [12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3]; // DOM order -> pad index (pad 1 bottom-left)
 const KEYMAP: Record<string, number> = { Digit1: 12, Digit2: 13, Digit3: 14, Digit4: 15, KeyQ: 8, KeyW: 9, KeyE: 10, KeyR: 11, KeyA: 4, KeyS: 5, KeyD: 6, KeyF: 7, KeyZ: 0, KeyX: 1, KeyC: 2, KeyV: 3 };
@@ -22,6 +23,7 @@ export class View {
   private macro: Record<string, any> = {};
   private live = h('div', { class: 'sr-only', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' });
   private tempoT = 0;
+  pulpitUI: PulpitUI | null = null;
   /** Screen-reader announcement (polite live region). */
   announce(msg: string) { this.live.textContent = ''; requestAnimationFrame(() => { this.live.textContent = msg; }); }
 
@@ -30,6 +32,8 @@ export class View {
     app.flash = (pad16, vel, x, y) => this.flash(pad16, vel, x, y);
     app.scheduleFlash = (g, vel, t) => { if (Math.floor(g / 16) === app.p.currentBank || app.sixteenLevels) this.visQ.push({ pad: g % 16, vel, t }); };
     this.build();
+    this.pulpitUI = new PulpitUI(app);
+    app.pulpit = this.pulpitUI;
     app.on((w) => this.onEvent(w));
     window.addEventListener('resize', () => this.relayout());
     window.addEventListener('orientationchange', () => setTimeout(() => this.relayout(), 200));
@@ -38,6 +42,11 @@ export class View {
     // block page-level gestures (pinch zoom / double-tap zoom on iOS)
     document.addEventListener('gesturestart', (e) => e.preventDefault());
     document.addEventListener('dblclick', (e) => e.preventDefault());
+  }
+
+  openPulpit() {
+    if (!this.app.started) this.app.start().then(() => this.pulpitUI?.open());
+    else this.pulpitUI?.open();
   }
 
   applyTheme() {
@@ -68,7 +77,8 @@ export class View {
     const midi = h('button', { class: 'chip midi hide-phone', 'aria-label': 'MIDI', onclick: () => this.sheets.sync() }, h('span', { class: 'led' }), 'MIDI');
     const menu = h('button', { class: 'tbtn hide-phone', 'aria-label': 'Menu', onclick: () => this.sheets.menu() }, '⚙');
     const share = h('button', { class: 'tbtn share hide-phone', 'aria-label': 'Share or post a clip, screenshot or promo', title: 'Share / Post', onclick: () => this.sheets.share() }, '⤴', h('span', { class: 'hide-phone' }, 'SHARE'));
-    const status = h('header', { class: 'status' }, h('div', { class: 'mark', html: archPadSvg(false) + '<span class="word">SANCTUM</span>' }), rec, play, stop, lcd, lat, link, midi, share, menu);
+    const pulpit = h('button', { class: 'tbtn pulpitBtn', 'aria-label': 'Open Sanctum Pulpit', title: 'Pulpit', onclick: () => this.openPulpit() }, '✝', h('span', { class: 'hide-phone' }, 'PULPIT'));
+    const status = h('header', { class: 'status' }, h('div', { class: 'mark', html: archPadSvg(false) + '<span class="word">SANCTUM</span>' }), rec, play, stop, lcd, lat, link, midi, pulpit, share, menu);
     Object.assign(this.els, { rec, play, lcd, lat, link, midi });
 
     // track row
@@ -154,7 +164,8 @@ export class View {
       slider('Master', 0, 1, 0.01, a.p.settings.master, (v) => Math.round(v * 100) + '%', (v) => { a.p.settings.master = v; a.engine.setMaster(v); a.save(); a.ccOut('master'); }),
       slider('Pad level', 0, 1.5, 0.01, sel.gain, (v) => Math.round(v * 100) + '%', (v) => { a.p.pads[a.p.selectedPad].gain = v; a.save(); a.ccOut('padLevel'); }),
       h('div', { class: 'drawer-btns' },
-        h('button', { class: 'btn primary', onclick: () => { this.toggleDrawer(false); this.sheets.share(); } }, '⤴ Share / Post'),
+        h('button', { class: 'btn primary', onclick: () => { this.toggleDrawer(false); this.openPulpit(); } }, '✝ Pulpit'),
+        h('button', { class: 'btn', onclick: () => { this.toggleDrawer(false); this.sheets.share(); } }, '⤴ Share / Post'),
         h('button', { class: 'btn', onclick: () => { this.toggleDrawer(false); this.sheets.settings(); } }, 'Theme & layout'),
         h('button', { class: 'btn', onclick: () => { this.toggleDrawer(false); this.sheets.timingLab(); } }, 'Timing Lab'),
         h('button', { class: 'btn', onclick: () => { this.toggleDrawer(false); this.sheets.sync(); } }, 'Link / MIDI')));

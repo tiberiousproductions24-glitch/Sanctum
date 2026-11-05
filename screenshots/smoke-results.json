@@ -1,5 +1,5 @@
 {
-  "at": "Thu Nov 05 2026 08:25:21 GMT-0800 (Pacific Standard Time)",
+  "at": "Thu Nov 05 2026 08:32:05 GMT-0800 (Pacific Standard Time)",
   "results": [
     {
       "name": "locked: only the lock screen mounts (no pads, no app/engine)",
@@ -39,7 +39,7 @@
     {
       "name": "audio engine starts (render thread running)",
       "pass": true,
-      "info": "{\"mode\":\"worklet\",\"sr\":48000,\"state\":\"running\",\"t\":0.128,\"frame\":4608,\"lat\":{\"base\":0.010666666666666666,\"output\":0.032,\"sampleRate\":48000,\"hint\":\"interactive\",\"mode\":\"worklet\",\"state\":\"running\"}}"
+      "info": "{\"mode\":\"worklet\",\"sr\":48000,\"state\":\"running\",\"t\":0.10666666666666667,\"frame\":4608,\"lat\":{\"base\":0.010666666666666666,\"output\":0.032,\"sampleRate\":48000,\"hint\":\"interactive\",\"mode\":\"worklet\",\"state\":\"running\"}}"
     },
     {
       "name": "AudioWorklet engine active",
@@ -54,7 +54,7 @@
     {
       "name": "pad tap produces audio (worklet voices/peak)",
       "pass": true,
-      "info": "{\"voices\":1,\"late\":0,\"peak\":0.3011994338327646,\"frame\":25088,\"queued\":0}"
+      "info": "{\"voices\":1,\"late\":0,\"peak\":0.30666743544220926,\"frame\":16896,\"queued\":0}"
     },
     {
       "name": "multi-touch (2 pads) triggers",
@@ -64,7 +64,7 @@
     {
       "name": "sequencer plays pattern",
       "pass": true,
-      "info": "{\"playing\":true,\"tick\":2125.5679999999993,\"voices\":6,\"late\":0,\"events\":14}"
+      "info": "{\"playing\":true,\"tick\":2125.5679999999993,\"voices\":5,\"late\":0,\"events\":14}"
     },
     {
       "name": "no late (unscheduled) events",
@@ -84,12 +84,12 @@
     {
       "name": "loop pad launches on next bar, tempo-synced rate",
       "pass": true,
-      "info": "{\"at\":3.554028985507246,\"now\":3.2106666666666666,\"startRel\":0,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
+      "info": "{\"at\":3.3940289855072465,\"now\":3.0613333333333332,\"startRel\":0,\"rate\":0.6969718750000001,\"bpm\":92,\"soundBpm\":132}"
     },
     {
       "name": "Timing Lab tap test measures input offset and sets recording correction",
       "pass": true,
-      "info": "{\"off\":27.575666657726927,\"jit\":0.2407436070707742,\"comp\":27.6}"
+      "info": "{\"off\":24.55466666368622,\"jit\":0.337388203538343,\"comp\":24.6}"
     },
     {
       "name": "autosave restores project on reload",
@@ -99,17 +99,52 @@
     {
       "name": "Link: bridge connected, peer visible, tempo follows peer (97)",
       "pass": true,
-      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":1.656405482121503,\"rtt\":387.79999999701977,\"chip\":\"LINK1\"}"
+      "info": "{\"connected\":true,\"peers\":1,\"bpm\":96.999953,\"backend\":\"relay\",\"appBpm\":97,\"clockBpm\":96.999953,\"offsetMs\":0.23242859226752838,\"rtt\":365.79999999701977,\"chip\":\"LINK1\"}"
     },
     {
       "name": "Link: phase error < 5 ms",
       "pass": true,
-      "info": "offset=1.66 ms"
+      "info": "offset=0.23 ms"
     },
     {
       "name": "Link: app tempo change propagates to the other peer",
       "pass": true,
-      "info": "[peer] t=1793895911879 peers=1 bpm=111.00 beat=48.408 phase=0.408"
+      "info": "[peer] t=1793896314214 peers=1 bpm=111.00 beat=49.193 phase=1.193"
+    },
+    {
+      "name": "Pulpit screen opens",
+      "pass": true,
+      "info": ""
+    },
+    {
+      "name": "Easy Play advances chords and produces audio",
+      "pass": true,
+      "info": "{\"before\":{\"idx\":0,\"chord\":null,\"peak\":0,\"voices\":0},\"afterEasy\":{\"idx\":1,\"chord\":\"Ab9\",\"peak\":0.623765105009079,\"voices\":2,\"playing\":true}}"
+    },
+    {
+      "name": "Pulpit key change lands on beat",
+      "pass": true,
+      "info": "{\"key\":0,\"pending\":null}"
+    },
+    {
+      "name": "Shout/Worship level switch",
+      "pass": true,
+      "info": "{\"shout\":3,\"worship\":{\"s\":0,\"w\":2}}"
+    },
+    {
+      "name": "Pulpit mute works",
+      "pass": true,
+      "info": "{\"d\":true,\"m\":true}"
+    },
+    {
+      "name": "Stage Mode lock blocks leaving Pulpit",
+      "pass": true,
+      "info": "stage lock held screen open"
+    },
+    {
+      "name": "Pulpit autosaves custom progression",
+      "pass": true,
+      "info": "[{\"c\":\"I\"},{\"c\":\"IV\"},{\"c\":\"V7\"},{\"c\":\"I\"}]"
     },
     {
       "name": "a11y: 16 named pads + labelled step checkboxes + live announcements",

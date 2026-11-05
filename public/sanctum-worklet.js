@@ -66,6 +66,7 @@ class SanctumProcessor extends AudioWorkletProcessor {
       gl: g * Math.cos((pan + 1) * Math.PI / 4) * Math.SQRT2,
       gr: g * Math.sin((pan + 1) * Math.PI / 4) * Math.SQRT2,
       key: m.key, choke: m.choke, start: offset, fade: 0, fadeStart: 0, srcRate: s.sr / sampleRate,
+      decay: Math.max(0, m.decay || 0),
     });
   }
 
@@ -105,12 +106,19 @@ class SanctumProcessor extends AudioWorkletProcessor {
         const j = idx + 1 < len ? idx + 1 : (v.loop ? 0 : idx);
         let a = ch0[idx] + (ch0[j] - ch0[idx]) * fr;
         let b = ch1[idx] + (ch1[j] - ch1[idx]) * fr;
+        let eg = 1;
+        if (v.decay > 0) {
+          // elapsed seconds ≈ sample position / source sample rate
+          const tSec = v.pos / (v.s.sr || sampleRate);
+          eg = Math.exp(-tSec / v.decay);
+          if (eg < 0.002) { done = true; break; }
+        }
         if (v.fade && i >= v.fadeStart) {
           const k = v.fade / FADE_FRAMES; a *= k; b *= k;
           if (--v.fade <= 0) { done = true; break; }
         }
-        L[i] += a * v.gl;
-        R[i] += b * v.gr;
+        L[i] += a * v.gl * eg;
+        R[i] += b * v.gr * eg;
         v.pos += v.rate;
       }
       v.start = 0; v.fadeStart = 0;

@@ -48,6 +48,7 @@ export class App {
   private warned = '';
   fromMidi = false;
   midiLearn: CcTarget | null = null;
+  pulpit: any = null; // set by View (PulpitUI)
 
   constructor() {
     const { project, restored } = loadProject();
@@ -185,6 +186,12 @@ export class App {
   // ---------- pads ----------
   soundOf(globalPad: number) { const id = this.p.pads[globalPad]?.sound; return id ? this.sounds.get(id) : undefined; }
   velGain(vel: number) { return Math.pow(Math.max(1, Math.min(127, vel)) / 127, this.p.settings.velocityCurve); }
+  setVelocityPreset(preset: 'soft' | 'linear' | 'hard' | 'fixed-curve') {
+    const map = { soft: 0.7, linear: 1.0, hard: 1.6, 'fixed-curve': 2.4 } as const;
+    this.p.settings.velocityPreset = preset;
+    this.p.settings.velocityCurve = map[preset];
+    this.save(); this.emit('settings');
+  }
 
   padDown(pad16: number, vel: number, perfMs: number, pointerId: number, x?: number, y?: number, src: 'touch' | 'midi' | 'key' = 'touch') {
     if (!this.started) this.start();
@@ -218,7 +225,7 @@ export class App {
     if (s.kind === 'loop') { if (src !== 'live') this.startLoop(global, at || this.engine.now); return; }
     const bank = Math.floor(global / 16);
     this.engine.trigger({ at, id: s.id, vel: this.velGain(vel), gain: slot.gain, pan: slot.pan, rate: Math.pow(2, slot.tune / 12),
-      choke: s.choke ? `${bank}:${s.choke}` : undefined, key: 'p' + global });
+      choke: s.choke ? `${bank}:${s.choke}` : undefined, key: 'p' + global, decay: slot.decay > 0 ? slot.decay : undefined });
     if (this.p.settings.midiNotesOut && !this.fromMidi) this.midi.sendNote(36 + (global % 16), vel, at ? this.engine.ctxToPerf(at) + this.p.settings.midiClockOffsetMs : undefined, (this.p.settings.midiChannel - 1) & 15);
     if (src !== 'live') this.scheduleFlash(global, vel, this.engine.ctxToPerf(at) - this.p.settings.preLightMs);
   }

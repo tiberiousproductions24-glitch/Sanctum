@@ -169,19 +169,47 @@ export class Sequencer {
     const p = this.proj();
 
     if (this.playing) {
-      const start = this.playStartBeat; const Lb = this.patternTicks / PPQ;
-      // pattern events
+      const start = this.playStartBeat;
+      // Song mode: each cycle can pull a different pattern from songChain (pattern chaining).
+      const chain = (p.songMode && p.songChain && p.songChain.length) ? p.songChain : null;
+      const barsOf = (idx: number) => (p.patterns[idx]?.bars || 2);
+      // When not chaining, one fixed pattern length; when chaining, length varies per slot — use current pattern's bars for the cycle index math by expanding a timeline.
+      const Lb = this.patternTicks / PPQ;
       const relFrom = from - start, relTo = to - start;
       if (relTo > 0) {
-        const c0 = Math.floor(Math.max(0, relFrom) / Lb), c1 = Math.floor(relTo / Lb);
-        for (let c = c0; c <= c1; c++) {
-          for (const ev of this.pattern.events) {
-            const b = start + c * Lb + this.warp(ev.t) / PPQ;
-            if (b >= from && b < to) {
-              const sk = this.skip.get(ev);
-              if (sk != null && Math.abs(sk - b) < 0.01) { this.skip.delete(ev); continue; }
-              this.hooks.voice(ev.p, ev.v, this.clock.timeAt(b), 'seq');
+        if (!chain) {
+          const c0 = Math.floor(Math.max(0, relFrom) / Lb), c1 = Math.floor(relTo / Lb);
+          for (let c = c0; c <= c1; c++) {
+            for (const ev of this.pattern.events) {
+              const b = start + c * Lb + this.warp(ev.t) / PPQ;
+              if (b >= from && b < to) {
+                const sk = this.skip.get(ev);
+                if (sk != null && Math.abs(sk - b) < 0.01) { this.skip.delete(ev); continue; }
+                this.hooks.voice(ev.p, ev.v, this.clock.timeAt(b), 'seq');
+              }
             }
+          }
+        } else {
+          // Build cycle starts in beats for a few cycles ahead
+          let beatCursor = 0; let cycle = 0;
+          const maxBeat = relTo + 16;
+          while (beatCursor < maxBeat) {
+            const idx = chain[cycle % chain.length];
+            const pat = p.patterns[idx]; if (!pat) break;
+            const lenB = pat.bars * 4;
+            const cStart = start + beatCursor, cEnd = cStart + lenB;
+            if (cEnd >= from && cStart < to) {
+              // switch display pattern at cycle boundary
+              if (relFrom < beatCursor + lenB && relFrom >= beatCursor && p.currentPattern !== idx) {
+                p.currentPattern = idx; this.hooks.onPosition?.(0, 0);
+              }
+              for (const ev of pat.events) {
+                const b = cStart + this.warp(ev.t) / PPQ;
+                if (b >= from && b < to) this.hooks.voice(ev.p, ev.v, this.clock.timeAt(b), 'seq');
+              }
+            }
+            beatCursor += lenB; cycle++;
+            if (cycle > 64) break;
           }
         }
       }

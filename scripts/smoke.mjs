@@ -220,6 +220,49 @@ try {
   await page.evaluate(() => window.__sanctum.sheets.sounds()); await shoot(page, 'phone-dark-sounds');
   await page.evaluate(() => window.__sanctum.sheets.close());
   await page.evaluate(() => window.__sanctum.app.setLink(false));
+
+  // ---------- Sanctum Pulpit ----------
+  {
+    await page.evaluate(() => window.__sanctum.view.openPulpit());
+    await sleep(400);
+    const opened = await page.evaluate(() => !!document.getElementById('sanctum-pulpit'));
+    ok('Pulpit screen opens', opened);
+    const before = await page.evaluate(() => { const p = window.__sanctum.app.pulpit.player; return { idx: p.state.stepIndex, chord: p.state.lastChord?.name || null, peak: window.__sanctum.app.engine.stats.peak, voices: window.__sanctum.app.engine.stats.voices }; });
+    await page.evaluate(() => window.__sanctum.app.pulpit.player.easyPlay());
+    await sleep(250);
+    const afterEasy = await page.evaluate(() => { const p = window.__sanctum.app.pulpit.player; return { idx: p.state.stepIndex, chord: p.state.lastChord?.name || null, peak: window.__sanctum.app.engine.stats.peak, voices: window.__sanctum.app.engine.stats.voices, playing: p.state.playing }; });
+    ok('Easy Play advances chords and produces audio', afterEasy.idx !== before.idx && !!afterEasy.chord && (afterEasy.voices > 0 || afterEasy.peak > before.peak || afterEasy.peak > 0.01), JSON.stringify({ before, afterEasy }));
+    // Quantized key change: start playing, request next key, wait for a beat
+    await page.evaluate(() => { const pl = window.__sanctum.app.pulpit.player; pl.setBpm(120); pl.start(); pl.setKey({ tonic: 0, mode: 'major' }, 'beat'); });
+    await sleep(600);
+    const keyLand = await page.evaluate(() => { const pl = window.__sanctum.app.pulpit.player; return { key: pl.state.key.tonic, pending: pl.state.pendingKey }; });
+    ok('Pulpit key change lands on beat', keyLand.key === 0 && keyLand.pending == null, JSON.stringify(keyLand));
+    await page.evaluate(() => window.__sanctum.app.pulpit.player.setShout(3));
+    const shout = await page.evaluate(() => window.__sanctum.app.pulpit.player.state.shoutLevel);
+    await page.evaluate(() => window.__sanctum.app.pulpit.player.setWorship(2));
+    const worship = await page.evaluate(() => ({ s: window.__sanctum.app.pulpit.player.state.shoutLevel, w: window.__sanctum.app.pulpit.player.state.worshipLevel }));
+    ok('Shout/Worship level switch', shout === 3 && worship.s === 0 && worship.w === 2, JSON.stringify({ shout, worship }));
+    await page.evaluate(() => { const pl = window.__sanctum.app.pulpit.player; pl.setMusicMute(true); pl.setDrumsMute(true); });
+    const mutes = await page.evaluate(() => { const s = window.__sanctum.app.pulpit.player.state; return { d: s.drumsMute, m: s.musicMute }; });
+    ok('Pulpit mute works', mutes.d && mutes.m, JSON.stringify(mutes));
+    await page.evaluate(() => window.__sanctum.app.pulpit.player.setStageLock(true));
+    const lockedNav = await page.evaluate(() => { window.__sanctum.app.pulpit.close(); return !!document.getElementById('sanctum-pulpit') && window.__sanctum.app.pulpit.player.state.stageLock; });
+    ok('Stage Mode lock blocks leaving Pulpit', lockedNav, 'stage lock held screen open');
+    await page.evaluate(() => window.__sanctum.app.pulpit.player.setStageLock(false));
+    // Autosave custom progression
+    await page.evaluate(() => { const pl = window.__sanctum.app.pulpit.player; pl.setCustomSteps([{ c: 'I' }, { c: 'IV' }, { c: 'V7' }, { c: 'I' }]); });
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('sanctum.pulpit.v1') || '{}'));
+    ok('Pulpit autosaves custom progression', Array.isArray(saved.customSteps) && saved.customSteps.length === 4 && saved.customSteps[2].c === 'V7', JSON.stringify(saved.customSteps));
+    // Screenshots: Pulpit in Neon + Warm, phone + tablet later
+    await page.evaluate(() => { const a = window.__sanctum.app; a.p.theme = 'neon'; a.emit('theme'); window.__sanctum.app.pulpit.player.setMusicMute(false); window.__sanctum.app.pulpit.player.setDrumsMute(false); });
+    await sleep(200);
+    await shoot(page, 'phone-neon-pulpit');
+    await page.evaluate(() => { const a = window.__sanctum.app; a.p.theme = 'warm'; a.emit('theme'); });
+    await sleep(200);
+    await shoot(page, 'phone-warm-pulpit');
+    await page.evaluate(() => { window.__sanctum.app.pulpit.player.setStageLock(false); window.__sanctum.app.pulpit.close(); });
+  }
+
   // accessibility tree (what TalkBack/VoiceOver get): named pads, step checkboxes, live region, radio theme picker
   {
     const snap = await page.accessibility.snapshot({ interestingOnly: true });

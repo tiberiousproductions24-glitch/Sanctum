@@ -39,7 +39,7 @@ export class Sheets {
   menu() {
     const items: [string, () => void][] = [
       ['Tempo & Sequencer', () => this.transport()], ['Note Repeat', () => this.noteRepeat()], ['Pad Editor', () => this.padEditor(this.app.p.selectedPad)],
-      ['Share / Post', () => this.share()], ['Sounds', () => this.sounds()], ['Timing Lab', () => this.timingLab()], ['Link & MIDI', () => this.sync()],
+      ['Pulpit (preacher backup)', () => this.view.openPulpit()], ['Share / Post', () => this.share()], ['Sounds', () => this.sounds()], ['Timing Lab', () => this.timingLab()], ['Link & MIDI', () => this.sync()],
       ['Settings & Theme', () => this.settings()], ['Credits', () => this.credits()], ['Help', () => this.help()], ...(this.app.isAdmin ? [['Admin', () => this.admin()] as [string, () => void]] : []),
     ];
     this.open('Sanctum', h('div', { class: 'menu-grid' }, items.map(([l, f]) => h('button', { onclick: f }, l))));
@@ -64,6 +64,12 @@ export class Sheets {
       h('div', { class: 'row' }, h('label', {}, 'Quantize (record + grid)'), seg(QOPTS, p.quantize, (v) => { p.quantize = v; a.save(); a.emit('pattern'); })),
       h('div', { class: 'row' }, toggle('Metronome', p.settings.metronome, (v) => { p.settings.metronome = v; a.save(); }), toggle('Count-in (1 bar)', p.settings.countIn, (v) => { p.settings.countIn = v; a.save(); })),
       h('div', { class: 'row' }, h('label', {}, 'Loop launch'), seg([{ v: 'bar' as const, label: 'Next bar' }, { v: 'beat' as const, label: 'Next beat' }], p.settings.loopLaunch, (v) => { p.settings.loopLaunch = v; a.save(); })),
+      h('div', { class: 'row' }, toggle('Song mode (chain patterns)', !!p.songMode, (v) => { p.songMode = v; if (v && (!p.songChain || !p.songChain.length)) p.songChain = [p.currentPattern]; a.save(); a.emit('pattern'); })),
+      h('div', { class: 'row' }, h('label', {}, 'Chain'), h('input', { value: (p.songChain || []).map((x: number) => x + 1).join(' '), 'aria-label': 'Pattern chain as numbers 1-8', placeholder: 'e.g. 1 1 2 3', onchange: (e: Event) => {
+        const nums = (e.target as HTMLInputElement).value.split(/[\s,]+/).map((x) => parseInt(x, 10) - 1).filter((n) => n >= 0 && n < p.patterns.length);
+        p.songChain = nums; a.save(); a.emit('pattern');
+      } })),
+      h('p', { class: 'note' }, 'Song mode plays the chain in order (1-based pattern numbers), looping. Turn off to loop only the current pattern.'),
       h('div', { class: 'row' }, h('button', { class: 'btn', onclick: () => { a.clearPad(a.p.selectedPad); toast('Pad events cleared'); } }, 'Clear pad'),
         h('button', { class: 'btn danger', onclick: () => { if (confirm('Clear all notes in this pattern?')) a.clearPattern(); } }, 'Clear pattern')),
       compact ? null : h('p', { class: 'note' }, 'Swing is non-destructive (applied at playback, MPC-style: 50% straight, 66% ≈ triplet). Recorded hits are corrected for touch latency (Timing Lab) and then quantized.'));
@@ -93,6 +99,7 @@ export class Sheets {
       compact ? null : slider('Level', 0, 1.5, 0.01, slot.gain, (v) => Math.round(v * 100) + '%', (v) => { slot.gain = v; a.save(); a.ccOut('padLevel'); }),
       slider('Pan', -1, 1, 0.05, slot.pan, (v) => (v === 0 ? 'C' : v < 0 ? 'L' + Math.round(-v * 100) : 'R' + Math.round(v * 100)), (v) => { slot.pan = v; a.save(); }),
       compact ? null : slider('Tune', -12, 12, 1, slot.tune, (v) => (v > 0 ? '+' : '') + v + ' st', (v) => { slot.tune = v; a.save(); a.ccOut('padTune'); if (a.loops.has(global)) a.updateLoopRates(); }),
+      compact ? null : slider('Decay', 0, 2, 0.05, slot.decay, (v) => v === 0 ? 'full' : v.toFixed(2) + 's', (v) => { slot.decay = v; a.save(); }),
       h('div', { class: 'row' }, toggle('Mute (pad dims to 30%)', slot.mute, (v) => { slot.mute = v; a.save(); a.emit('banks'); }),
         h('button', { class: 'btn', onclick: () => a.voice(global, 110, 0, 'live') }, 'Preview')),
       s ? h('p', { class: 'note' }, `Credit: ${s.credit.author} — ${s.credit.license}`) : null);
@@ -152,7 +159,8 @@ export class Sheets {
       h('div', { class: 'row' }, seg([{ v: 'auto', label: 'Auto' }, { v: 'position', label: 'Position' }, { v: 'pressure', label: 'Pressure' }, { v: 'fixed', label: 'Fixed' }] as const as any, s.velocityMode, (v: any) => { s.velocityMode = v; a.save(); }, 'Velocity mode')),
       h('p', { class: 'note' }, 'Auto: uses stylus/3D-touch force when the device reports it, else finger contact size + vertical position (top of pad = loudest). Mouse/keyboard: position / Shift = 127.'),
       slider('Fixed vel', 1, 127, 1, s.fixedVelocity, (v) => String(v), (v) => { s.fixedVelocity = v; a.save(); }),
-      slider('Curve', 0.6, 3, 0.1, s.velocityCurve, (v) => v.toFixed(1), (v) => { s.velocityCurve = v; a.save(); }),
+      slider('Curve', 0.6, 3, 0.1, s.velocityCurve, (v) => v.toFixed(1), (v) => { s.velocityCurve = v; s.velocityPreset = 'hard'; a.save(); }),
+      h('div', { class: 'row' }, h('label', {}, 'Velocity feel'), seg([{ v: 'soft', label: 'Soft' }, { v: 'linear', label: 'Linear' }, { v: 'hard', label: 'Hard' }, { v: 'fixed-curve', label: 'Punch' }] as any, s.velocityPreset || 'hard', (v: any) => a.setVelocityPreset(v))),
       h('h3', {}, 'Layout & feel'),
       h('div', { class: 'row' }, h('label', {}, 'Layout'), seg([{ v: 'auto', label: 'Auto' }, { v: 'phone', label: 'Phone' }, { v: 'tablet', label: 'Tablet' }] as any, s.deviceClass, (v: any) => { s.deviceClass = v; a.save(); a.emit('layout'); }, 'Layout mode')),
       h('p', { class: 'note' }, 'Auto picks from screen size and orientation. Phone: compact 4×4 pads with mixer and quick buttons in a pull-up CONTROLS drawer. Tablet: pads with sequencer and mixer panels side by side. Layout is separate from the colour theme.'),

@@ -1,6 +1,6 @@
 {
   "name": "sanctum",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Sanctum — MPC-style touch drum machine (PWA prototype)",
@@ -10,6 +10,7 @@
     "preview": "vite preview --host --port 4173",
     "bridge": "node bridge/server.js",
     "smoke": "node scripts/smoke.mjs",
+    "pulpit:test": "node scripts/pulpit-test.mjs",
     "dev:https": "HTTPS=1 vite --host",
     "preview:https": "npm run build && HTTPS=1 vite preview --host --port 4173",
     "bridge:setup": "cd bridge && npm install && bash native/build.sh",

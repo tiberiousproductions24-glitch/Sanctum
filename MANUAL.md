@@ -626,3 +626,23 @@ What we do now: request the lowest-latency audio mode (`latencyHint: "interactiv
 
 **The route to sub-10 ms (next step, not built yet):** a native Capacitor plugin that plays the pads through Google's **Oboe** library (AAudio, LowLatency performance mode, Exclusive sharing, 48 kHz, double-buffered callback — Google's *DrumThumper* sample is the model), triggered straight from the native touch event. On phones that report Android's **"Pro Audio"** feature (`android.hardware.audio.pro`, which promises a short round trip — about 20 ms or less in the Android compatibility rules) this can get output latency near 10 ms; on other phones it will still beat the WebView. Sources: Android low-latency audio guide (developer.android.com/games/sdk/oboe/low-latency-audio), Oboe DrumThumper sample (github.com/google/oboe/tree/main/samples/drumthumper).
 
+## Sanctum Pulpit — backing a preacher or singer
+
+Pulpit is for Sunday morning when you need a band behind the Word and you only have a phone.
+
+1. Unlock Sanctum with your code, tap to start sound, then tap **PULPIT** (or Menu → Pulpit).
+2. Pick the **key** the preacher or singer is in (big buttons across the top). Hold a key for about a second to let the mic listen — the guessed key lights green; tap it to lock. If the mic is blocked, just tap the key yourself.
+3. Tap **EASY PLAY** on every phrase. Each tap plays the next chord of the progression. You do not need to know music theory.
+4. Swipe or tap **SHOUT 1–4** when the room gets hot; swipe or tap **WORSHIP 1–4** for softer altar moments. **Drums** and **Music** mute buttons cut those layers without stopping.
+5. **HIT** is a short stab for band hits. **STOP** cuts now; **FADE** softens out.
+6. **Full Band** vs **Organ + Drums** changes the texture. Organ run buttons add a short fill.
+7. **STAGE** locks the screen so a pocket bump cannot leave Pulpit mid-service. Hold/unlock Stage to go back.
+8. **Follow Voice** (optional): turns the mic into an automatic trigger. It listens for syllables and pitch on the device only (nothing is uploaded). It will place hits on phrase pauses, nudge shout/worship level slowly, and suggest chords that fit the sung note. **Your taps always win.** Keep the phone away from the speakers — loud PA into the mic will confuse it and can feedback. In a very loud room, prefer Easy Play.
+
+Edit sequence: **Edit sequence** lets you type your own chord list (Roman numerals like `I IV V7` or Nashville numbers like `1 4 5`). It autosaves on this device.
+
+Pulpit tempo follows the project tempo and Ableton Link when Link is on.
+
+### What Follow Voice can and cannot do
+- It estimates speaking rate and pitch from the microphone. It is **not** a cloud transcription service and does not understand words.
+- Accuracy drops with distant mics, heavy reverb, drums in the mic, or several people talking. Use the sensitivity slider; if it misbehaves, turn Follow Voice off and use Easy Play.
