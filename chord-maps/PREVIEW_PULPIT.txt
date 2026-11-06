@@ -1,0 +1,43 @@
+FOLLOW ME / PREACHER ASSIST — Ab preview
+========================================================
+Official: Follow Me    Subtitle: Preacher Assist
+Feel: Preaching hold    Control: Easy Play    Voice: Follow Voice
+Intensity: Shout 1–4 / Worship 1–4
+Do not use in UI: Whoop Triggerz, Whoop Trigger, Hook Trigger
+Legacy code: src/pulpit/   Legacy UI title: PULPIT (rename pending)
+
+1) whoop-14  Preaching 1–4  in Ab
+   Tokens: I9 – IV9 – I9 – IV9
+   I9     Ab9     notes [56=Ab3 60=C4 63=Eb4 66=Gb4 70=Bb4]
+          bass 32 (Ab1)  cue=hold
+   IV9    Db9     notes [49=Db3 53=F3 56=Ab3 59=B3 63=Eb4]
+          bass 37 (Db2)  cue=hold
+   I9     Ab9     notes [56=Ab3 60=C4 63=Eb4 66=Gb4 70=Bb4]
+          bass 32 (Ab1)  cue=hold
+   IV9    Db9     notes [49=Db3 53=F3 56=Ab3 59=B3 63=Eb4]
+          bass 37 (Db2)  cue=hold
+
+2) i-iv-v-bvii  I7–IV7–V7–bVII7  in Ab
+   Tokens: I7 – IV7 – V7 – bVII7
+   I7     Ab7     notes [56=Ab3 60=C4 63=Eb4 66=Gb4]
+          bass 32 (Ab1)  cue=vamp
+   IV7    Db7     notes [49=Db3 53=F3 56=Ab3 59=B3]
+          bass 37 (Db2)  cue=vamp
+   V7     Eb7     notes [51=Eb3 55=G3 58=Bb3 61=Db4]
+          bass 39 (Eb2)  cue=vamp
+   bVII7  Gb7     notes [54=Gb3 58=Bb3 61=Db4 64=E4]
+          bass 30 (Gb1)  cue=vamp
+   Relative minor of Ab = Fm
+   Walk into V (3-4-#4-5): C Db D Eb  MIDI [36, 37, 38, 39]
+
+3) Intensity map (shoutLevel / worshipLevel → substance)
+   Shout 1: triads/add9, roots, light drums, pads, 1/bar
+   Shout 2: dom7/9, quarters + light walk into 4, hats/clap, talk-stab ok, 1/bar
+   Shout 3: dom7/9/13, chrom into 4 and 5, snare in, organ comments, 1–2/bar
+   Shout 4: dom7/9/13/#9, 8ths+ghosts+chrom walks, full storefront, runs / 4 bars, 2/bar ok
+   Worship 1: sparse maj9 / triads, long-tone roots, drums off or swell, pads
+   Worship 2: add9/maj9, gentle fifths, light kit, pads
+   Worship 3: 9ths and sus, walking quarters, praise kit, light organ
+   Worship 4: 9/11/13 (not shout #9 density), motion without ghost-shout, full worship band
+   Player scale: intensity = level/4. Shout and worship lanes are exclusive.
+========================================================

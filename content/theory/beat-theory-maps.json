@@ -1,0 +1,619 @@
+{
+  "version": 1,
+  "source": "beat-theory",
+  "diatonic": {
+    "major": [
+      "I",
+      "ii",
+      "iii",
+      "IV",
+      "V",
+      "vi",
+      "vii\u00b0"
+    ],
+    "minor": [
+      "i",
+      "ii\u00b0",
+      "bIII",
+      "iv",
+      "v",
+      "bVI",
+      "bVII"
+    ]
+  },
+  "subs": [
+    {
+      "id": "tritone",
+      "from": "V7",
+      "to": [
+        "bII7"
+      ],
+      "label": "Tritone substitution (in Ab: Eb7 \u2192 A7)"
+    },
+    {
+      "id": "2-5-1",
+      "from": "I",
+      "to": [
+        "ii7",
+        "V7",
+        "Imaj7"
+      ],
+      "label": "ii\u2013V\u2013I approach"
+    },
+    {
+      "id": "1-6-2-5",
+      "from": "I",
+      "to": [
+        "I",
+        "vi7",
+        "ii7",
+        "V7"
+      ],
+      "label": "I\u2013vi\u2013ii\u2013V rhythm changes turnaround"
+    },
+    {
+      "id": "passing-dim",
+      "from": "I",
+      "to": [
+        "I",
+        "#idim7",
+        "ii7"
+      ],
+      "label": "Passing diminished"
+    },
+    {
+      "id": "passing-sharp-iv",
+      "from": "IV7",
+      "to": [
+        "IV7",
+        "#ivdim7",
+        "I/5"
+      ],
+      "label": "Gospel #iv\u00b07 walk-home"
+    },
+    {
+      "id": "backdoor",
+      "from": "Imaj7",
+      "to": [
+        "iv7",
+        "bVII7",
+        "Imaj7"
+      ],
+      "label": "Backdoor ii\u2013V (iv\u2013bVII\u2013I)"
+    },
+    {
+      "id": "gospel-walk",
+      "from": "I",
+      "to": [
+        "I",
+        "IV",
+        "I/V",
+        "V7"
+      ],
+      "label": "Gospel I\u2013IV\u2013I/V\u2013V7"
+    },
+    {
+      "id": "shout-bVII",
+      "from": "I",
+      "to": [
+        "I",
+        "bVII",
+        "IV",
+        "I"
+      ],
+      "label": "Shout bVII vamp"
+    },
+    {
+      "id": "shout-iv-v-bvii",
+      "from": "I7",
+      "to": [
+        "I7",
+        "IV7",
+        "V7",
+        "bVII7"
+      ],
+      "label": "Shout I7\u2013IV7\u2013V7\u2013bVII7"
+    },
+    {
+      "id": "truck-driver",
+      "from": "I7",
+      "to": [
+        "I7"
+      ],
+      "label": "Truck-driver: same vamp up a half step"
+    },
+    {
+      "id": "relative-flip",
+      "from": "I7",
+      "to": [
+        "i7",
+        "iv7",
+        "bVI7",
+        "bVII7"
+      ],
+      "label": "Flip to relative-minor i\u2013iv\u2013bVI\u2013bVII"
+    }
+  ],
+  "progressions": [
+    {
+      "id": "2-5-1",
+      "tokens": [
+        "ii7",
+        "V7",
+        "Imaj7"
+      ],
+      "mode": "major",
+      "label": "ii\u2013V\u2013I"
+    },
+    {
+      "id": "1-6-2-5",
+      "tokens": [
+        "I",
+        "vi7",
+        "ii7",
+        "V7"
+      ],
+      "mode": "major",
+      "label": "I\u2013vi\u2013ii\u2013V"
+    },
+    {
+      "id": "backdoor",
+      "tokens": [
+        "iv7",
+        "bVII7",
+        "Imaj7"
+      ],
+      "mode": "major",
+      "label": "Backdoor"
+    },
+    {
+      "id": "minor-2-5-1",
+      "tokens": [
+        "iim7b5",
+        "V7",
+        "i"
+      ],
+      "mode": "minor",
+      "label": "Minor ii\u2013V\u2013i"
+    },
+    {
+      "id": "gospel-145",
+      "tokens": [
+        "I",
+        "IV",
+        "V7",
+        "I"
+      ],
+      "mode": "major",
+      "label": "Gospel I\u2013IV\u2013V"
+    },
+    {
+      "id": "shout",
+      "tokens": [
+        "I",
+        "bVII",
+        "IV",
+        "I"
+      ],
+      "mode": "major",
+      "label": "Shout vamp"
+    },
+    {
+      "id": "andante",
+      "tokens": [
+        "i",
+        "bVI",
+        "bVII",
+        "i"
+      ],
+      "mode": "minor",
+      "label": "Aeolian walkup"
+    },
+    {
+      "id": "i-iv-v-bvii",
+      "tokens": [
+        "I7",
+        "IV7",
+        "V7",
+        "bVII7"
+      ],
+      "mode": "major",
+      "label": "Shout I7\u2013IV7\u2013V7\u2013bVII7"
+    },
+    {
+      "id": "shout-call-response",
+      "tokens": [
+        "I7",
+        "IV7"
+      ],
+      "mode": "major",
+      "label": "Call & response I7\u2194IV7"
+    },
+    {
+      "id": "shout-build",
+      "tokens": [
+        "I7",
+        "IV7",
+        "V7",
+        "bVII7"
+      ],
+      "mode": "major",
+      "label": "Shout build"
+    },
+    {
+      "id": "shout-full-break",
+      "tokens": [
+        "I7",
+        "IV7",
+        "V7",
+        "bVII7"
+      ],
+      "mode": "major",
+      "label": "Full praise break"
+    },
+    {
+      "id": "shout-breakdown",
+      "tokens": [
+        "I7",
+        "IV7"
+      ],
+      "mode": "major",
+      "label": "Shout breakdown"
+    },
+    {
+      "id": "shout-storefront",
+      "tokens": [
+        "I7",
+        "bVII7",
+        "IV7",
+        "I7"
+      ],
+      "mode": "major",
+      "label": "Storefront I\u2013bVII\u2013IV\u2013I"
+    },
+    {
+      "id": "shout-walk-home",
+      "tokens": [
+        "I7",
+        "I7/3",
+        "IV7",
+        "#ivdim7",
+        "I/5",
+        "V7",
+        "I7"
+      ],
+      "mode": "major",
+      "label": "Walk-home turnaround"
+    },
+    {
+      "id": "shout-modulate-up",
+      "tokens": [
+        "I7",
+        "IV7",
+        "V7",
+        "bVII7"
+      ],
+      "mode": "major",
+      "label": "Truck-driver vamp (lift \u00bd step / 8 bars)"
+    },
+    {
+      "id": "shout-relative-flip",
+      "tokens": [
+        "I7",
+        "IV7",
+        "V7",
+        "bVII7",
+        "i7",
+        "iv7",
+        "bVI7",
+        "bVII7"
+      ],
+      "mode": "major",
+      "label": "Major vamp then relative-minor i\u2013iv\u2013bVI\u2013bVII"
+    },
+    {
+      "id": "whoop-14",
+      "tokens": [
+        "I9",
+        "IV9",
+        "I9",
+        "IV9"
+      ],
+      "mode": "major",
+      "label": "Preaching 1\u20134 (Follow Me)"
+    },
+    {
+      "id": "whoop-145",
+      "tokens": [
+        "I",
+        "IV9",
+        "I",
+        "V7sus",
+        "V7"
+      ],
+      "mode": "major",
+      "label": "Preaching 1\u20134\u20131\u20135"
+    },
+    {
+      "id": "two-five-one",
+      "tokens": [
+        "ii9",
+        "V13",
+        "Imaj9",
+        "I7"
+      ],
+      "mode": "major",
+      "label": "2\u20135\u20131 resolve"
+    },
+    {
+      "id": "one-six-two-five",
+      "tokens": [
+        "1(9)",
+        "6(7#9)",
+        "2m9",
+        "5(13)"
+      ],
+      "mode": "major",
+      "label": "1\u20136\u20132\u20135 turnaround"
+    },
+    {
+      "id": "passing-walk",
+      "tokens": [
+        "I9",
+        "IV13",
+        "#ivdim7",
+        "I/5",
+        "VI7#9",
+        "ii9",
+        "V13"
+      ],
+      "mode": "major",
+      "label": "Passing walk 1\u20134\u2013#4\u00b0\u20131/5"
+    },
+    {
+      "id": "minor-whoop",
+      "tokens": [
+        "i9",
+        "iv9",
+        "i9",
+        "V7#9"
+      ],
+      "mode": "minor",
+      "label": "Minor preaching i\u2013iv"
+    },
+    {
+      "id": "minor-walk",
+      "tokens": [
+        "i9",
+        "bVImaj7",
+        "V7#9",
+        "i9"
+      ],
+      "mode": "minor",
+      "label": "Minor 1\u20136\u20135"
+    },
+    {
+      "id": "band-hits",
+      "tokens": [
+        "I",
+        "IV",
+        "I",
+        "V7"
+      ],
+      "mode": "major",
+      "label": "Band hits (stabs)"
+    },
+    {
+      "id": "tune-up",
+      "tokens": [
+        "I",
+        "IV/1",
+        "I",
+        "V7sus",
+        "V7"
+      ],
+      "mode": "major",
+      "label": "Tuning up"
+    },
+    {
+      "id": "altar-call",
+      "tokens": [
+        "Imaj9",
+        "iii7",
+        "vi9",
+        "ii9",
+        "IVmaj7/5",
+        "V7sus"
+      ],
+      "mode": "major",
+      "label": "Altar call"
+    },
+    {
+      "id": "shout-14",
+      "tokens": [
+        "I7",
+        "IV9"
+      ],
+      "mode": "major",
+      "label": "Shout 1\u20134 vamp"
+    },
+    {
+      "id": "shout-1415",
+      "tokens": [
+        "I7",
+        "IV9",
+        "I7",
+        "V7#9"
+      ],
+      "mode": "major",
+      "label": "Shout 1\u20134\u20131\u20135"
+    },
+    {
+      "id": "shout-minor",
+      "tokens": [
+        "i7",
+        "iv9"
+      ],
+      "mode": "minor",
+      "label": "Minor shout i\u2013iv"
+    },
+    {
+      "id": "shout-fast-1625",
+      "tokens": [
+        "I7",
+        "VI7#9",
+        "ii9",
+        "V13"
+      ],
+      "mode": "major",
+      "label": "Fast shout 1\u20136\u20132\u20135"
+    }
+  ],
+  "markov": {
+    "I": {
+      "IV": 0.3,
+      "V": 0.16,
+      "bVII": 0.2,
+      "V7": 0.12,
+      "vi": 0.1,
+      "ii": 0.07,
+      "I": 0.05
+    },
+    "I7": {
+      "IV7": 0.32,
+      "IV": 0.1,
+      "V7": 0.18,
+      "bVII7": 0.22,
+      "I7": 0.1,
+      "V": 0.08
+    },
+    "ii": {
+      "V": 0.4,
+      "V7": 0.32,
+      "I": 0.1,
+      "iii": 0.08,
+      "ii": 0.1
+    },
+    "ii7": {
+      "V7": 0.45,
+      "V": 0.25,
+      "I": 0.1,
+      "iii": 0.08,
+      "ii7": 0.12
+    },
+    "iii": {
+      "vi": 0.4,
+      "IV": 0.3,
+      "ii": 0.15,
+      "iii": 0.15
+    },
+    "IV": {
+      "I": 0.28,
+      "V": 0.22,
+      "bVII": 0.16,
+      "V7": 0.16,
+      "ii": 0.1,
+      "IV": 0.08
+    },
+    "IV7": {
+      "I7": 0.28,
+      "V7": 0.24,
+      "bVII7": 0.22,
+      "I": 0.12,
+      "IV7": 0.14
+    },
+    "V": {
+      "I": 0.48,
+      "vi": 0.12,
+      "V7": 0.12,
+      "bVII": 0.12,
+      "IV": 0.08,
+      "V": 0.08
+    },
+    "V7": {
+      "I": 0.42,
+      "I7": 0.16,
+      "vi": 0.1,
+      "bVII7": 0.12,
+      "bII7": 0.1,
+      "V7": 0.1
+    },
+    "vi": {
+      "ii": 0.28,
+      "IV": 0.24,
+      "V": 0.16,
+      "I": 0.12,
+      "vi": 0.2
+    },
+    "vi7": {
+      "ii7": 0.32,
+      "IV": 0.22,
+      "V7": 0.18,
+      "I": 0.1,
+      "vi7": 0.18
+    },
+    "vii\u00b0": {
+      "I": 0.5,
+      "iii": 0.2,
+      "V": 0.15,
+      "vii\u00b0": 0.15
+    },
+    "bVII": {
+      "IV": 0.36,
+      "I": 0.32,
+      "V": 0.12,
+      "bVII": 0.12,
+      "IV7": 0.08
+    },
+    "bVII7": {
+      "IV7": 0.32,
+      "I7": 0.32,
+      "IV": 0.12,
+      "V7": 0.12,
+      "bVII7": 0.12
+    },
+    "bII7": {
+      "I": 0.55,
+      "I7": 0.2,
+      "bII7": 0.15,
+      "V7": 0.1
+    },
+    "i": {
+      "iv": 0.28,
+      "bVI": 0.22,
+      "bVII": 0.22,
+      "V": 0.14,
+      "i": 0.14
+    },
+    "i7": {
+      "iv7": 0.3,
+      "bVI7": 0.22,
+      "bVII7": 0.22,
+      "V7": 0.14,
+      "i7": 0.12
+    },
+    "iv": {
+      "i": 0.28,
+      "V": 0.24,
+      "bVII": 0.24,
+      "iv": 0.24
+    },
+    "iv7": {
+      "i7": 0.3,
+      "bVII7": 0.24,
+      "V7": 0.22,
+      "iv7": 0.24
+    },
+    "bVI": {
+      "bVII": 0.4,
+      "i": 0.3,
+      "bVI": 0.3
+    },
+    "bVI7": {
+      "bVII7": 0.4,
+      "i7": 0.3,
+      "bVI7": 0.3
+    }
+  },
+  "note": "Chords / Follow Me drop-in consumed by src/chords/theory-ext.ts loadBeatTheoryMaps(). Richer engine-facing maps: chord-maps/shout-iv-v-bvii.json (shout patterns) and chord-maps/pulpit-12key-charts.json (Follow Me / Preacher Assist 12-key charts). User-facing name is Follow Me (subtitle Preacher Assist); module path remains src/pulpit/."
+}

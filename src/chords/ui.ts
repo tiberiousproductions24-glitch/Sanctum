@@ -307,7 +307,7 @@ export class ChordsUI {
       h('div', { class: 'chords-next' }, ...panel.next.map((n) => h('span', { class: 'pill' }, `${n.label} · ${n.roman} · ${Math.round(n.p * 100)}%`))),
       h('h3', {}, 'Gospel / jazz moves'),
       h('ul', { class: 'list' }, ...panel.subs.map((s) => h('li', {}, `${s.label}: ${s.from} → ${s.to.join(' ')}`))),
-      h('p', { class: 'note' }, 'Beat Theory chord maps were not found on disk. Drop JSON at content/theory/beat-theory-maps.json (schema in theory-ext.ts) to override.'),
+      h('p', { class: 'note' }, 'Beat Theory maps load from content/theory/beat-theory-maps.json (Follow Me + shout progressions). Override by replacing that file.'),
     );
   }
 }

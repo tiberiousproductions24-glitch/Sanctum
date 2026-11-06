@@ -3,9 +3,8 @@
  * Extends Pulpit theory with diatonic maps, relatives, gospel/jazz substitutions,
  * and a simple Markov next-chord model.
  *
- * Beat Theory maps were NOT found on disk (agent profile exists; no chord-map files).
- * Drop-in schema below — place a JSON file at content/theory/beat-theory-maps.json
- * (or pass the object to `loadBeatTheoryMaps`) and it will override built-ins.
+ * Beat Theory maps ship at content/theory/beat-theory-maps.json (loaded on boot via
+ * loadBeatTheoryMapsFromContent). Pass an object to `loadBeatTheoryMaps` to override.
  *
  * Schema (BeatTheoryMaps):
  * {

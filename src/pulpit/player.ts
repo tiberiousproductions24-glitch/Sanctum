@@ -4,6 +4,8 @@ import type { Clock } from '../seq/transport';
 import { chordIn, parseKey, keyName, shiftKey, KEY_NAMES, type Key, type Chord } from './theory';
 import { PROGRESSIONS, FEELS, type Progression, type Step } from './library';
 import { renderChord, drumBar, organRun } from './tones';
+import type { FollowMeEngine, IntensityCue } from '../followme';
+import { FOLLOW_ME_NAME } from '../followme';
 
 export type BandMode = 'full' | 'duo' | 'modern';
 export type PulpitLane = 'none' | 'shout' | 'worship';
@@ -24,6 +26,10 @@ export interface PulpitState {
   stageLock: boolean;
   playing: boolean;
   followVoice: boolean;
+  /** Follow Me (Preacher Assist) Beat Theory pattern id, or null = library progression. */
+  followMePatternId: string | null;
+  /** Follow Me intensity 1–5 (swell cues); drives density with shoutLevel. */
+  followMeIntensity: number;
   lastChord: Chord | null;
   cue: string;
   activity: string;
@@ -39,13 +45,18 @@ export class PulpitPlayer {
   private sampleN = 0;
   private ready = false;
   onChange?: () => void;
+  /** Beat Theory Follow Me engine (set by UI/boot once maps load). */
+  followMe: FollowMeEngine | null = null;
+  lastIntensityCue: IntensityCue | null = null;
 
   constructor(private engine: Engine, private clock: () => Clock, private projectBpm: () => number, private linkEnabled: () => boolean) {
     this.state = this.load() || {
       open: false, key: parseKey('Ab')!, pendingKey: null, bpm: 92, band: 'full',
       progressionId: 'whoop-14', stepIndex: 0, customSteps: null,
       shoutLevel: 0, worshipLevel: 0, drumsMute: false, musicMute: false,
-      stageLock: false, playing: false, followVoice: false, lastChord: null, cue: '', activity: 'Ready',
+      stageLock: false, playing: false, followVoice: false,
+      followMePatternId: null, followMeIntensity: 3,
+      lastChord: null, cue: '', activity: 'Ready',
     };
   }
 
@@ -60,7 +71,10 @@ export class PulpitPlayer {
         customSteps: Array.isArray(o.customSteps) ? o.customSteps : null,
         shoutLevel: o.shoutLevel | 0, worshipLevel: o.worshipLevel | 0,
         drumsMute: !!o.drumsMute, musicMute: !!o.musicMute, stageLock: false,
-        playing: false, followVoice: false, lastChord: null, cue: '', activity: 'Ready',
+        playing: false, followVoice: false,
+        followMePatternId: typeof o.followMePatternId === 'string' ? o.followMePatternId : null,
+        followMeIntensity: Math.max(1, Math.min(5, (o.followMeIntensity | 0) || 3)),
+        lastChord: null, cue: '', activity: 'Ready',
       };
     } catch { return null; }
   }
@@ -71,6 +85,7 @@ export class PulpitPlayer {
         keyName: keyName(s.key), bpm: s.bpm, band: s.band, progressionId: s.progressionId,
         customSteps: s.customSteps, shoutLevel: s.shoutLevel, worshipLevel: s.worshipLevel,
         drumsMute: s.drumsMute, musicMute: s.musicMute,
+        followMePatternId: s.followMePatternId, followMeIntensity: s.followMeIntensity,
       }));
     } catch {}
   }
@@ -83,13 +98,69 @@ export class PulpitPlayer {
     return PROGRESSIONS.find((p) => p.id === this.state.progressionId) || PROGRESSIONS[0];
   }
   steps(): Step[] {
-    return this.state.customSteps?.length ? this.state.customSteps : this.progression().steps;
+    if (this.state.customSteps?.length) return this.state.customSteps;
+    if (this.followMe) {
+      const kn = keyName(this.state.key);
+      const mode = this.state.key.mode;
+      const fromMaps = this.followMe.stepsForEasyPlay({
+        key: kn,
+        mode,
+        progressionId: this.state.followMePatternId ? null : this.state.progressionId,
+        shoutPatternId: this.state.followMePatternId,
+      });
+      if (fromMaps.length) return fromMaps as Step[];
+    }
+    return this.progression().steps;
   }
   setProgression(id: string) {
     this.state.progressionId = id; this.state.stepIndex = 0; this.state.customSteps = null;
-    const p = this.progression(); const feel = FEELS[p.feel];
-    if (feel) this.state.bpm = feel.bpm;
-    this.save(); this.emit('Loaded ' + p.name);
+    this.state.followMePatternId = null;
+    try { this.followMe?.setChartProgression(id); } catch { /* charts may omit id */ }
+    const lib = PROGRESSIONS.find((p) => p.id === id);
+    const cp = this.followMe?.chartProgression(id);
+    if (cp?.bpm) this.state.bpm = cp.bpm;
+    else if (lib) { const feel = FEELS[lib.feel]; if (feel) this.state.bpm = feel.bpm; }
+    this.refreshIntensityCue();
+    this.save(); this.emit('Loaded ' + (cp?.name || lib?.name || id));
+  }
+  attachFollowMe(engine: FollowMeEngine | null) {
+    this.followMe = engine;
+    if (engine) {
+      try {
+        engine.setKey(keyName(this.state.key), this.state.key.mode);
+        if (this.state.followMePatternId) engine.setShoutPattern(this.state.followMePatternId);
+        else engine.setChartProgression(this.state.progressionId);
+      } catch { /* stale id */ }
+      this.refreshIntensityCue();
+    }
+    this.emit(engine ? (FOLLOW_ME_NAME + ' ready') : undefined);
+  }
+  setFollowMePattern(id: string | null) {
+    if (!id) {
+      this.state.followMePatternId = null; this.state.stepIndex = 0; this.state.customSteps = null;
+      try { this.followMe?.setChartProgression(this.state.progressionId); } catch {}
+      this.refreshIntensityCue();
+      this.save(); this.emit('Library progression'); return;
+    }
+    if (!this.followMe) { this.emit(FOLLOW_ME_NAME + ' maps not loaded'); return; }
+    const p = this.followMe.setShoutPattern(id);
+    this.state.followMePatternId = id;
+    this.state.stepIndex = 0; this.state.customSteps = null;
+    this.state.bpm = p.defaultBpm || this.state.bpm;
+    // Peak shout pattern → nudge shout lane (HANDOFF: stay on 1–4, no 5th detent)
+    if (this.state.shoutLevel === 0 && this.state.worshipLevel === 0) this.state.shoutLevel = Math.min(4, Math.max(1, p.intensity - 1));
+    this.refreshIntensityCue();
+    this.drumFeel = null; this.rebuildDrums();
+    this.save(); this.emit(FOLLOW_ME_NAME + ': ' + p.name);
+  }
+  /** Sync intensityWiring row from current shout/worship levels (scale = level/4). */
+  refreshIntensityCue(): IntensityCue | null {
+    if (!this.followMe) { this.lastIntensityCue = null; return null; }
+    const s = this.state;
+    const lane = s.shoutLevel > 0 ? 'shout' : s.worshipLevel > 0 ? 'worship' : 'none';
+    const level = lane === 'shout' ? s.shoutLevel : lane === 'worship' ? s.worshipLevel : 0;
+    this.lastIntensityCue = this.followMe.intensityCue(lane, level);
+    return this.lastIntensityCue;
   }
   setCustomSteps(steps: Step[]) {
     this.state.customSteps = steps.map((s) => ({ ...s }));
@@ -223,7 +294,9 @@ export class PulpitPlayer {
 
   setKey(k: Key, quantize: 'immediate' | 'beat' | 'bar' = 'beat') {
     if (quantize === 'immediate' || !this.state.playing) {
-      this.state.key = k; this.state.pendingKey = null; this.save(); this.emit('Key ' + keyName(k)); return;
+      this.state.key = k; this.state.pendingKey = null;
+      try { this.followMe?.setKey(keyName(k).replace(/m$/, '')); } catch {}
+      this.save(); this.emit('Key ' + keyName(k)); return;
     }
     this.state.pendingKey = k; this.emit('Key → ' + keyName(k) + ' (next ' + quantize + ')');
     this.armKeyChange(quantize);
@@ -240,7 +313,9 @@ export class PulpitPlayer {
   }
   applyPendingKeyIfDue(_force: boolean) {
     if (!this.state.pendingKey) return;
-    this.state.key = this.state.pendingKey; this.state.pendingKey = null; this.save();
+    this.state.key = this.state.pendingKey; this.state.pendingKey = null;
+    try { this.followMe?.setKey(keyName(this.state.key).replace(/m$/, '')); } catch {}
+    this.save();
     this.emit('Key ' + keyName(this.state.key));
   }
   /** Poll from rAF — applies pending key when beat crosses. */
@@ -268,15 +343,17 @@ export class PulpitPlayer {
     level = Math.max(0, Math.min(4, level | 0));
     this.state.shoutLevel = level;
     if (level > 0) this.state.worshipLevel = 0;
+    const cue = this.refreshIntensityCue();
     this.drumFeel = null; this.rebuildDrums();
-    this.save(); this.emit(level ? `Shout ${level}` : 'Shout off');
+    this.save(); this.emit(level ? `Shout ${level}` + (cue?.name ? ` · ${cue.name}` : '') : 'Shout off');
   }
   setWorship(level: number) {
     level = Math.max(0, Math.min(4, level | 0));
     this.state.worshipLevel = level;
     if (level > 0) this.state.shoutLevel = 0;
+    const cue = this.refreshIntensityCue();
     this.drumFeel = null; this.rebuildDrums();
-    this.save(); this.emit(level ? `Worship ${level}` : 'Worship off');
+    this.save(); this.emit(level ? `Worship ${level}` + (cue?.name ? ` · ${cue.name}` : '') : 'Worship off');
   }
   setDrumsMute(m: boolean) {
     this.state.drumsMute = m;

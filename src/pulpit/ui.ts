@@ -6,6 +6,7 @@ import { PROGRESSIONS } from './library';
 import { VoiceFollow, type FollowMeter } from './voicefollow';
 import { MicKeyDetector } from './keydetect';
 import type { KeyResult } from './keydetect';
+import { loadFollowMe, FOLLOW_ME_NAME, FOLLOW_ME_SUBTITLE } from '../followme';
 
 export class PulpitUI {
   root: HTMLElement | null = null;
@@ -40,6 +41,7 @@ export class PulpitUI {
     this.player.state.open = true;
     this.mount();
     this.player.ensureSamples();
+    this.ensureFollowMe();
     this.loop();
   }
   close() {
@@ -55,10 +57,12 @@ export class PulpitUI {
   private mount() {
     this.root?.remove();
     const s = this.player.state;
-    const overlay = h('div', { class: 'pulpit', id: 'sanctum-pulpit', role: 'dialog', 'aria-label': 'Sanctum Pulpit' });
+    const overlay = h('div', { class: 'pulpit', id: 'sanctum-pulpit', role: 'dialog', 'aria-label': 'Follow Me — Preacher Assist' });
     const top = h('header', { class: 'pulpit-top' },
       h('button', { class: 'pulpit-back', 'aria-label': 'Back', onclick: () => this.close() }, '←'),
-      h('div', { class: 'pulpit-title' }, h('b', {}, 'PULPIT'), h('span', { class: 'pulpit-sub' }, 'Sanctum · preacher & singer backup')),
+      h('div', { class: 'pulpit-title' },
+        h('b', {}, 'FOLLOW ME'),
+        h('span', { class: 'pulpit-sub' }, FOLLOW_ME_SUBTITLE + ' · Sanctum preacher-band backup')),
       h('button', { class: 'pulpit-stage', 'aria-pressed': String(s.stageLock), onclick: () => this.toggleStage() }, 'STAGE'),
     );
 
@@ -113,10 +117,29 @@ export class PulpitUI {
       if (!this.app.p.settings.linkEnabled) this.app.setTempo(v);
     });
 
+    const fmPatterns = this.player.followMe?.listShoutPatterns() || [];
+    const chartProgs = this.player.followMe?.listChartProgressions() || [];
+    const libOptions = chartProgs.length
+      ? chartProgs.map((p) => h('option', { value: p.id, selected: !s.followMePatternId && p.id === s.progressionId }, p.name))
+      : PROGRESSIONS.map((p) => h('option', { value: p.id, selected: !s.followMePatternId && p.id === s.progressionId }, p.name));
     const prog = h('div', { class: 'pulpit-prog' },
-      h('label', {}, 'Progression'),
-      h('select', { class: 'prog-sel', onchange: (e: Event) => this.player.setProgression((e.target as HTMLSelectElement).value) },
-        PROGRESSIONS.map((p) => h('option', { value: p.id, selected: p.id === s.progressionId }, p.name))),
+      h('label', {}, FOLLOW_ME_NAME + ' · charts'),
+      h('select', { class: 'prog-sel', 'aria-label': FOLLOW_ME_NAME + ' progression',
+        onchange: (e: Event) => { this.player.setProgression((e.target as HTMLSelectElement).value); this.refresh(); } },
+        ...libOptions),
+      h('label', {}, 'Shout loops'),
+      h('select', {
+        class: 'fm-sel', 'aria-label': FOLLOW_ME_NAME + ' shout pattern',
+        onchange: (e: Event) => {
+          const v = (e.target as HTMLSelectElement).value;
+          if (!v) this.player.setFollowMePattern(null);
+          else this.player.setFollowMePattern(v);
+          this.refresh();
+        },
+      },
+        h('option', { value: '', selected: !s.followMePatternId }, '— Off (use chart above) —'),
+        ...fmPatterns.map((p) => h('option', { value: p.id, selected: p.id === s.followMePatternId }, p.name)),
+      ),
       h('button', { class: 'btn', onclick: () => this.openPadsEditor() }, 'Edit sequence'),
     );
 
@@ -143,6 +166,20 @@ export class PulpitUI {
     Object.assign(this.els, { chord, activity, keyRow, easy, levels, band, mutes, followBtn, followMeter, prog });
     this.refresh();
   }
+
+  private async ensureFollowMe() {
+    if (this.player.followMe) { this.remountFollowMeSelect(); return; }
+    try {
+      const eng = await loadFollowMe();
+      this.player.attachFollowMe(eng);
+      if (this.root) this.mount();
+      toast(FOLLOW_ME_NAME + ' · ' + FOLLOW_ME_SUBTITLE + ' · 12-key charts ready');
+    } catch (e) {
+      console.warn(e);
+      toast(FOLLOW_ME_NAME + ' maps unavailable');
+    }
+  }
+  private remountFollowMeSelect() { /* options filled at mount */ }
 
   private fireRun(kind: 'up' | 'down' | 'slide') {
     this.player.ensureSamples();
@@ -330,7 +367,8 @@ export class PulpitUI {
     const pc = this.els.chord.querySelector('.pc')!;
     const cue = this.els.chord.querySelector('.cue')!;
     pc.textContent = s.lastChord?.name || keyName(s.key);
-    cue.textContent = s.cue || this.player.progression().name;
+    const fmName = s.followMePatternId && this.player.followMe?.shoutPattern(s.followMePatternId)?.name;
+    cue.textContent = s.cue || fmName || this.player.progression().name;
     this.els.activity.textContent = s.activity + (s.pendingKey ? ` · → ${keyName(s.pendingKey)}` : '');
     this.root.querySelectorAll('.pulpit-key').forEach((b) => {
       const kn = (b as HTMLElement).dataset.key!;
@@ -348,7 +386,16 @@ export class PulpitUI {
       el.classList.toggle('on', muted); el.setAttribute('aria-pressed', String(muted));
     });
     const sel = this.root.querySelector('.prog-sel') as HTMLSelectElement | null;
-    if (sel && sel.value !== s.progressionId) sel.value = s.progressionId;
+    if (sel && !s.followMePatternId && sel.value !== s.progressionId) sel.value = s.progressionId;
+    const fmSel = this.root.querySelector('.fm-sel') as HTMLSelectElement | null;
+    if (fmSel) {
+      const want = s.followMePatternId || '';
+      if (fmSel.value !== want) fmSel.value = want;
+    }
+    if (s.followMePatternId && this.player.followMe) {
+      const p = this.player.followMe.shoutPattern(s.followMePatternId);
+      if (p) cue.textContent = s.cue || p.name;
+    }
   }
 
   private loop = () => {

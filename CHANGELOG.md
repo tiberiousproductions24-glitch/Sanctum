@@ -1,3 +1,12 @@
+## v0.3.3 — 2026-11-05 (America/Los_Angeles)
+
+### Follow Me / Preacher Assist
+- Locked feature name: **Follow Me** (primary) with **Preacher Assist** (subtitle). Pulpit chrome, menu, and aria-labels renamed. No Whoop/Hook Trigger branding in UI.
+- Wired Beat Theory maps: `chord-maps/shout-iv-v-bvii.json` (8 shout loops, pad map, intensity overlay) + `chord-maps/pulpit-12key-charts.json` (15 progressions × 12 keys, hookChords, intensityWiring Shout/Worship 1–4).
+- Easy Play pulls `progressions[].charts[keyName]` when charts are loaded; shout-loop select still launches the 8 I7–IV7–V7–bVII7 patterns. Density scales by `shoutLevel/4` and `worshipLevel/4`.
+- Boot loads `content/theory/beat-theory-maps.json` (30 progressions) into Chords theory.
+- Tests: `npm run followme:test`. versionName 0.3.3 / versionCode 6. Web dist only (no signed APK this cut).
+
 # Sanctum Changelog
 
 ## v0.3.2 — 2026-11-05 (America/Los_Angeles)

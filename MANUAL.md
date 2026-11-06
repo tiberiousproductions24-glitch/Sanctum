@@ -736,11 +736,11 @@ What we do now: request the lowest-latency audio mode (`latencyHint: "interactiv
 
 **The route to sub-10 ms (next step, not built yet):** a native Capacitor plugin that plays the pads through Google's **Oboe** library (AAudio, LowLatency performance mode, Exclusive sharing, 48 kHz, double-buffered callback — Google's *DrumThumper* sample is the model), triggered straight from the native touch event. On phones that report Android's **"Pro Audio"** feature (`android.hardware.audio.pro`, which promises a short round trip — about 20 ms or less in the Android compatibility rules) this can get output latency near 10 ms; on other phones it will still beat the WebView. Sources: Android low-latency audio guide (developer.android.com/games/sdk/oboe/low-latency-audio), Oboe DrumThumper sample (github.com/google/oboe/tree/main/samples/drumthumper).
 
-## Sanctum Pulpit — backing a preacher or singer
+## Follow Me (Preacher Assist) — backing a preacher or singer
 
-Pulpit is for Sunday morning when you need a band behind the Word and you only have a phone.
+**Follow Me** (subtitle: **Preacher Assist**) is for Sunday morning when you need a band behind the Word and you only have a phone. The code module is still called Pulpit.
 
-1. Unlock Sanctum with your code, tap to start sound, then tap **PULPIT** (or Menu → Pulpit).
+1. Unlock Sanctum with your code, tap to start sound, then tap **FOLLOW ME** (or Menu → Follow Me).
 2. Pick the **key** the preacher or singer is in (big buttons across the top). Hold a key for about a second to let the mic listen — the guessed key lights green; tap it to lock. If the mic is blocked, just tap the key yourself.
 3. Tap **EASY PLAY** on every phrase. Each tap plays the next chord of the progression. You do not need to know music theory.
 4. Swipe or tap **SHOUT 1–4** when the room gets hot; swipe or tap **WORSHIP 1–4** for softer altar moments. **Drums** and **Music** mute buttons cut those layers without stopping.

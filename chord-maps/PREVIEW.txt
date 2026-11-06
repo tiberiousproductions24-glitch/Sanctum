@@ -1,0 +1,49 @@
+SANCTUM / BEAT THEORY — shout-full-break in Ab
+========================================================
+Pattern:    Full Praise Break  (shout-full-break)
+Moment:     shout            Intensity: 5
+BPM:        132–150 (default 140)
+Key:        Ab major   relative minor: Fm
+Tokens:     I7 – IV7 – V7 – bVII7
+Form:       Full I7-IV7-V7-bVII7 vamp. Dense 8th-note bass with ghosts. Organ run every 4 bars (mixo-down then blues-fill).
+
+Resolved close dom7 (voice() low=48, ~48–72) and bass (bassNote() low=28):
+  I7     Ab7    root  8   notes [56=Ab3 60=C4 63=Eb4 66=Gb4]
+         bass 32 (Ab1)   alt +12 = 44 (Ab2)
+  IV7    Db7    root  1   notes [49=Db3 53=F3 56=Ab3 59=B3]
+         bass 37 (Db2)   alt +12 = 49 (Db3)
+  V7     Eb7    root  3   notes [51=Eb3 55=G3 58=Bb3 61=Db4]
+         bass 39 (Eb2)   alt +12 = 51 (Eb3)
+  bVII7  Gb7    root  6   notes [54=Gb3 58=Bb3 61=Db4 64=E4]
+         bass 30 (Gb1)   alt +12 = 42 (Gb2)
+  Tritone of V7 (Eb7) = A7
+  Walk into V (key degrees 3-4-#4-5): C Db D Eb  MIDI [36, 37, 38, 39]
+
+8-bar cycle — variation A (bars 1–4) is not variation B (bars 5–8):
+  Variation A
+    bar 1 (4 beats)  I7      Ab7      voicing=organ-close  bass=32 (Ab1)  octave-pops
+      notesMidi [68, 72, 75, 78]  (Ab4, C5, Eb5, Gb5)
+    bar 2 (4 beats)  IV7     Db7      voicing=organ-close  bass=37 (Db2)  octave-pops
+      notesMidi [61, 65, 68, 71]  (Db4, F4, Ab4, B4)
+    bar 3 (4 beats)  V7      Eb7      voicing=organ-close  bass=39 (Eb2)  chrom-to-5  walk:[36, 37, 38, 39]
+      notesMidi [63, 67, 70, 73]  (Eb4, G4, Bb4, Db5)
+    bar 4 (4 beats)  bVII7   Gb7      voicing=organ-close  bass=30 (Gb1)  ghost-shout  organ:mixo-down
+      notesMidi [66, 70, 73, 76]  (Gb4, Bb4, Db5, E5)
+  Variation B
+    bar 5 (4 beats)  I7      Ab7      voicing=dom9         bass=32 (Ab1)  ghost-shout
+      notesMidi [56, 60, 63, 66, 70]  (Ab3, C4, Eb4, Gb4, Bb4)
+    bar 6 (4 beats)  IV7     Db7      voicing=dom13        bass=37 (Db2)  ghost-shout
+      notesMidi [49, 53, 58, 59, 63]  (Db3, F3, Bb3, B3, Eb4)
+    bar 7 (4 beats)  V7      Eb7      voicing=dom7sharp9   bass=39 (Eb2)  chrom-to-5  walk:[36, 37, 38, 39]
+      notesMidi [51, 55, 61, 66]  (Eb3, G3, Db4, Gb4)
+    bar 8 (4 beats)  bVII7   Gb7      voicing=gospel9      bass=30 (Gb1)  octave-pops  organ:blues-fill
+      notesMidi [54, 58, 64, 68]  (Gb3, Bb3, E4, Ab4)
+
+Anti-repetition: close organ 7 vs 9/13/7#9; octave-pops vs ghost-shout;
+organ mixo-down on bar 4, blues-fill on bar 8. Engine also rotates voicing,
+bass walk, and (every 4/8 bars) organ run so no identical bar reprints inside 4 bars.
+
+Pad surface: Bank E perc covers MIDI 36–51 (kick/snare/storefront snare/clap/hats…).
+Bank C pads 1–4 = I7 IV7 V7 bVII7 organ stabs (in-bank notes 36–39, globalPad 32–35).
+Bank D = bass walks. Bank G = organ runs. Bank A pad 3 launches this pattern.
+========================================================

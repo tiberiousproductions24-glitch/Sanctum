@@ -80,7 +80,7 @@ export class View {
     const midi = h('button', { class: 'chip midi hide-phone', 'aria-label': 'MIDI', onclick: () => this.sheets.sync() }, h('span', { class: 'led' }), 'MIDI');
     const menu = h('button', { class: 'tbtn hide-phone', 'aria-label': 'Menu', onclick: () => this.sheets.menu() }, '⚙');
     const share = h('button', { class: 'tbtn share hide-phone', 'aria-label': 'Share or post a clip, screenshot or promo', title: 'Share / Post', onclick: () => this.sheets.share() }, '⤴', h('span', { class: 'hide-phone' }, 'SHARE'));
-    const pulpit = h('button', { class: 'tbtn pulpitBtn', 'aria-label': 'Open Sanctum Pulpit', title: 'Pulpit', onclick: () => this.openPulpit() }, '✝', h('span', { class: 'hide-phone' }, 'PULPIT'));
+    const pulpit = h('button', { class: 'tbtn pulpitBtn', 'aria-label': 'Open Follow Me — Preacher Assist', title: 'Follow Me', onclick: () => this.openPulpit() }, '✝', h('span', { class: 'hide-phone' }, 'FOLLOW ME'));
     const status = h('header', { class: 'status' }, h('div', { class: 'mark', html: archPadSvg(false) + '<span class="word">SANCTUM</span>' }), rec, play, stop, lcd, lat, link, midi, pulpit, share, menu);
     Object.assign(this.els, { rec, play, lcd, lat, link, midi });
 
@@ -167,7 +167,7 @@ export class View {
       slider('Master', 0, 1, 0.01, a.p.settings.master, (v) => Math.round(v * 100) + '%', (v) => { a.p.settings.master = v; a.engine.setMaster(v); a.save(); a.ccOut('master'); }),
       slider('Pad level', 0, 1.5, 0.01, sel.gain, (v) => Math.round(v * 100) + '%', (v) => { a.p.pads[a.p.selectedPad].gain = v; a.save(); a.ccOut('padLevel'); }),
       h('div', { class: 'drawer-btns' },
-        h('button', { class: 'btn primary', onclick: () => { this.toggleDrawer(false); this.openPulpit(); } }, '✝ Pulpit'),
+        h('button', { class: 'btn primary', onclick: () => { this.toggleDrawer(false); this.openPulpit(); } }, '✝ Follow Me'),
         h('button', { class: 'btn', onclick: () => { this.toggleDrawer(false); this.sheets.share(); } }, '⤴ Share / Post'),
         h('button', { class: 'btn', onclick: () => { this.toggleDrawer(false); this.sheets.settings(); } }, 'Theme & layout'),
         h('button', { class: 'btn', onclick: () => { this.toggleDrawer(false); this.sheets.timingLab(); } }, 'Timing Lab'),

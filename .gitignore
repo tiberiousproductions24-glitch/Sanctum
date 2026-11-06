@@ -10,3 +10,7 @@ licensing-keys/
 release/
 sanctum-manual-site.zip
 manual-site/
+
+# Beat Theory / Follow Me
+chord-maps/__pycache__/
+chord-maps/_gen/__pycache__/

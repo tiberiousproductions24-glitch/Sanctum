@@ -8,6 +8,7 @@ import type { LicenseState } from './license/license';
 import type { LicensePayload } from './license/token';
 import { initNative } from './native';
 import { THEMES } from './state';
+import { loadFollowMe, loadBeatTheoryMapsFromContent } from './followme';
 
 export function mountApp(license: LicensePayload, st: LicenseState) {
   const app = new App();
@@ -42,5 +43,10 @@ export function mountApp(license: LicensePayload, st: LicenseState) {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) resume(); });
 
   (window as any).__sanctum = { app, view, sheets };
+  // Beat Theory maps: Follow Me shout library + Chords theory drop-in (non-blocking).
+  Promise.all([
+    loadFollowMe().then((eng) => { view.pulpitUI?.player.attachFollowMe(eng); }).catch((e) => console.warn('[Follow Me]', e)),
+    loadBeatTheoryMapsFromContent().catch((e) => console.warn('[Beat Theory]', e)),
+  ]);
   return app;
 }

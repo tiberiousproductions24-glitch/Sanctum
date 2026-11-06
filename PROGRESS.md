@@ -1,3 +1,8 @@
+## Thu Nov 5 2026 — v0.3.3 Follow Me / Preacher Assist + Beat Theory charts
+- Integrated `shout-iv-v-bvii.json` + `pulpit-12key-charts.json` under `src/followme/`. UI title Follow Me / Preacher Assist. Easy Play uses 12-key charts; shout loops from shout map; intensity via existing Shout/Worship 1–4 (`level/4`).
+- Mirrors under `content/chord-maps/` for Vite/Capacitor. `followme:test` asserts Ab I7–IV7–V7–bVII7 and Ab whoop-14.
+- No APK this cut (stand-down on heavy builds). Open bank/MIDI questions left per HANDOFF.
+
 # Sanctum Prototype — Progress Log
 
 ## Thu Nov 5 2026 09:12 PST — v0.3.2 Chords menu hookup + signed APK

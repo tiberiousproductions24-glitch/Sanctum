@@ -41,6 +41,7 @@ export const PROGRESSIONS: Progression[] = [
   { id: 'minor-walk', name: 'Minor 1–6–5', mode: 'minor', feel: 'whoop', key: 'Cm', steps: st('i9 bVImaj7 V7#9 i9'), desc: 'Minor preaching hold with a bVI lift.', tags: ['preaching', 'minor'] },
   { id: 'band-hits', name: 'Band hits (stabs)', mode: 'major', feel: 'praise', key: 'Ab', steps: st('I! IV! I! V7!'), desc: 'Short, punched band hits that answer the preacher.', tags: ['hits'] },
   { id: 'tune-up', name: 'Tuning up', mode: 'major', feel: 'tuneup', key: 'Eb', steps: st('I IV/1 I V7sus ~V7'), desc: 'Pre-sermon organ "tune up" with a run into the 5.', tags: ['preaching', 'intro'] },
+  { id: 'i-iv-v-bvii', name: 'I7–IV7–V7–bVII7 vamp', mode: 'major', feel: 'shout', key: 'Ab', steps: st('I7 IV7 V7 bVII7'), desc: 'Follow Me shout root vamp in any key.', tags: ['shout', 'follow-me'] },
   { id: 'altar-call', name: 'Altar call', mode: 'major', feel: 'worship', key: 'Db', steps: st('Imaj9 iii7 vi9 ii9 IVmaj7/5 V7sus'), desc: 'Soft worship changes for prayer and altar call.', tags: ['worship'] },
 ];
 
@@ -100,9 +101,9 @@ export const SHOUT_SETS: ShoutSet[] = [
 ];
 
 export const COLLECTIONS: Collection[] = [
-  { id: 'preaching', name: 'Preaching hold', kind: 'progression', ids: ['tune-up', 'whoop-14', 'whoop-145', 'two-five-one', 'one-six-two-five', 'passing-walk', 'minor-whoop', 'minor-walk', 'band-hits'] },
+  { id: 'preaching', name: 'Preaching hold', kind: 'progression', ids: ['tune-up', 'whoop-14', 'whoop-145', 'two-five-one', 'one-six-two-five', 'passing-walk', 'minor-whoop', 'minor-walk', 'band-hits', 'i-iv-v-bvii'] },
   { id: 'singer', name: 'Singer backup (hymns)', kind: 'song', ids: ['amazing-grace', 'blessed-assurance', 'little-light', 'call-response'] },
-  { id: 'shout', name: 'Shout', kind: 'shout', ids: ['shout-14', 'shout-1415', 'shout-minor', 'shout-fast-1625'] },
+  { id: 'shout', name: 'Shout', kind: 'shout', ids: ['shout-14', 'shout-1415', 'shout-minor', 'shout-fast-1625'] }, // i-iv-v-bvii is a progression (Follow Me charts),
   { id: 'worship', name: 'Worship & altar', kind: 'progression', ids: ['altar-call', 'two-five-one'] },
 ];
 

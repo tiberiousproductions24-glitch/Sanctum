@@ -43,7 +43,7 @@ export class Sheets {
   menu() {
     const items: [string, () => void][] = [
       ['Tempo & Sequencer', () => this.transport()], ['Note Repeat', () => this.noteRepeat()], ['Pad Editor', () => this.padEditor(this.app.p.selectedPad)],
-      ['Pulpit (preacher backup)', () => this.view.openPulpit()], ['Chords', () => this.chords()], ['Share / Post', () => this.share()], ['Sounds', () => this.sounds()], ['Timing Lab', () => this.timingLab()], ['Link & MIDI', () => this.sync()],
+      ['Follow Me (Preacher Assist)', () => this.view.openPulpit()], ['Chords', () => this.chords()], ['Share / Post', () => this.share()], ['Sounds', () => this.sounds()], ['Timing Lab', () => this.timingLab()], ['Link & MIDI', () => this.sync()],
       ['Settings & Theme', () => this.settings()], ['Credits', () => this.credits()], ['Help', () => this.help()], ...(this.app.isAdmin ? [['Admin', () => this.admin()] as [string, () => void]] : []),
     ];
     this.open('Sanctum', h('div', { class: 'menu-grid' }, items.map(([l, f]) => h('button', { onclick: f }, l))));

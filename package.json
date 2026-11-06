@@ -1,6 +1,6 @@
 {
   "name": "sanctum",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "type": "module",
   "description": "Sanctum \u2014 MPC-style touch drum machine (PWA prototype)",
@@ -27,7 +27,8 @@
     "license:verify": "node scripts/license.mjs verify",
     "android:assets": "node scripts/android-assets.mjs && npx capacitor-assets generate --android --iconBackgroundColor \"#07070C\" --iconBackgroundColorDark \"#07070C\" --splashBackgroundColor \"#07070C\" --splashBackgroundColorDark \"#07070C\" && node scripts/compress-splash.mjs",
     "chords:test": "node --import ./scripts/ts-ext-resolve.mjs scripts/chords-test.mjs",
-    "chords:shots": "node scripts/chords-shots.mjs"
+    "chords:shots": "node scripts/chords-shots.mjs",
+    "followme:test": "node --import ./scripts/ts-ext-resolve.mjs scripts/followme-test.mjs"
   },
   "devDependencies": {
     "@capacitor/assets": "^4.0.0",
