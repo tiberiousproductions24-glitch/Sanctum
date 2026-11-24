@@ -1,3 +1,14 @@
+## v0.3.4 — 2026-11-23 (America/Los_Angeles)
+
+### Follow Me / Preacher Assist: new chord source
+- Follow Me charts now load **`content/chord-maps/follow-me-shout-reference.json`** (built from `chord-maps/lawrence/progressions.json`). It is a **shout reference transcription from a live stream**: 10 progressions × 12 keys, plus an `F#` alias. It is **not** Lawrence's own playing, and the UI says so.
+- This replaces Beat Theory's `pulpit-12key-charts.json` as the chart source for Easy Play steps, the chart list, hook chords and the 136 BPM defaults. The Beat Theory files stay in the repo and dist, unused, for rollback (`LEGACY_CHARTS_URL` in `src/followme/load.ts`).
+- Shout/Worship 1–4 `intensityWiring` and organ-run cues are carried over unchanged. They are level semantics, not chords.
+- Two low-confidence progressions (`lw-walkup-low`, `lw-two-chromatic-low`) are flagged **check by ear** in the data and the UI.
+- Player: if a saved progression id (such as `whoop-14`) isn't in the new charts, it defaults to the first reference chart.
+- Validator: `assertChartsShape()` now checks the reference set, and `assertLegacyChartsShape()` keeps checking the Beat Theory file. `followme:test` was rewritten.
+- versionName 0.3.4 / versionCode 7. Web deploy only, no APK.
+
 ## v0.3.3 — 2026-11-05 (America/Los_Angeles)
 
 ### Follow Me / Preacher Assist

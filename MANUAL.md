@@ -749,6 +749,13 @@ What we do now: request the lowest-latency audio mode (`latencyHint: "interactiv
 7. **STAGE** locks the screen so a pocket bump cannot leave Pulpit mid-service. Hold/unlock Stage to go back.
 8. **Follow Voice** (optional): turns the mic into an automatic trigger. It listens for syllables and pitch on the device only (nothing is uploaded). It will place hits on phrase pauses, nudge shout/worship level slowly, and suggest chords that fit the sung note. **Your taps always win.** Keep the phone away from the speakers — loud PA into the mic will confuse it and can feedback. In a very loud room, prefer Easy Play.
 
+### Where the Follow Me chords come from (v0.3.4)
+The **Follow Me · charts** list is a **shout reference transcription** taken from a live-stream recording of a church organist (a Facebook Live; it is **not** Lawrence's own playing). It has 10 progressions, each charted in all 12 keys. Examples are the 6–5–1 shout cadence (Ebm7 → Dbsus4 → Gbm → Gb in Gb), the augmented lick, the half-step key lift, and the lifted shout loop (G → Csus2 → C#m7b5 → Dsus4 in G). Each one starts at 136 BPM.
+
+Two progressions are marked **check by ear** because the transcription is low-confidence: "4m9 walk-up back to 1" and "2(7sus) → #4(9) → b3 → 1". Play them against the room before you rely on them.
+
+The older Beat Theory 12-key charts are still in the app files but are no longer used. Method and uncertain spots: `chord-maps/lawrence/ANALYSIS.md`. **Shout loops** (the second list) still play the generic I7–IV7–V7–bVII7 loops from the shout map.
+
 Edit sequence: **Edit sequence** lets you type your own chord list (Roman numerals like `I IV V7` or Nashville numbers like `1 4 5`). It autosaves on this device.
 
 Pulpit tempo follows the project tempo and Ableton Link when Link is on.

@@ -3,7 +3,10 @@ import type { PulpitChartsFile, ShoutChordMap } from './types';
 import { FollowMeEngine, assertChartsShape, assertShoutMapShape } from './engine';
 
 const SHOUT_URL = './content/chord-maps/shout-iv-v-bvii.json';
-const CHARTS_URL = './content/chord-maps/pulpit-12key-charts.json';
+// v0.3.4: Follow Me charts = shout reference transcription (chord-maps/lawrence/progressions.json).
+// Legacy Beat Theory charts stay in the repo/dist for rollback: swap CHARTS_URL to LEGACY_CHARTS_URL.
+const CHARTS_URL = './content/chord-maps/follow-me-shout-reference.json';
+const LEGACY_CHARTS_URL = './content/chord-maps/pulpit-12key-charts.json';
 const THEORY_URL = './content/theory/beat-theory-maps.json';
 
 let cachedEngine: FollowMeEngine | null = null;
@@ -19,7 +22,7 @@ async function fetchJson<T>(url: string): Promise<T | null> {
   }
 }
 
-/** Load shout map + pulpit 12-key charts. Idempotent. */
+/** Load shout map + Follow Me 12-key charts (shout reference transcription). Idempotent. */
 export async function loadFollowMe(): Promise<FollowMeEngine> {
   if (cachedEngine) return cachedEngine;
   if (loadPromise) return loadPromise;
@@ -29,7 +32,7 @@ export async function loadFollowMe(): Promise<FollowMeEngine> {
       fetchJson<PulpitChartsFile>(CHARTS_URL),
     ]);
     if (!shout) throw new Error('Follow Me: shout map missing at ' + SHOUT_URL);
-    if (!charts) throw new Error('Follow Me: pulpit charts missing at ' + CHARTS_URL);
+    if (!charts) throw new Error('Follow Me: charts missing at ' + CHARTS_URL);
     const sErr = assertShoutMapShape(shout);
     const cErr = assertChartsShape(charts);
     if (sErr.length) console.warn('[Follow Me] shout map warnings:', sErr);
@@ -61,4 +64,4 @@ export async function loadBeatTheoryMapsFromContent(): Promise<boolean> {
   return true;
 }
 
-export { SHOUT_URL, CHARTS_URL, THEORY_URL };
+export { SHOUT_URL, CHARTS_URL, LEGACY_CHARTS_URL, THEORY_URL };

@@ -120,10 +120,11 @@ export class PulpitUI {
     const fmPatterns = this.player.followMe?.listShoutPatterns() || [];
     const chartProgs = this.player.followMe?.listChartProgressions() || [];
     const libOptions = chartProgs.length
-      ? chartProgs.map((p) => h('option', { value: p.id, selected: !s.followMePatternId && p.id === s.progressionId }, p.name))
+      ? chartProgs.map((p) => h('option', { value: p.id, selected: !s.followMePatternId && p.id === s.progressionId }, p.checkByEar && !/check by ear/i.test(p.name) ? p.name + ' — check by ear' : p.name))
       : PROGRESSIONS.map((p) => h('option', { value: p.id, selected: !s.followMePatternId && p.id === s.progressionId }, p.name));
     const prog = h('div', { class: 'pulpit-prog' },
       h('label', {}, FOLLOW_ME_NAME + ' · charts'),
+      ...(this.player.followMe?.sourceLabel() ? [h('p', { class: 'note fm-source' }, this.player.followMe.sourceLabel())] : []),
       h('select', { class: 'prog-sel', 'aria-label': FOLLOW_ME_NAME + ' progression',
         onchange: (e: Event) => { this.player.setProgression((e.target as HTMLSelectElement).value); this.refresh(); } },
         ...libOptions),
@@ -173,7 +174,7 @@ export class PulpitUI {
       const eng = await loadFollowMe();
       this.player.attachFollowMe(eng);
       if (this.root) this.mount();
-      toast(FOLLOW_ME_NAME + ' · ' + FOLLOW_ME_SUBTITLE + ' · 12-key charts ready');
+      toast(FOLLOW_ME_NAME + ' · ' + FOLLOW_ME_SUBTITLE + ' · shout reference charts ready (12 keys)');
     } catch (e) {
       console.warn(e);
       toast(FOLLOW_ME_NAME + ' maps unavailable');

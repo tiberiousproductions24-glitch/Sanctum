@@ -126,6 +126,15 @@ export class PulpitPlayer {
   attachFollowMe(engine: FollowMeEngine | null) {
     this.followMe = engine;
     if (engine) {
+      // v0.3.4: chart source no longer contains library ids (whoop-14…); default to the first reference chart.
+      if (!this.state.followMePatternId && !engine.chartProgression(this.state.progressionId)) {
+        const first = engine.firstProgressionId();
+        if (first) {
+          this.state.progressionId = first; this.state.stepIndex = 0; this.state.customSteps = null;
+          const cp = engine.chartProgression(first);
+          if (cp?.bpm) this.state.bpm = cp.bpm;
+        }
+      }
       try {
         engine.setKey(keyName(this.state.key), this.state.key.mode);
         if (this.state.followMePatternId) engine.setShoutPattern(this.state.followMePatternId);

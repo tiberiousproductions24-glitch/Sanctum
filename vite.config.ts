@@ -60,6 +60,9 @@ function contentBanks(): Plugin {
         const src = path.join(CHORD_MAPS_DIR, name);
         if (fs.existsSync(src)) fs.copyFileSync(src, path.join(mapsOut, name));
       }
+      // v0.3.4 Follow Me chart source (shout reference transcription); legacy file above kept for rollback.
+      const ref = path.join(CHORD_MAPS_DIR, 'lawrence', 'progressions.json');
+      if (fs.existsSync(ref)) fs.copyFileSync(ref, path.join(mapsOut, 'follow-me-shout-reference.json'));
       // Ensure theory drop-in is present even if content/ was sparse
       const theorySrc = path.join(CONTENT_DIR, 'theory', 'beat-theory-maps.json');
       if (fs.existsSync(theorySrc)) {

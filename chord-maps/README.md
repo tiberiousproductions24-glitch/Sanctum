@@ -1,4 +1,8 @@
-# Sanctum chord-maps (Beat Theory)
+# Sanctum chord-maps
+
+> **v0.3.4:** Follow Me loads [`lawrence/progressions.json`](lawrence/progressions.json), a shout reference transcription from a live stream, not Lawrence's own playing (served as `content/chord-maps/follow-me-shout-reference.json`). The Beat Theory files below are kept for rollback but are **unused** by Follow Me charts. See [`lawrence/ANALYSIS.md`](lawrence/ANALYSIS.md).
+
+## Beat Theory (legacy)
 
 Three JSON formats live side by side:
 

@@ -105,6 +105,10 @@ export interface ChartProgression {
   calls?: string[];
   beatsPerChord?: number;
   bpm?: number;
+  /** Low-confidence transcription: flag in UI as "check by ear". */
+  checkByEar?: boolean;
+  analysis?: { confidence: string; heardAtSec?: number[][]; uncertain?: string; bassWalk?: string };
+  modulation?: { atToken: number; semitones: number; note?: string };
 }
 
 export interface IntensityWiringRow {
@@ -121,6 +125,9 @@ export interface PulpitChartsFile {
   source?: string;
   feature?: string;
   featureSubtitle?: string;
+  /** Honest provenance shown in the UI (e.g. "Shout reference transcription (from a live stream)"). */
+  sourceLabel?: string;
+  checkByEar?: string[];
   naming?: Record<string, unknown>;
   intensityWiring?: {
     shoutLevel?: Record<string, IntensityWiringRow>;

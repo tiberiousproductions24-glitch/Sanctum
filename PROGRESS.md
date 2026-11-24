@@ -1,3 +1,7 @@
+## Mon Nov 23 2026 — v0.3.4 Follow Me uses the shout reference transcription
+- Lawrence chose to replace Beat Theory's Follow Me chords with the transcription set (`chord-maps/lawrence/`). The loader, validator, player default, UI source label and the "check by ear" markers are wired. The Beat Theory charts are kept but unused.
+- Source is labelled honestly: a live-stream reference transcription (organist likely Montrell James), not Lawrence's playing.
+
 ## Thu Nov 5 2026 — v0.3.3 Follow Me / Preacher Assist + Beat Theory charts
 - Integrated `shout-iv-v-bvii.json` + `pulpit-12key-charts.json` under `src/followme/`. UI title Follow Me / Preacher Assist. Easy Play uses 12-key charts; shout loops from shout map; intensity via existing Shout/Worship 1–4 (`level/4`).
 - Mirrors under `content/chord-maps/` for Vite/Capacitor. `followme:test` asserts Ab I7–IV7–V7–bVII7 and Ab whoop-14.

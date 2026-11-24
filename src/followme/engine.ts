@@ -38,12 +38,14 @@ export class FollowMeEngine {
     this.shout = shout;
     this.charts = charts;
     this.patternId = null;
-    this.progressionId = charts.progressions?.[0]?.id || 'whoop-14';
-    this.keyName = charts.progressions?.[0]?.defaultKey || 'Ab';
+    this.progressionId = charts.progressions?.[0]?.id || null;
+    this.keyName = normalizeKeyName(charts.progressions?.[0]?.defaultKey || 'Ab');
   }
 
   featureName() { return this.charts.feature || FOLLOW_ME_NAME; }
   featureSubtitle() { return this.charts.featureSubtitle || FOLLOW_ME_SUBTITLE; }
+  sourceLabel() { return this.charts.sourceLabel || ''; }
+  firstProgressionId(): string | null { return this.charts.progressions?.[0]?.id || null; }
 
   listShoutPatterns(): FollowMePattern[] {
     return this.shout.patterns.slice();
@@ -208,7 +210,13 @@ export class FollowMeEngine {
     };
   }
 
-  /** Ab whoop-14 sanity from charts (PREVIEW_PULPIT.txt). */
+  /** Gb shout-cadence sanity from the reference transcription charts. */
+  previewGbShoutCadence() {
+    const steps = this.chartSteps('lw-shout-cadence', 'Gb') || [];
+    return { symbols: steps.map((s) => s.symbol), tokens: steps.map((s) => s.token), notes: steps.map((s) => s.notesMidi), bass: steps.map((s) => s.bassMidi) };
+  }
+
+  /** Ab whoop-14 sanity from legacy Beat Theory charts (PREVIEW_PULPIT.txt). */
   previewAbWhoop14() {
     const steps = this.chartSteps('whoop-14', 'Ab') || [];
     return {
@@ -229,7 +237,43 @@ export function assertShoutMapShape(map: ShoutChordMap): string[] {
   return errs;
 }
 
+/** v0.3.4 chart source: shout reference transcription (chord-maps/lawrence/progressions.json). */
+export const REFERENCE_PROGRESSION_IDS = [
+  'lw-shout-cadence', 'lw-shout-cadence-vi7', 'lw-aug-lick', 'lw-turnaround-lift', 'lw-half-step-lift',
+  'lw-walkup-low', 'lw-two-chromatic-low', 'lw-lift-shout', 'lw-lift-shout-ext', 'lw-lift-tag',
+];
+export const CHECK_BY_EAR_IDS = ['lw-walkup-low', 'lw-two-chromatic-low'];
+const CHART_KEYS = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
 export function assertChartsShape(charts: PulpitChartsFile): string[] {
+  const errs: string[] = [];
+  const progs = charts.progressions || [];
+  if (charts.source !== 'reference-transcription') errs.push('source should be reference-transcription, got ' + charts.source);
+  if (!charts.sourceLabel || !/reference transcription/i.test(charts.sourceLabel)) errs.push('sourceLabel must say "reference transcription"');
+  if (progs.length !== REFERENCE_PROGRESSION_IDS.length) errs.push(`expected ${REFERENCE_PROGRESSION_IDS.length} progressions, got ${progs.length}`);
+  for (const id of REFERENCE_PROGRESSION_IDS) if (!progs.find((p) => p.id === id)) errs.push('missing progression ' + id);
+  for (const p of progs) {
+    for (const k of [...CHART_KEYS, 'F#']) {
+      const c = p.charts?.[k];
+      if (!c || c.length !== p.tokens.length) { errs.push(`${p.id} chart ${k} missing/short`); continue; }
+      for (const s of c) {
+        if (!s.notesMidi?.length || s.bassMidi < 28 || s.bassMidi > 39) errs.push(`${p.id} ${k} ${s.token} bad voicing`);
+      }
+    }
+    if (!!p.checkByEar !== CHECK_BY_EAR_IDS.includes(p.id)) errs.push(`${p.id} checkByEar flag wrong`);
+  }
+  const cad = progs.find((p) => p.id === 'lw-shout-cadence')?.charts?.['Gb'];
+  if (!cad || JSON.stringify(cad.map((s) => s.symbol)) !== JSON.stringify(['Ebm7', 'Dbsus4', 'Gbm', 'Gb'])) {
+    errs.push('lw-shout-cadence Gb expected Ebm7 Dbsus4 Gbm Gb got ' + (cad ? cad.map((s) => s.symbol).join(' ') : 'none'));
+  }
+  if (!charts.intensityWiring?.shoutLevel?.['4'] || !charts.intensityWiring?.worshipLevel?.['4']) {
+    errs.push('intensityWiring needs shoutLevel/worshipLevel 1–4');
+  }
+  return errs;
+}
+
+/** Legacy Beat Theory charts (pulpit-12key-charts.json) — unused since v0.3.4, kept for rollback. */
+export function assertLegacyChartsShape(charts: PulpitChartsFile): string[] {
   const errs: string[] = [];
   const progs = charts.progressions || [];
   if (progs.length !== 15) errs.push(`expected 15 progressions, got ${progs.length}`);
